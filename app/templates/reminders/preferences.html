@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Reminder Preferences{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">⚙️ Reminder Preferences</h1>
+                <a href="{{ url_for('reminders.reminders_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📧 Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Enable/Disable Reminders -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_enabled" name="is_enabled"
+                                        {{ 'checked' if preferences.is_enabled else '' }}>
+                                    <label class="form-check-label" for="is_enabled">
+                                        <strong>Enable Study Reminders</strong>
+                                        <small class="text-muted d-block">Receive notifications for your study
+                                            sessions</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reminder Methods -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label"><strong>Reminder Methods</strong></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email" name="reminder_methods"
+                                        value="email" {{ 'checked' if 'email' in preferences.reminder_methods else ''
+                                        }}>
+                                    <label class="form-check-label" for="email">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sms" name="reminder_methods"
+                                        value="sms" {{ 'checked' if 'sms' in preferences.reminder_methods else '' }}>
+                                    <label class="form-check-label" for="sms">
+                                        <i class="fas fa-sms"></i> SMS (Coming Soon)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="push" name="reminder_methods"
+                                        value="push" {{ 'checked' if 'push' in preferences.reminder_methods else '' }}>
+                                    <label class="form-check-label" for="push">
+                                        <i class="fas fa-bell"></i> Push Notifications (Coming Soon)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Frequency -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="frequency" class="form-label"><strong>Reminder Frequency</strong></label>
+                                <select class="form-select" id="frequency" name="frequency">
+                                    <option value="daily" {{ 'selected' if preferences.frequency=='daily' else '' }}>
+                                        Daily</option>
+                                    <option value="weekly" {{ 'selected' if preferences.frequency=='weekly' else '' }}>
+                                        Weekly</option>
+                                    <option value="custom" {{ 'selected' if preferences.frequency=='custom' else '' }}>
+                                        Custom</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="timezone" class="form-label"><strong>Timezone</strong></label>
+                                <select class="form-select" id="timezone" name="timezone">
+                                    <option value="UTC" {{ 'selected' if preferences.timezone=='UTC' else '' }}>UTC
+                                    </option>
+                                    <option value="America/New_York" {{ 'selected' if
+                                        preferences.timezone=='America/New_York' else '' }}>Eastern Time</option>
+                                    <option value="America/Chicago" {{ 'selected' if
+                                        preferences.timezone=='America/Chicago' else '' }}>Central Time</option>
+                                    <option value="America/Denver" {{ 'selected' if
+                                        preferences.timezone=='America/Denver' else '' }}>Mountain Time</option>
+                                    <option value="America/Los_Angeles" {{ 'selected' if
+                                        preferences.timezone=='America/Los_Angeles' else '' }}>Pacific Time</option>
+                                    <option value="Europe/London" {{ 'selected' if preferences.timezone=='Europe/London'
+                                        else '' }}>London</option>
+                                    <option value="Europe/Paris" {{ 'selected' if preferences.timezone=='Europe/Paris'
+                                        else '' }}>Paris</option>
+                                    <option value="Asia/Tokyo" {{ 'selected' if preferences.timezone=='Asia/Tokyo'
+                                        else '' }}>Tokyo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Days of Week -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label"><strong>Study Days</strong></label>
+                                <div class="row">
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_monday"
+                                                name="day_monday" {{ 'checked' if 1 in preferences.days_of_week else ''
+                                                }}>
+                                            <label class="form-check-label" for="day_monday">Monday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_tuesday"
+                                                name="day_tuesday" {{ 'checked' if 2 in preferences.days_of_week else ''
+                                                }}>
+                                            <label class="form-check-label" for="day_tuesday">Tuesday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_wednesday"
+                                                name="day_wednesday" {{ 'checked' if 3 in preferences.days_of_week
+                                                else '' }}>
+                                            <label class="form-check-label" for="day_wednesday">Wednesday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_thursday"
+                                                name="day_thursday" {{ 'checked' if 4 in preferences.days_of_week
+                                                else '' }}>
+                                            <label class="form-check-label" for="day_thursday">Thursday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_friday"
+                                                name="day_friday" {{ 'checked' if 5 in preferences.days_of_week else ''
+                                                }}>
+                                            <label class="form-check-label" for="day_friday">Friday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_saturday"
+                                                name="day_saturday" {{ 'checked' if 6 in preferences.days_of_week
+                                                else '' }}>
+                                            <label class="form-check-label" for="day_saturday">Saturday</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="day_sunday"
+                                                name="day_sunday" {{ 'checked' if 7 in preferences.days_of_week else ''
+                                                }}>
+                                            <label class="form-check-label" for="day_sunday">Sunday</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferred Times -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label"><strong>Preferred Study Times</strong></label>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="morning_time" class="form-label">Morning</label>
+                                        <input type="time" class="form-control" id="morning_time" name="morning_time"
+                                            value="{{ preferences.preferred_times[0] if preferences.preferred_times|length > 0 else '09:00' }}">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="afternoon_time" class="form-label">Afternoon</label>
+                                        <input type="time" class="form-control" id="afternoon_time"
+                                            name="afternoon_time"
+                                            value="{{ preferences.preferred_times[1] if preferences.preferred_times|length > 1 else '14:00' }}">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="evening_time" class="form-label">Evening</label>
+                                        <input type="time" class="form-control" id="evening_time" name="evening_time"
+                                            value="{{ preferences.preferred_times[2] if preferences.preferred_times|length > 2 else '18:00' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Study Goals -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="study_goal_minutes" class="form-label"><strong>Daily Study Goal
+                                        (minutes)</strong></label>
+                                <input type="number" class="form-control" id="study_goal_minutes"
+                                    name="study_goal_minutes" value="{{ preferences.study_goal_minutes }}" min="5"
+                                    max="480" step="5">
+                                <div class="form-text">How many minutes do you want to study each day?</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="advance_notice_minutes" class="form-label"><strong>Advance Notice
+                                        (minutes)</strong></label>
+                                <input type="number" class="form-control" id="advance_notice_minutes"
+                                    name="advance_notice_minutes" value="{{ preferences.advance_notice_minutes }}"
+                                    min="5" max="120" step="5">
+                                <div class="form-text">How far in advance should we remind you?</div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Preferences
+                                </button>
+                                <a href="{{ url_for('reminders.reminders_dashboard') }}"
+                                    class="btn btn-outline-secondary ms-2">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">🧠 AI Insights</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>📊 Your Study Patterns</h6>
+                            <p class="text-muted small">
+                                Based on your study history, our AI analyzes your patterns to suggest optimal study
+                                times.
+                                Complete more study sessions to get personalized recommendations!
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🎯 Smart Scheduling</h6>
+                            <p class="text-muted small">
+                                Our smart scheduling system considers your energy levels, past performance, and study
+                                habits
+                                to suggest the best times for learning.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('reminders.smart_schedule') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-magic"></i> View Smart Suggestions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const studyGoalInput = document.getElementById('study_goal_minutes');
+        const advanceNoticeInput = document.getElementById('advance_notice_minutes');
+
+        form.addEventListener('submit', function (e) {
+            // Validate study goal
+            if (studyGoalInput.value < 5 || studyGoalInput.value > 480) {
+                e.preventDefault();
+                alert('Daily study goal must be between 5 and 480 minutes.');
+                studyGoalInput.focus();
+                return;
+            }
+
+            // Validate advance notice
+            if (advanceNoticeInput.value < 5 || advanceNoticeInput.value > 120) {
+                e.preventDefault();
+                alert('Advance notice must be between 5 and 120 minutes.');
+                advanceNoticeInput.focus();
+                return;
+            }
+
+            // Check if at least one reminder method is selected
+            const reminderMethods = document.querySelectorAll('input[name="reminder_methods"]:checked');
+            if (reminderMethods.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one reminder method.');
+                return;
+            }
+
+            // Check if at least one day is selected
+            const studyDays = document.querySelectorAll('input[name^="day_"]:checked');
+            if (studyDays.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one study day.');
+                return;
+            }
+        });
+
+        // Real-time validation feedback
+        studyGoalInput.addEventListener('input', function () {
+            const value = parseInt(this.value);
+            if (value < 5 || value > 480) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        advanceNoticeInput.addEventListener('input', function () {
+            const value = parseInt(this.value);
+            if (value < 5 || value > 120) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+</script>
+{% endblock %}

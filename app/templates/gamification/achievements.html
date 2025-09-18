@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Achievements - Gamification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-star me-2"></i>Achievements
+                    </h1>
+                    <p class="text-muted mb-0">Unlock achievements by reaching significant milestones in your learning
+                        journey!</p>
+                </div>
+                <a href="{{ url_for('gamification.gamification_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Achievement Categories -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-filter me-2"></i>Filter by Category
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-success active"
+                                    onclick="filterAchievements('all')">
+                                    All Achievements
+                                </button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="filterAchievements('study')">
+                                    <i class="fas fa-book me-1"></i>Study
+                                </button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="filterAchievements('quiz')">
+                                    <i class="fas fa-question-circle me-1"></i>Quiz
+                                </button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="filterAchievements('streak')">
+                                    <i class="fas fa-fire me-1"></i>Streak
+                                </button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="filterAchievements('time')">
+                                    <i class="fas fa-clock me-1"></i>Time
+                                </button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="filterAchievements('mastery')">
+                                    <i class="fas fa-graduation-cap me-1"></i>Mastery
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Grid -->
+            <div class="row" id="achievements-grid">
+                {% for achievement in all_achievements %}
+                <div class="col-md-6 col-lg-4 mb-4 achievement-card" data-category="{{ achievement.category }}">
+                    <div
+                        class="card border-0 shadow-sm h-100 {% if achievement.id in user_achievement_ids %}achievement-unlocked{% else %}achievement-locked{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <i class="{{ achievement.icon }} fa-3x 
+                                        {% if achievement.id in user_achievement_ids %}text-success
+                                        {% else %}text-muted{% endif %}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5
+                                        class="card-title {% if achievement.id in user_achievement_ids %}text-dark{% else %}text-muted{% endif %}">
+                                        {{ achievement.name }}
+                                    </h5>
+
+                                    <p
+                                        class="card-text {% if achievement.id in user_achievement_ids %}text-muted{% else %}text-muted{% endif %}">
+                                        {{ achievement.description }}
+                                    </p>
+
+                                    <div class="mb-2">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-star me-1"></i>{{ achievement.xp_reward }} XP
+                                        </span>
+                                        <span class="badge bg-outline-secondary ms-1">
+                                            {{ achievement.category.title() }}
+                                        </span>
+                                    </div>
+
+                                    {% if achievement.id in user_achievement_ids %}
+                                    <div class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>Achievement Unlocked!
+                                    </div>
+                                    {% else %}
+                                    <div class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>Locked
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Achievement Statistics -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>Achievement Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ user_achievement_ids|length }}</h4>
+                                    <p class="text-muted mb-0">Achievements Unlocked</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-primary">{{ all_achievements|length }}</h4>
+                                    <p class="text-muted mb-0">Total Achievements</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-info">{{ "%.1f"|format((user_achievement_ids|length /
+                                        all_achievements|length * 100) if all_achievements|length > 0 else 0) }}%</h4>
+                                    <p class="text-muted mb-0">Completion Rate</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-warning">{{ user_achievement_ids|length * 25 }}</h4>
+                                    <p class="text-muted mb-0">XP from Achievements</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievement Progress -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tasks me-2"></i>Achievement Progress
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Study Achievements</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-primary" role="progressbar"
+                                            style="width: {{ (user_achievement_ids|length / all_achievements|length * 100) if all_achievements|length > 0 else 0 }}%">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ user_achievement_ids|length }} of {{
+                                        all_achievements|length }} unlocked</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Quiz Achievements</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                            style="width: {{ (user_achievement_ids|length / all_achievements|length * 100) if all_achievements|length > 0 else 0 }}%">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ user_achievement_ids|length }} of {{
+                                        all_achievements|length }} unlocked</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterAchievements(category) {
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filter achievements
+        const achievementCards = document.querySelectorAll('.achievement-card');
+        achievementCards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Add some CSS for better achievement styling
+    const style = document.createElement('style');
+    style.textContent = `
+    .achievement-unlocked {
+        border: 2px solid #28a745 !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .achievement-locked {
+        opacity: 0.7;
+        filter: grayscale(50%);
+    }
+    
+    .achievement-unlocked .fa-3x {
+        animation: glow 2s infinite;
+    }
+    
+    @keyframes glow {
+        0% { text-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+        50% { text-shadow: 0 0 20px rgba(40, 167, 69, 0.8); }
+        100% { text-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+    }
+`;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Badges - Gamification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-medal me-2"></i>Badges
+                    </h1>
+                    <p class="text-muted mb-0">Earn badges by completing various learning activities and milestones!</p>
+                </div>
+                <a href="{{ url_for('gamification.gamification_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Badge Categories -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-filter me-2"></i>Filter by Category
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active"
+                                    onclick="filterBadges('all')">
+                                    All Badges
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterBadges('study')">
+                                    <i class="fas fa-book me-1"></i>Study
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterBadges('quiz')">
+                                    <i class="fas fa-question-circle me-1"></i>Quiz
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterBadges('streak')">
+                                    <i class="fas fa-fire me-1"></i>Streak
+                                </button>
+                                <button type="button" class="btn btn-outline-primary"
+                                    onclick="filterBadges('achievement')">
+                                    <i class="fas fa-star me-1"></i>Achievement
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterBadges('special')">
+                                    <i class="fas fa-gem me-1"></i>Special
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges Grid -->
+            <div class="row" id="badges-grid">
+                {% for badge in all_badges %}
+                <div class="col-md-4 col-lg-3 mb-4 badge-card" data-category="{{ badge.category }}">
+                    <div
+                        class="card border-0 shadow-sm h-100 {% if badge.id in user_badge_ids %}badge-earned{% else %}badge-locked{% endif %}">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="{{ badge.icon }} fa-4x 
+                                    {% if badge.id in user_badge_ids %}
+                                        {% if badge.rarity == 'legendary' %}text-warning
+                                        {% elif badge.rarity == 'epic' %}text-purple
+                                        {% elif badge.rarity == 'rare' %}text-info
+                                        {% else %}text-success{% endif %}
+                                    {% else %}text-muted{% endif %}"></i>
+                            </div>
+
+                            <h5
+                                class="card-title {% if badge.id in user_badge_ids %}text-dark{% else %}text-muted{% endif %}">
+                                {{ badge.name }}
+                            </h5>
+
+                            <p
+                                class="card-text {% if badge.id in user_badge_ids %}text-muted{% else %}text-muted{% endif %}">
+                                {{ badge.description }}
+                            </p>
+
+                            <div class="mb-3">
+                                <span
+                                    class="badge bg-{{ badge.rarity == 'legendary' and 'warning' or badge.rarity == 'epic' and 'purple' or badge.rarity == 'rare' and 'info' or 'secondary' }}">
+                                    {{ badge.rarity.title() }}
+                                </span>
+                                <span class="badge bg-primary ms-1">
+                                    <i class="fas fa-star me-1"></i>{{ badge.xp_reward }} XP
+                                </span>
+                            </div>
+
+                            {% if badge.id in user_badge_ids %}
+                            <div class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>Earned!
+                            </div>
+                            {% else %}
+                            <div class="text-muted">
+                                <i class="fas fa-lock me-1"></i>Locked
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Badge Statistics -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>Badge Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h4 class="text-success">{{ user_badge_ids|length }}</h4>
+                                    <p class="text-muted mb-0">Badges Earned</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-primary">{{ all_badges|length }}</h4>
+                                    <p class="text-muted mb-0">Total Badges</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-info">{{ "%.1f"|format((user_badge_ids|length / all_badges|length *
+                                        100) if all_badges|length > 0 else 0) }}%</h4>
+                                    <p class="text-muted mb-0">Completion Rate</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <h4 class="text-warning">{{ user_badge_ids|length * 10 }}</h4>
+                                    <p class="text-muted mb-0">XP from Badges</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterBadges(category) {
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filter badges
+        const badgeCards = document.querySelectorAll('.badge-card');
+        badgeCards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Add some CSS for better badge styling
+    const style = document.createElement('style');
+    style.textContent = `
+    .badge-earned {
+        border: 2px solid #28a745 !important;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .badge-locked {
+        opacity: 0.7;
+        filter: grayscale(50%);
+    }
+    
+    .badge-earned .fa-4x {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    .text-purple {
+        color: #6f42c1 !important;
+    }
+    
+    .bg-purple {
+        background-color: #6f42c1 !important;
+    }
+`;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

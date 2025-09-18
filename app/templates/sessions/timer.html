@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}Study Timer - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="h2 mb-3">
+                    <i class="fas fa-stopwatch text-primary me-2"></i>Study Timer
+                </h1>
+                <p class="text-muted">Focus on your learning with our Pomodoro-style timer</p>
+            </div>
+
+            <div class="row">
+                <!-- Timer Interface -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-5 text-center">
+                            <!-- Timer Display -->
+                            <div class="timer-display mb-4">
+                                <div class="timer-circle mx-auto mb-3" id="timer-circle">
+                                    <div class="timer-text">
+                                        <div class="timer-time" id="timer-time">25:00</div>
+                                        <div class="timer-label" id="timer-label">Focus Time</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Timer Controls -->
+                            <div class="timer-controls mb-4">
+                                <button class="btn btn-success btn-lg me-3" id="start-btn" onclick="startTimer()">
+                                    <i class="fas fa-play me-2"></i>Start
+                                </button>
+                                <button class="btn btn-warning btn-lg me-3" id="pause-btn" onclick="pauseTimer()" disabled>
+                                    <i class="fas fa-pause me-2"></i>Pause
+                                </button>
+                                <button class="btn btn-danger btn-lg" id="stop-btn" onclick="stopTimer()" disabled>
+                                    <i class="fas fa-stop me-2"></i>Stop
+                                </button>
+                            </div>
+
+                            <!-- Session Info -->
+                            <div class="session-info" id="session-info" style="display: none;">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-2"></i>Current Session
+                                    </h6>
+                                    <p class="mb-0">
+                                        <strong>Topic:</strong> <span id="current-topic">-</span><br>
+                                        <strong>Type:</strong> <span id="current-type">-</span><br>
+                                        <strong>Started:</strong> <span id="session-start-time">-</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Session Completion Form -->
+                            <div class="session-completion" id="session-completion" style="display: none;">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-check-circle me-2"></i>Session Complete!
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="complete-session-form">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Confidence After Session (1-10)</label>
+                                                    <input type="range" class="form-range" id="confidence-after" min="1" max="10" value="5">
+                                                    <div class="d-flex justify-content-between text-muted small">
+                                                        <span>1</span>
+                                                        <span id="confidence-display">5</span>
+                                                        <span>10</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Actual Duration (minutes)</label>
+                                                    <input type="number" class="form-control" id="actual-duration" min="1" max="480" value="25">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Session Notes</label>
+                                                <textarea class="form-control" id="session-notes" rows="3" 
+                                                          placeholder="What did you learn? Any insights or challenges?"></textarea>
+                                            </div>
+                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetTimer()">
+                                                    <i class="fas fa-redo me-2"></i>Start New Session
+                                                </button>
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="fas fa-save me-2"></i>Save Session
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Setup -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cog text-primary me-2"></i>Session Setup
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="session-setup-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Topic</label>
+                                    <select class="form-select" id="session-topic" required>
+                                        <option value="">Select a topic...</option>
+                                        {% for topic in topics %}
+                                        <option value="{{ topic.id }}">{{ topic.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Session Type</label>
+                                    <select class="form-select" id="session-type" required>
+                                        <option value="study">Study</option>
+                                        <option value="review">Review</option>
+                                        <option value="practice">Practice</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Confidence Before (1-10)</label>
+                                    <input type="range" class="form-range" id="confidence-before" min="1" max="10" value="5">
+                                    <div class="d-flex justify-content-between text-muted small">
+                                        <span>1 - Beginner</span>
+                                        <span id="confidence-before-display">5</span>
+                                        <span>10 - Expert</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Timer Duration</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(15)">15m</button>
+                                        <button type="button" class="btn btn-outline-primary active" onclick="setTimerDuration(25)">25m</button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(45)">45m</button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(60)">1h</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="button" class="btn btn-primary" onclick="setupSession()">
+                                        <i class="fas fa-play me-2"></i>Setup Session
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Timer Presets -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light border-0">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-clock text-primary me-2"></i>Timer Presets
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" onclick="setTimerDuration(15)">
+                                    <i class="fas fa-bolt me-2"></i>Quick Focus (15 min)
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="setTimerDuration(25)">
+                                    <i class="fas fa-fire me-2"></i>Pomodoro (25 min)
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="setTimerDuration(45)">
+                                    <i class="fas fa-brain me-2"></i>Deep Work (45 min)
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="setTimerDuration(60)">
+                                    <i class="fas fa-graduation-cap me-2"></i>Study Block (60 min)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timer-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.timer-text {
+    color: white;
+    text-align: center;
+}
+
+.timer-time {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.timer-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.timer-circle.break {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.timer-circle.completed {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+</style>
+
+<script>
+let timer = null;
+let timeLeft = 25 * 60; // 25 minutes in seconds
+let isRunning = false;
+let currentSession = null;
+let timerDuration = 25; // minutes
+
+// Timer functions
+function startTimer() {
+    if (!currentSession) {
+        alert('Please setup a session first!');
+        return;
+    }
+    
+    isRunning = true;
+    timer = setInterval(updateTimer, 1000);
+    
+    document.getElementById('start-btn').disabled = true;
+    document.getElementById('pause-btn').disabled = false;
+    document.getElementById('stop-btn').disabled = false;
+    
+    // Show session info
+    document.getElementById('session-info').style.display = 'block';
+}
+
+function pauseTimer() {
+    isRunning = false;
+    clearInterval(timer);
+    
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('pause-btn').disabled = true;
+}
+
+function stopTimer() {
+    isRunning = false;
+    clearInterval(timer);
+    
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('pause-btn').disabled = true;
+    document.getElementById('stop-btn').disabled = true;
+    
+    // Show completion form
+    showCompletionForm();
+}
+
+function updateTimer() {
+    timeLeft--;
+    
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    document.getElementById('timer-time').textContent = timeString;
+    
+    if (timeLeft <= 0) {
+        // Timer finished
+        isRunning = false;
+        clearInterval(timer);
+        document.getElementById('timer-circle').classList.add('completed');
+        document.getElementById('timer-label').textContent = 'Time\'s Up!';
+        
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('pause-btn').disabled = true;
+        document.getElementById('stop-btn').disabled = true;
+        
+        // Show completion form
+        showCompletionForm();
+    }
+}
+
+function resetTimer() {
+    isRunning = false;
+    clearInterval(timer);
+    timeLeft = timerDuration * 60;
+    
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    document.getElementById('timer-time').textContent = timeString;
+    document.getElementById('timer-label').textContent = 'Focus Time';
+    document.getElementById('timer-circle').classList.remove('completed', 'break');
+    
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('pause-btn').disabled = true;
+    document.getElementById('stop-btn').disabled = true;
+    
+    // Hide forms
+    document.getElementById('session-info').style.display = 'none';
+    document.getElementById('session-completion').style.display = 'none';
+    
+    currentSession = null;
+}
+
+function setTimerDuration(minutes) {
+    timerDuration = minutes;
+    timeLeft = minutes * 60;
+    
+    const timeString = `${minutes.toString().padStart(2, '0')}:00`;
+    document.getElementById('timer-time').textContent = timeString;
+    
+    // Update active button
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function setupSession() {
+    const topicId = document.getElementById('session-topic').value;
+    const sessionType = document.getElementById('session-type').value;
+    const confidenceBefore = document.getElementById('confidence-before').value;
+    
+    if (!topicId) {
+        alert('Please select a topic!');
+        return;
+    }
+    
+    // Create session via API
+    fetch('/sessions/api/start-timer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            topic_id: parseInt(topicId),
+            session_type: sessionType,
+            confidence_before: parseInt(confidenceBefore)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentSession = {
+                id: data.session_id,
+                topic_id: topicId,
+                session_type: sessionType,
+                confidence_before: confidenceBefore,
+                start_time: new Date()
+            };
+            
+            // Update session info display
+            const topicSelect = document.getElementById('session-topic');
+            const selectedTopic = topicSelect.options[topicSelect.selectedIndex].text;
+            
+            document.getElementById('current-topic').textContent = selectedTopic;
+            document.getElementById('current-type').textContent = sessionType.charAt(0).toUpperCase() + sessionType.slice(1);
+            document.getElementById('session-start-time').textContent = currentSession.start_time.toLocaleTimeString();
+            
+            // Enable start button
+            document.getElementById('start-btn').disabled = false;
+            
+            alert('Session setup complete! Click Start to begin your timer.');
+        } else {
+            alert('Error setting up session: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error setting up session. Please try again.');
+    });
+}
+
+function showCompletionForm() {
+    document.getElementById('session-completion').style.display = 'block';
+    
+    // Set actual duration to timer duration by default
+    document.getElementById('actual-duration').value = timerDuration;
+}
+
+// Event listeners
+document.getElementById('confidence-before').addEventListener('input', function() {
+    document.getElementById('confidence-before-display').textContent = this.value;
+});
+
+document.getElementById('confidence-after').addEventListener('input', function() {
+    document.getElementById('confidence-display').textContent = this.value;
+});
+
+document.getElementById('complete-session-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!currentSession) {
+        alert('No active session to complete!');
+        return;
+    }
+    
+    const confidenceAfter = document.getElementById('confidence-after').value;
+    const actualDuration = document.getElementById('actual-duration').value;
+    const notes = document.getElementById('session-notes').value;
+    
+    // Complete session via API
+    fetch('/sessions/api/complete-timer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: currentSession.id,
+            duration_minutes: parseInt(actualDuration),
+            confidence_after: parseInt(confidenceAfter),
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Session completed! Confidence improved by ${data.confidence_gain} points.`);
+            // Redirect to session detail page
+            window.location.href = `/sessions/${currentSession.id}`;
+        } else {
+            alert('Error completing session: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error completing session. Please try again.');
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confidence-before-display').textContent = document.getElementById('confidence-before').value;
+    document.getElementById('confidence-display').textContent = document.getElementById('confidence-after').value;
+});
+</script>
+{% endblock %}

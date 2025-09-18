@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}My Topics - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="topics-container">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-book text-primary me-2"></i>My Topics
+            </h1>
+            <p class="text-muted mb-0">Manage your study subjects and learning materials</p>
+        </div>
+        <a href="{{ url_for('topics.create_topic') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>New Topic
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" id="searchTopics" placeholder="Search topics...">
+            </div>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <span class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                {{ topics|length }} topic{{ 's' if topics|length != 1 else '' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Topics Grid -->
+    {% if topics %}
+    <div class="row" id="topicsGrid">
+        {% for topic in topics %}
+        <div class="col-lg-4 col-md-6 mb-4 topic-card" data-title="{{ topic.title|lower }}"
+            data-description="{{ topic.description|lower }}">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0 text-truncate" title="{{ topic.title }}">
+                            {{ topic.title }}
+                        </h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item"
+                                        href="{{ url_for('topics.view_topic', topic_id=topic.id) }}">
+                                        <i class="fas fa-eye me-2"></i>View
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                        href="{{ url_for('topics.edit_topic', topic_id=topic.id) }}">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <button class="dropdown-item text-danger"
+                                        onclick="deleteTopic({{ topic.id }}, '{{ topic.title }}')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted flex-grow-1">
+                        {{ topic.description[:150] }}{% if topic.description|length > 150 %}...{% endif %}
+                    </p>
+
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ topic.created_at.strftime('%b %d, %Y') }}
+                            </small>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('topics.view_topic', topic_id=topic.id) }}"
+                                    class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                <a href="{{ url_for('topics.edit_topic', topic_id=topic.id) }}"
+                                    class="btn btn-outline-secondary">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-book-open fa-4x text-muted"></i>
+        </div>
+        <h3 class="text-muted mb-3">No topics yet</h3>
+        <p class="text-muted mb-4">Start organizing your learning by creating your first topic.</p>
+        <a href="{{ url_for('topics.create_topic') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Create Your First Topic
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Topic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "<span id="topicTitle"></span>"?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Topic</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Search functionality
+    document.getElementById('searchTopics').addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        const topicCards = document.querySelectorAll('.topic-card');
+
+        topicCards.forEach(card => {
+            const title = card.dataset.title;
+            const description = card.dataset.description;
+
+            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Delete topic functionality
+    function deleteTopic(topicId, topicTitle) {
+        document.getElementById('topicTitle').textContent = topicTitle;
+        document.getElementById('deleteForm').action = `/topics/${topicId}/delete`;
+
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Study Scheduling{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">🧠 Smart Study Scheduling</h1>
+                <div>
+                    <a href="{{ url_for('reminders.reminders_dashboard') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button class="btn btn-primary" onclick="refreshSuggestions()">
+                        <i class="fas fa-sync-alt"></i> Refresh AI Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Summary -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="card-title">🎯 AI-Powered Study Optimization</h4>
+                            <p class="card-text mb-0">
+                                Our AI analyzes your study patterns, energy levels, and learning preferences to suggest
+                                the optimal times for your study sessions. Get personalized recommendations based on
+                                your data!
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-brain fa-4x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Study Patterns Analysis -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Your Study Patterns</h5>
+                </div>
+                <div class="card-body">
+                    {% if patterns %}
+                    <!-- Peak Hours -->
+                    {% if patterns.peak_hours %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-clock text-primary"></i> Peak Study Hours</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for hour in patterns.peak_hours.peak_hours %}
+                            <span class="badge bg-primary">{{ hour }}:00</span>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">
+                            Confidence: {{ (patterns.peak_hours.confidence * 100)|round }}%
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Best Days -->
+                    {% if patterns.best_days %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-calendar text-success"></i> Best Study Days</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for day in patterns.best_days.best_days %}
+                            <span class="badge bg-success">{{ day }}</span>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">
+                            Confidence: {{ (patterns.best_days.confidence * 100)|round }}%
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Optimal Duration -->
+                    {% if patterns.session_duration %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-hourglass-half text-info"></i> Optimal Duration</h6>
+                        <p class="mb-1">
+                            <strong>{{ patterns.session_duration.optimal_duration }} minutes</strong>
+                        </p>
+                        <small class="text-muted">
+                            Average: {{ patterns.session_duration.average_duration|round }} min
+                            | Confidence: {{ (patterns.session_duration.confidence * 100)|round }}%
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Study Consistency -->
+                    {% if patterns.study_consistency %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-chart-line text-warning"></i> Study Consistency</h6>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning"
+                                style="width: {{ (patterns.study_consistency.consistency_score * 100)|round }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            {{ (patterns.study_consistency.consistency_score * 100)|round }}% consistent
+                            | Current streak: {{ patterns.study_consistency.current_streak }} days
+                        </small>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Complete more study sessions to see your patterns!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🎯 AI Study Time Suggestions</h5>
+                    <span class="badge bg-primary">{{ optimal_times|length }} suggestions</span>
+                </div>
+                <div class="card-body">
+                    {% if optimal_times %}
+                    <div class="row">
+                        {% for suggestion in optimal_times %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-{{ 'success' if suggestion.is_accepted else 'primary' }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">
+                                            {{ suggestion.suggested_time.strftime('%A, %B %d') }}
+                                        </h6>
+                                        <div class="text-end">
+                                            <span
+                                                class="badge bg-{{ 'success' if suggestion.is_accepted else 'info' }}">
+                                                {{ (suggestion.confidence_score * 100)|round }}%
+                                            </span>
+                                            {% if suggestion.is_accepted %}
+                                            <span class="badge bg-success ms-1">Accepted</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <h5 class="text-primary mb-1">
+                                            <i class="fas fa-clock"></i> {{ suggestion.suggested_time.strftime('%H:%M')
+                                            }}
+                                        </h5>
+                                        <p class="card-text small text-muted mb-2">
+                                            {{ suggestion.reasoning }}
+                                        </p>
+                                    </div>
+
+                                    {% if suggestion.factors %}
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>Key Factors:</strong><br>
+                                            {% for factor, value in suggestion.factors.items() %}
+                                            • {{ factor.replace('_', ' ').title() }}: {{ value }}<br>
+                                            {% endfor %}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-play"></i> {{ suggestion.session_type.title() }}
+                                            {% if suggestion.topic_id %}
+                                            | <i class="fas fa-book"></i> Topic
+                                            {% endif %}
+                                        </small>
+                                        {% if not suggestion.is_accepted %}
+                                        <a href="{{ url_for('reminders.accept_optimal_suggestion', suggestion_id=suggestion.id) }}"
+                                            class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Accept
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-brain fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No AI Suggestions Yet</h5>
+                        <p class="text-muted">
+                            Complete a few study sessions to get personalized AI recommendations!
+                        </p>
+                        <a href="{{ url_for('sessions.start_session') }}" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start a Study Session
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Schedule -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ Quick Smart Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <form id="quickScheduleForm">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="topic_id" class="form-label">Topic (Optional)</label>
+                                <select class="form-select" id="topic_id" name="topic_id">
+                                    <option value="">Select a topic...</option>
+                                    {% for topic in topics %}
+                                    <option value="{{ topic.id }}">{{ topic.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="session_type" class="form-label">Session Type</label>
+                                <select class="form-select" id="session_type" name="session_type">
+                                    <option value="review">Review</option>
+                                    <option value="practice">Practice</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="duration_minutes" class="form-label">Duration (minutes)</label>
+                                <select class="form-select" id="duration_minutes" name="duration_minutes">
+                                    <option value="15">15 minutes</option>
+                                    <option value="30" selected>30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60">60 minutes</option>
+                                    <option value="90">90 minutes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-magic"></i> Create Smart Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function refreshSuggestions() {
+        // Show loading state
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+        button.disabled = true;
+
+        // Reload the page to refresh suggestions
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+
+    // Quick schedule form submission
+    document.getElementById('quickScheduleForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+
+        // Show loading state
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        button.disabled = true;
+
+        // Submit form data
+        fetch('{{ url_for("reminders.create_smart_schedule") }}', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    showNotification('Smart schedule created successfully!', 'success');
+
+                    // Reload page to show new schedule
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification('Error creating schedule: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error creating schedule', 'error');
+            })
+            .finally(() => {
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+    });
+
+    function showNotification(message, type = 'info') {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    // Auto-refresh suggestions every 10 minutes
+    setInterval(function () {
+        // Check for new suggestions without reloading the page
+        fetch('/api/reminders/optimal-times/{{ current_user.id if current_user else "mock-user" }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.optimal_times.length > 0) {
+                    // Show notification if new suggestions are available
+                    const newSuggestions = data.optimal_times.filter(s => !s.is_accepted);
+                    if (newSuggestions.length > 0) {
+                        showNotification(`New AI suggestions available! ${newSuggestions.length} optimal times found.`, 'info');
+                    }
+                }
+            })
+            .catch(error => console.log('Error checking for new suggestions:', error));
+    }, 600000); // 10 minutes
+</script>
+{% endblock %}

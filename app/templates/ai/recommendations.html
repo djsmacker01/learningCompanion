@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}AI Recommendations - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-brain text-primary me-2"></i>
+                    AI Recommendations
+                </h1>
+                <button class="btn btn-outline-primary" onclick="refreshRecommendations()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <!-- AI Recommendations Cards -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Personalized Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recommendations %}
+                    <div class="row">
+                        {% for rec in recommendations %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div
+                                class="card h-100 border-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6
+                                            class="card-title text-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                            {{ rec.title }}
+                                        </h6>
+                                        <span
+                                            class="badge bg-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                            {{ rec.priority.title() }}
+                                        </span>
+                                    </div>
+                                    <p class="card-text small">{{ rec.description }}</p>
+                                    {% if rec.topic_id %}
+                                    <a href="{{ url_for('sessions.start_session', topic_id=rec.topic_id) }}"
+                                        class="btn btn-sm btn-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                        <i class="fas fa-play me-1"></i>Start Session
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-robot fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recommendations available yet. Start studying to get personalized
+                            suggestions!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Study Patterns & Schedule -->
+    <div class="row">
+        <!-- Study Patterns -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Study Patterns
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if study_patterns %}
+                    <div class="mb-3">
+                        <h6>Optimal Study Time</h6>
+                        <p class="text-muted">
+                            {% if study_patterns.best_time != 'insufficient_data' %}
+                            <i class="fas fa-clock text-success me-1"></i>
+                            {{ study_patterns.best_time }}
+                            {% else %}
+                            <i class="fas fa-question-circle text-muted me-1"></i>
+                            Insufficient data
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Best Study Day</h6>
+                        <p class="text-muted">
+                            {% if study_patterns.best_day != 'insufficient_data' %}
+                            <i class="fas fa-calendar text-success me-1"></i>
+                            {{ study_patterns.best_day }}
+                            {% else %}
+                            <i class="fas fa-question-circle text-muted me-1"></i>
+                            Insufficient data
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if study_patterns.recommendations %}
+                    <div class="mb-3">
+                        <h6>AI Insights</h6>
+                        <ul class="list-unstyled">
+                            {% for rec in study_patterns.recommendations %}
+                            <li class="mb-1">
+                                <i class="fas fa-arrow-right text-info me-2"></i>
+                                <small>{{ rec }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-chart-line fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small">Study more to unlock pattern insights!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics for Review -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-redo me-2"></i>
+                        Spaced Repetition
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if topics_for_review %}
+                    <div class="mb-3">
+                        <h6>Topics Ready for Review</h6>
+                        {% for topic in topics_for_review[:5] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                            <div>
+                                <strong>{{ topic.title }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    {% if topic.days_since_last_session == 999 %}
+                                    Never studied
+                                    {% else %}
+                                    {{ topic.days_since_last_session }} days ago
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span
+                                    class="badge bg-{{ 'danger' if topic.days_since_last_session > topic.recommended_interval * 2 else 'warning' if topic.days_since_last_session >= topic.recommended_interval else 'success' }}">
+                                    Level {{ topic.mastery_level }}
+                                </span>
+                                <br>
+                                <a href="{{ url_for('sessions.start_session', topic_id=topic.topic_id) }}"
+                                    class="btn btn-sm btn-outline-primary mt-1">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <p class="text-muted small">All topics are up to date!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Study Schedule -->
+    {% if study_schedule %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Optimal Study Schedule (Next 7 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for day in study_schedule %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-calendar-day me-1"></i>
+                                        {{ day.study_date }}
+                                    </h6>
+                                    <p class="card-text">
+                                        <strong>{{ day.title }}</strong><br>
+                                        <small class="text-muted">{{ day.reason }}</small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-success">{{ day.recommended_duration }} min</span>
+                                        <a href="{{ url_for('sessions.start_session', topic_id=day.topic_id) }}"
+                                            class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-play"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function refreshRecommendations() {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+        btn.disabled = true;
+
+        // Reload the page to get fresh recommendations
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    }
+
+    // Auto-refresh recommendations every 5 minutes
+    setInterval(() => {
+        fetch('/ai/api/recommendations')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Recommendations updated:', data);
+            })
+            .catch(error => {
+                console.log('Error updating recommendations:', error);
+            });
+    }, 300000); // 5 minutes
+</script>
+{% endblock %}

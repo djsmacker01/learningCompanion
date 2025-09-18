@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Quizzes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-question-circle me-2"></i>Quizzes
+                </h1>
+                <div>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createQuizModal">
+                        <i class="fas fa-plus me-1"></i>Create Quiz
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="fas fa-question-circle fa-2x"></i>
+                            </div>
+                            <h4 class="mb-1" id="total-quizzes">-</h4>
+                            <p class="text-muted mb-0">Total Quizzes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="text-success mb-2">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                            <h4 class="mb-1" id="completed-attempts">-</h4>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="text-info mb-2">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                            <h4 class="mb-1" id="average-score">-</h4>
+                            <p class="text-muted mb-0">Avg Score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="text-warning mb-2">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                            <h4 class="mb-1" id="due-flashcards">-</h4>
+                            <p class="text-muted mb-0">Due Flashcards</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quizzes by Topic -->
+            {% if topics %}
+            <div class="row">
+                {% for topic in topics %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-folder me-2"></i>{{ topic.title }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">{{ topic.description[:100] }}{% if topic.description|length > 100
+                                %}...{% endif %}</p>
+
+                            {% set topic_quizzes = quizzes|selectattr('topic_id', 'equalto', topic.id)|list %}
+                            {% if topic_quizzes %}
+                            <div class="row">
+                                {% for quiz in topic_quizzes %}
+                                <div class="col-12 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                                        <div>
+                                            <h6 class="mb-1">{{ quiz.title }}</h6>
+                                            <small class="text-muted">
+                                                <i
+                                                    class="fas fa-{{ 'list' if quiz.quiz_type == 'multiple_choice' else 'lightbulb' if quiz.quiz_type == 'flashcards' else 'clipboard-check' if quiz.quiz_type == 'practice_test' else 'graduation-cap' }} me-1"></i>
+                                                {{ quiz.quiz_type.replace('_', ' ').title() }}
+                                                <span
+                                                    class="badge bg-{{ 'success' if quiz.difficulty_level == 'easy' else 'warning' if quiz.difficulty_level == 'medium' else 'danger' }} ms-2">
+                                                    {{ quiz.difficulty_level.title() }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                            {% if quiz.quiz_type == 'flashcards' %}
+                                            <a href="{{ url_for('quizzes.flashcards', quiz_id=quiz.id) }}"
+                                                class="btn btn-sm btn-primary">
+                                                <i class="fas fa-play me-1"></i>Study
+                                            </a>
+                                            {% else %}
+                                            <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}"
+                                                class="btn btn-sm btn-primary">
+                                                <i class="fas fa-play me-1"></i>Take Quiz
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-3">No quizzes created yet</p>
+                                <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}"
+                                    class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>Create First Quiz
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">No Topics Found</h4>
+                <p class="text-muted mb-4">Create a topic first to start building quizzes</p>
+                <a href="{{ url_for('topics.create_topic') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Create Topic
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Create Quiz Modal -->
+<div class="modal fade" id="createQuizModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Quiz</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Select a topic to create a quiz for:</p>
+                <div class="list-group">
+                    {% for topic in topics %}
+                    <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}"
+                        class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ topic.title }}</h6>
+                            <small class="text-muted">{{ topic.created_at.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        <p class="mb-1">{{ topic.description[:100] }}{% if topic.description|length > 100 %}...{% endif
+                            %}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        loadQuizStats();
+    });
+
+    function loadQuizStats() {
+        fetch('/quizzes/api/quiz-stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-quizzes').textContent = data.total_quizzes || 0;
+                document.getElementById('completed-attempts').textContent = data.completed_attempts || 0;
+                document.getElementById('average-score').textContent = (data.average_score || 0) + '%';
+                document.getElementById('due-flashcards').textContent = data.due_flashcards || 0;
+            })
+            .catch(error => {
+                console.error('Error loading quiz stats:', error);
+            });
+    }
+</script>
+{% endblock %}

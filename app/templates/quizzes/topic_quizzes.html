@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Quizzes - {{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-folder me-2"></i>{{ topic.title }}
+                    </h1>
+                    <p class="text-muted mb-0">Quizzes for this topic</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('quizzes.quiz_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>All Quizzes
+                    </a>
+                    <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Create Quiz
+                    </a>
+                </div>
+            </div>
+
+            <!-- Topic Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Topic Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">{{ topic.description }}</p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-primary mb-1">{{ quizzes|length }}</h4>
+                                <p class="text-muted mb-0">Total Quizzes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-success mb-1">
+                                    {{ quizzes|selectattr('quiz_type', 'equalto', 'flashcards')|list|length }}
+                                </h4>
+                                <p class="text-muted mb-0">Flashcard Sets</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-info mb-1">
+                                    {{ quizzes|rejectattr('quiz_type', 'equalto', 'flashcards')|list|length }}
+                                </h4>
+                                <p class="text-muted mb-0">Test Quizzes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quizzes List -->
+            {% if quizzes %}
+            <div class="row">
+                {% for quiz in quizzes %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div
+                            class="card-header bg-{{ 'success' if quiz.quiz_type == 'flashcards' else 'primary' }} text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i
+                                        class="fas fa-{{ 'lightbulb' if quiz.quiz_type == 'flashcards' else 'list' if quiz.quiz_type == 'multiple_choice' else 'clipboard-check' if quiz.quiz_type == 'practice_test' else 'graduation-cap' }} me-2"></i>
+                                    {{ quiz.title }}
+                                </h5>
+                                <span
+                                    class="badge bg-{{ 'success' if quiz.difficulty_level == 'easy' else 'warning' if quiz.difficulty_level == 'medium' else 'danger' }}">
+                                    {{ quiz.difficulty_level.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            {% if quiz.description %}
+                            <p class="text-muted mb-3">{{ quiz.description[:100] }}{% if quiz.description|length > 100
+                                %}...{% endif %}</p>
+                            {% endif %}
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <h6 class="text-primary mb-1">{{ quiz.quiz_type.replace('_', ' ').title() }}
+                                        </h6>
+                                        <small class="text-muted">Type</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <h6 class="text-info mb-1">{{ quiz.passing_score }}%</h6>
+                                        <small class="text-muted">Passing Score</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if quiz.time_limit_minutes %}
+                            <div class="mb-3">
+                                <div class="text-center">
+                                    <h6 class="text-warning mb-1">{{ quiz.time_limit_minutes }} min</h6>
+                                    <small class="text-muted">Time Limit</small>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-auto">
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}"
+                                        class="btn btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                    {% if quiz.quiz_type == 'flashcards' %}
+                                    <a href="{{ url_for('quizzes.flashcards', quiz_id=quiz.id) }}"
+                                        class="btn btn-success">
+                                        <i class="fas fa-play me-1"></i>Study
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}"
+                                        class="btn btn-primary">
+                                        <i class="fas fa-play me-1"></i>Take Quiz
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                Created {{ quiz.created_at.strftime('%B %d, %Y') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-question-circle fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">No Quizzes Yet</h4>
+                <p class="text-muted mb-4">Create your first quiz to start testing your knowledge on this topic</p>
+                <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Create First Quiz
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}"
+                                    class="btn btn-outline-primary w-100 mb-2">
+                                    <i class="fas fa-plus me-2"></i>Create Quiz
+                                </a>
+                                <small class="text-muted">Multiple choice, true/false, fill-in-the-blank</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}?type=flashcards"
+                                    class="btn btn-outline-success w-100 mb-2">
+                                    <i class="fas fa-lightbulb me-2"></i>Create Flashcards
+                                </a>
+                                <small class="text-muted">Study cards with spaced repetition</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <a href="{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}?type=practice_test"
+                                    class="btn btn-outline-info w-100 mb-2">
+                                    <i class="fas fa-clipboard-check me-2"></i>Practice Test
+                                </a>
+                                <small class="text-muted">Timed practice session</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if there's a type parameter in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizType = urlParams.get('type');
+
+        if (quizType) {
+            // Redirect to create quiz with pre-selected type
+            const createUrl = "{{ url_for('quizzes.create_quiz', topic_id=topic.id) }}";
+            window.location.href = createUrl;
+        }
+    });
+</script>
+{% endblock %}

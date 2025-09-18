@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Add Options - {{ question.question_text[:50] }}...{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Add Answer Options</h1>
+                    <p class="text-muted mb-0">Quiz: {{ quiz.title }}</p>
+                </div>
+                <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Quiz
+                </a>
+            </div>
+
+            <!-- Question Preview -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Question Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">{{ question.question_text }}</h6>
+                    <p class="text-muted mb-0">
+                        <strong>Correct Answer:</strong> {{ question.correct_answer }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Add New Option -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Option
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.option_text.label(class="form-label") }}
+                            {{ form.option_text(class="form-control" + (" is-invalid" if form.option_text.errors else
+                            ""), placeholder="Enter option text...") }}
+                            {% if form.option_text.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.option_text.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_correct(class="form-check-input" + (" is-invalid" if form.is_correct.errors
+                                else "")) }}
+                                {{ form.is_correct.label(class="form-check-label") }}
+                                {% if form.is_correct.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.is_correct.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">Check this if this option is the correct answer</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Done Adding Options
+                            </a>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Current Options -->
+            {% if options %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Current Options ({{ options|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for option in options %}
+                    <div
+                        class="border rounded p-3 mb-3 {{ 'border-success bg-light' if option.is_correct else 'border-secondary' }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-{{ 'success' if option.is_correct else 'secondary' }} me-2">
+                                        Option {{ loop.index }}
+                                    </span>
+                                    {% if option.is_correct %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Correct
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-0">{{ option.option_text }}</p>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editOption('{{ option.id }}')">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteOption('{{ option.id }}')">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted mb-3">No Options Yet</h5>
+                    <p class="text-muted mb-0">Add answer options above to make this a proper multiple choice question
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Instructions -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Instructions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Add at least 2 options
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Mark exactly one as correct
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Keep options concise
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Make distractors plausible
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function editOption(optionId) {
+        // TODO: Implement option editing
+        alert('Option editing will be implemented soon!');
+    }
+
+    function deleteOption(optionId) {
+        if (confirm('Are you sure you want to delete this option?')) {
+            // TODO: Implement option deletion
+            alert('Option deletion will be implemented soon!');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Auto-focus on option text field
+        const optionTextField = document.getElementById('option_text');
+        if (optionTextField) {
+            optionTextField.focus();
+        }
+
+        // Form validation
+        const form = document.querySelector('form');
+        const submitBtn = form.querySelector('input[type="submit"]');
+
+        form.addEventListener('submit', function (e) {
+            const optionText = document.getElementById('option_text').value.trim();
+
+            if (optionText === '') {
+                e.preventDefault();
+                alert('Please enter option text before adding.');
+                return false;
+            }
+
+            // Disable submit button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.value = 'Adding...';
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Enter key to submit (if not in textarea)
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    });
+</script>
+{% endblock %}

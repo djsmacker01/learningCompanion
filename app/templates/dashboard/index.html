@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">Welcome back!</h1>
+                            <p class="mb-0 opacity-75">Ready to continue your learning journey? Let's make today
+                                productive!</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <i class="fas fa-graduation-cap fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-book fa-2x"></i>
+                    </div>
+                    <h3 class="mb-1">{{ topics|length if topics else 0 }}</h3>
+                    <p class="text-muted mb-0">Total Topics</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="mb-1">{{ session_stats.total_sessions if session_stats else 0 }}</h3>
+                    <p class="text-muted mb-0">Study Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-hourglass-half fa-2x"></i>
+                    </div>
+                    <h3 class="mb-1">{{ session_stats.total_time_hours if session_stats else 0 }}h</h3>
+                    <p class="text-muted mb-0">Total Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-fire fa-2x"></i>
+                    </div>
+                    <h3 class="mb-1">{{ study_streak }}</h3>
+                    <p class="text-muted mb-0">Day Streak</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-trophy me-2"></i>Gamification Progress
+                        </h5>
+                        <a href="{{ url_for('gamification.gamification_dashboard') }}"
+                            class="btn btn-sm btn-outline-dark">
+                            View Full Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                                <h4 class="text-warning" id="user-level">Loading...</h4>
+                                <p class="text-muted mb-0">Level</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <i class="fas fa-fire fa-2x text-danger mb-2"></i>
+                                <h4 class="text-danger" id="user-streak">Loading...</h4>
+                                <p class="text-muted mb-0">Study Streak</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <i class="fas fa-medal fa-2x text-primary mb-2"></i>
+                                <h4 class="text-primary" id="user-badges">Loading...</h4>
+                                <p class="text-muted mb-0">Badges Earned</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <i class="fas fa-star fa-2x text-success mb-2"></i>
+                                <h4 class="text-success" id="user-achievements">Loading...</h4>
+                                <p class="text-muted mb-0">Achievements</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                                    role="progressbar" id="xp-progress-bar" style="width: 0%">
+                                    <span id="xp-text">0 XP</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted" id="xp-to-next">Loading...</small>
+                                <small class="text-muted" id="total-xp">Loading...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-book text-primary me-2"></i>Recent Topics
+                        </h5>
+                        <a href="{{ url_for('topics.list_topics') }}" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if topics %}
+                    <div class="row">
+                        {% for topic in topics[:6] %}
+                        <div class="col-md-6 mb-3">
+                            <div class="topic-card p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0 text-truncate" title="{{ topic.title }}">
+                                        {{ topic.title }}
+                                    </h6>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item"
+                                                    href="{{ url_for('topics.view_topic', topic_id=topic.id) }}">
+                                                    <i class="fas fa-eye me-2"></i>View
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item"
+                                                    href="{{ url_for('topics.edit_topic', topic_id=topic.id) }}">
+                                                    <i class="fas fa-edit me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    {{ topic.description[:100] }}{% if topic.description|length > 100 %}...{% endif %}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        {{ topic.created_at.strftime('%b %d') }}
+                                    </small>
+                                    <a href="{{ url_for('topics.view_topic', topic_id=topic.id) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-play me-1"></i>Study
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted mb-2">No topics yet</h5>
+                        <p class="text-muted mb-3">Start organizing your learning by creating your first topic.</p>
+                        <a href="{{ url_for('topics.create_topic') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Your First Topic
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history text-success me-2"></i>Recent Sessions
+                        </h5>
+                        <a href="{{ url_for('sessions.session_history') }}" class="btn btn-sm btn-outline-success">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                    {% for session in recent_sessions[:3] %}
+                    <div class="d-flex align-items-center mb-3 {% if not loop.last %}border-bottom pb-3{% endif %}">
+                        <div class="flex-shrink-0">
+                            {% if session.session_type == 'study' %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            {% elif session.session_type == 'review' %}
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                <i class="fas fa-redo"></i>
+                            </div>
+                            {% else %}
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="fw-medium">{{ session.session_date.strftime('%b %d') }}</div>
+                            <div class="text-muted small">
+                                {{ session.duration_minutes }}m
+                                {% if session.confidence_after and session.confidence_before %}
+                                {% set gain = session.confidence_after - session.confidence_before %}
+                                {% if gain > 0 %}
+                                <span class="text-success">+{{ gain }}</span>
+                                {% elif gain < 0 %} <span class="text-danger">{{ gain }}</span>
+                                    {% endif %}
+                                    {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="{{ url_for('sessions.session_detail', session_id=session.id) }}"
+                                class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-2">No recent sessions</p>
+                        <a href="{{ url_for('sessions.start_session') }}" class="btn btn-sm btn-primary">
+                            Start First Session
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient bg-primary text-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-brain me-2"></i>AI Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="ai-recommendations">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small">Loading AI recommendations...</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('ai_recommendations.recommendations_dashboard') }}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-brain me-1"></i>View All Recommendations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('topics.create_topic') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create New Topic
+                        </a>
+                        <a href="{{ url_for('topics.list_topics') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-book me-2"></i>Manage Topics
+                        </a>
+                        <a href="{{ url_for('sessions.start_session') }}" class="btn btn-outline-success">
+                            <i class="fas fa-play me-2"></i>Start Study Session
+                        </a>
+                        <a href="{{ url_for('sessions.session_history') }}" class="btn btn-outline-info">
+                            <i class="fas fa-clock me-2"></i>View Sessions
+                        </a>
+                        <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-chart-bar me-2"></i>View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Study Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Study in 25-minute focused sessions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Review topics regularly for better retention
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Take breaks between study sessions
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success me-2"></i>
+                            Track your progress to stay motivated
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Load AI recommendations and gamification data when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        loadAIRecommendations();
+        loadGamificationData();
+    });
+
+    function loadAIRecommendations() {
+        fetch('/ai/api/recommendations')
+            .then(response => response.json())
+            .then(data => {
+                displayAIRecommendations(data.recommendations);
+            })
+            .catch(error => {
+                console.error('Error loading AI recommendations:', error);
+                displayAIRecommendationsError();
+            });
+    }
+
+    function displayAIRecommendations(recommendations) {
+        const container = document.getElementById('ai-recommendations');
+
+        if (!recommendations || recommendations.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="fas fa-robot fa-2x text-muted mb-2"></i>
+                    <p class="text-muted small">No recommendations yet. Start studying to get personalized suggestions!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Show top 3 recommendations
+        const topRecommendations = recommendations.slice(0, 3);
+        let html = '';
+
+        topRecommendations.forEach(rec => {
+            const priorityClass = rec.priority === 'high' ? 'danger' : rec.priority === 'medium' ? 'warning' : 'info';
+            const priorityIcon = rec.priority === 'high' ? 'exclamation-triangle' : rec.priority === 'medium' ? 'clock' : 'info-circle';
+
+            html += `
+                <div class="mb-3 p-2 border-start border-3 border-${priorityClass} bg-light rounded">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 text-${priorityClass}">
+                                <i class="fas fa-${priorityIcon} me-1"></i>
+                                ${rec.title}
+                            </h6>
+                            <p class="small text-muted mb-1">${rec.description}</p>
+                        </div>
+                        <span class="badge bg-${priorityClass} ms-2">${rec.priority}</span>
+                    </div>
+                    ${rec.topic_id ? `
+                        <a href="/sessions/start?topic_id=${rec.topic_id}" class="btn btn-sm btn-${priorityClass} mt-2">
+                            <i class="fas fa-play me-1"></i>Start Session
+                        </a>
+                    ` : ''}
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function displayAIRecommendationsError() {
+        const container = document.getElementById('ai-recommendations');
+        container.innerHTML = `
+            <div class="text-center py-3">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <p class="text-muted small">Unable to load AI recommendations</p>
+            </div>
+        `;
+    }
+
+    function loadGamificationData() {
+        fetch('/gamification/api/profile')
+            .then(response => response.json())
+            .then(data => {
+                if (data.total_xp !== undefined) {
+                    // Update gamification stats
+                    document.getElementById('user-level').textContent = data.current_level;
+                    document.getElementById('user-streak').textContent = data.study_streak;
+                    document.getElementById('user-badges').textContent = data.badges_earned;
+                    document.getElementById('user-achievements').textContent = data.achievements_unlocked;
+
+                    // Update XP progress
+                    const progressBar = document.getElementById('xp-progress-bar');
+                    const xpText = document.getElementById('xp-text');
+                    const xpToNext = document.getElementById('xp-to-next');
+                    const totalXp = document.getElementById('total-xp');
+
+                    progressBar.style.width = data.level_progress.progress_percentage + '%';
+                    xpText.textContent = data.total_xp + ' XP';
+                    xpToNext.textContent = data.xp_to_next_level + ' XP to next level';
+                    totalXp.textContent = data.total_xp + ' total XP';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading gamification data:', error);
+                // Set default values on error
+                document.getElementById('user-level').textContent = '1';
+                document.getElementById('user-streak').textContent = '0';
+                document.getElementById('user-badges').textContent = '0';
+                document.getElementById('user-achievements').textContent = '0';
+            });
+    }
+</script>
+{% endblock %}

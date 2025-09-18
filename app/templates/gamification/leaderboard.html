@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - Gamification{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-crown me-2"></i>Leaderboard
+                    </h1>
+                    <p class="text-muted mb-0">Compete with other learners and climb the rankings!</p>
+                </div>
+                <a href="{{ url_for('gamification.gamification_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Leaderboard Categories -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-trophy me-2"></i>Leaderboard Categories
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-warning active"
+                                    onclick="showLeaderboard('total_xp')">
+                                    <i class="fas fa-star me-1"></i>Total XP
+                                </button>
+                                <button type="button" class="btn btn-outline-warning"
+                                    onclick="showLeaderboard('study_streak')">
+                                    <i class="fas fa-fire me-1"></i>Study Streak
+                                </button>
+                                <button type="button" class="btn btn-outline-warning"
+                                    onclick="showLeaderboard('quizzes_completed')">
+                                    <i class="fas fa-question-circle me-1"></i>Quizzes
+                                </button>
+                                <button type="button" class="btn btn-outline-warning"
+                                    onclick="showLeaderboard('study_time')">
+                                    <i class="fas fa-clock me-1"></i>Study Time
+                                </button>
+                                <button type="button" class="btn btn-outline-warning"
+                                    onclick="showLeaderboard('topics_mastered')">
+                                    <i class="fas fa-graduation-cap me-1"></i>Topics
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Content -->
+            <div class="row">
+                <!-- Total XP Leaderboard -->
+                <div class="col-12 leaderboard-section" id="total_xp-leaderboard">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-star me-2"></i>Total XP Leaderboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User</th>
+                                            <th>Total XP</th>
+                                            <th>Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in leaderboards.total_xp %}
+                                        <tr class="{% if entry.user_id == profile.user_id %}table-warning{% endif %}">
+                                            <td>
+                                                {% if entry.rank == 1 %}
+                                                <i class="fas fa-crown text-warning"></i> 1st
+                                                {% elif entry.rank == 2 %}
+                                                <i class="fas fa-medal text-secondary"></i> 2nd
+                                                {% elif entry.rank == 3 %}
+                                                <i class="fas fa-medal text-warning"></i> 3rd
+                                                {% else %}
+                                                #{{ entry.rank }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ entry.users.email }}</strong>
+                                                        {% if entry.user_id == profile.user_id %}
+                                                        <span class="badge bg-warning text-dark ms-1">You</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ entry.value }} XP</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">Level {{ (entry.value / 100) ** 0.5 + 1|int
+                                                    }}</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Streak Leaderboard -->
+                <div class="col-12 leaderboard-section" id="study_streak-leaderboard" style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-fire me-2"></i>Study Streak Leaderboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User</th>
+                                            <th>Current Streak</th>
+                                            <th>Longest Streak</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in leaderboards.study_streak %}
+                                        <tr class="{% if entry.user_id == profile.user_id %}table-warning{% endif %}">
+                                            <td>
+                                                {% if entry.rank == 1 %}
+                                                <i class="fas fa-crown text-warning"></i> 1st
+                                                {% elif entry.rank == 2 %}
+                                                <i class="fas fa-medal text-secondary"></i> 2nd
+                                                {% elif entry.rank == 3 %}
+                                                <i class="fas fa-medal text-warning"></i> 3rd
+                                                {% else %}
+                                                #{{ entry.rank }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ entry.users.email }}</strong>
+                                                        {% if entry.user_id == profile.user_id %}
+                                                        <span class="badge bg-warning text-dark ms-1">You</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-danger">{{ entry.value }} days</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ entry.value }} days</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quizzes Completed Leaderboard -->
+                <div class="col-12 leaderboard-section" id="quizzes_completed-leaderboard" style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-question-circle me-2"></i>Quizzes Completed Leaderboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User</th>
+                                            <th>Quizzes Completed</th>
+                                            <th>Average Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in leaderboards.quizzes_completed %}
+                                        <tr class="{% if entry.user_id == profile.user_id %}table-warning{% endif %}">
+                                            <td>
+                                                {% if entry.rank == 1 %}
+                                                <i class="fas fa-crown text-warning"></i> 1st
+                                                {% elif entry.rank == 2 %}
+                                                <i class="fas fa-medal text-secondary"></i> 2nd
+                                                {% elif entry.rank == 3 %}
+                                                <i class="fas fa-medal text-warning"></i> 3rd
+                                                {% else %}
+                                                #{{ entry.rank }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ entry.users.email }}</strong>
+                                                        {% if entry.user_id == profile.user_id %}
+                                                        <span class="badge bg-warning text-dark ms-1">You</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ entry.value }} quizzes</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">85%</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study Time Leaderboard -->
+                <div class="col-12 leaderboard-section" id="study_time-leaderboard" style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-clock me-2"></i>Study Time Leaderboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User</th>
+                                            <th>Study Time</th>
+                                            <th>Sessions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in leaderboards.study_time %}
+                                        <tr class="{% if entry.user_id == profile.user_id %}table-warning{% endif %}">
+                                            <td>
+                                                {% if entry.rank == 1 %}
+                                                <i class="fas fa-crown text-warning"></i> 1st
+                                                {% elif entry.rank == 2 %}
+                                                <i class="fas fa-medal text-secondary"></i> 2nd
+                                                {% elif entry.rank == 3 %}
+                                                <i class="fas fa-medal text-warning"></i> 3rd
+                                                {% else %}
+                                                #{{ entry.rank }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ entry.users.email }}</strong>
+                                                        {% if entry.user_id == profile.user_id %}
+                                                        <span class="badge bg-warning text-dark ms-1">You</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">{{ "%.1f"|format(entry.value / 60) }}
+                                                    hours</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ entry.value // 30 }} sessions</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topics Mastered Leaderboard -->
+                <div class="col-12 leaderboard-section" id="topics_mastered-leaderboard" style="display: none;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-graduation-cap me-2"></i>Topics Mastered Leaderboard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User</th>
+                                            <th>Topics Mastered</th>
+                                            <th>Mastery Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for entry in leaderboards.topics_mastered %}
+                                        <tr class="{% if entry.user_id == profile.user_id %}table-warning{% endif %}">
+                                            <td>
+                                                {% if entry.rank == 1 %}
+                                                <i class="fas fa-crown text-warning"></i> 1st
+                                                {% elif entry.rank == 2 %}
+                                                <i class="fas fa-medal text-secondary"></i> 2nd
+                                                {% elif entry.rank == 3 %}
+                                                <i class="fas fa-medal text-warning"></i> 3rd
+                                                {% else %}
+                                                #{{ entry.rank }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ entry.users.email }}</strong>
+                                                        {% if entry.user_id == profile.user_id %}
+                                                        <span class="badge bg-warning text-dark ms-1">You</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ entry.value }} topics</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">95%</span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Your Rankings -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-user me-2"></i>Your Rankings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-2">
+                                    <h4 class="text-warning">#{{ user_ranks.total_xp or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Total XP</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-danger">#{{ user_ranks.study_streak or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Study Streak</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-info">#{{ user_ranks.quizzes_completed or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Quizzes</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-success">#{{ user_ranks.study_time or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Study Time</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-primary">#{{ user_ranks.topics_mastered or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Topics</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-secondary">#{{ (user_ranks.total_xp + user_ranks.study_streak +
+                                        user_ranks.quizzes_completed) // 3 or 'N/A' }}</h4>
+                                    <p class="text-muted mb-0">Overall</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showLeaderboard(category) {
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Hide all leaderboard sections
+        document.querySelectorAll('.leaderboard-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        // Show selected leaderboard
+        document.getElementById(category + '-leaderboard').style.display = 'block';
+    }
+
+    // Auto-refresh leaderboard data every 60 seconds
+    setInterval(function () {
+        // Refresh current leaderboard
+        const activeButton = document.querySelector('.btn-group .btn.active');
+        if (activeButton) {
+            const category = activeButton.onclick.toString().match(/showLeaderboard\('(\w+)'\)/)[1];
+            fetch(`/gamification/api/leaderboard/${category}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update leaderboard data (simplified for demo)
+                    console.log('Leaderboard data updated:', data);
+                })
+                .catch(error => console.error('Error updating leaderboard:', error));
+        }
+    }, 60000);
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Start Study Session - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="h2 mb-3">
+                    <i class="fas fa-play-circle text-primary me-2"></i>Start Study Session
+                </h1>
+                <p class="text-muted">Begin a focused learning session and track your progress</p>
+            </div>
+
+            <!-- AI Recommendations -->
+            {% if ai_recommendations %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-brain me-2"></i>AI Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for rec in ai_recommendations[:3] %}
+                    <div class="alert alert-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }} alert-dismissible fade show"
+                        role="alert">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="alert-heading">
+                                    <i
+                                        class="fas fa-{{ 'exclamation-triangle' if rec.priority == 'high' else 'clock' if rec.priority == 'medium' else 'info-circle' }} me-1"></i>
+                                    {{ rec.title }}
+                                </h6>
+                                <p class="mb-2">{{ rec.description }}</p>
+                                {% if rec.topic_id %}
+                                <button type="button"
+                                    class="btn btn-sm btn-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}"
+                                    onclick="selectRecommendedTopic('{{ rec.topic_id }}')">
+                                    <i class="fas fa-play me-1"></i>Start This Session
+                                </button>
+                                {% endif %}
+                            </div>
+                            <span
+                                class="badge bg-{{ 'danger' if rec.priority == 'high' else 'warning' if rec.priority == 'medium' else 'info' }}">
+                                {{ rec.priority.title() }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Session Start Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <!-- Topic Selection -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-medium">
+                                    <i class="fas fa-book text-primary me-2"></i>Choose Topic
+                                </label>
+                                {{ form.topic_id(class="form-select form-select-lg") }}
+                                {% if form.topic_id.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.topic_id.errors %}
+                                    <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Session Type -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-medium">
+                                    <i class="fas fa-tag text-primary me-2"></i>Session Type
+                                </label>
+                                {{ form.session_type(class="form-select form-select-lg") }}
+                                {% if form.session_type.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.session_type.errors %}
+                                    <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Confidence Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-chart-line text-primary me-2"></i>Current Confidence Level
+                            </label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    {{ form.confidence_before(class="form-range", min="1", max="10", value="5") }}
+                                    <div class="d-flex justify-content-between text-muted small mt-1">
+                                        <span>1 - Beginner</span>
+                                        <span>5 - Intermediate</span>
+                                        <span>10 - Expert</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="display-6 text-primary" id="confidence-display">5</div>
+                                        <small class="text-muted">Current Level</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.confidence_before.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.confidence_before.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Estimated Duration -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-clock text-primary me-2"></i>Estimated Duration
+                            </label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    {{ form.estimated_duration(class="form-control form-control-lg") }}
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="setDuration(15)">15m</button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="setDuration(25)">25m</button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="setDuration(45)">45m</button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="setDuration(60)">1h</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.estimated_duration.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.estimated_duration.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Initial Notes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-sticky-note text-primary me-2"></i>Initial Notes (Optional)
+                            </label>
+                            {{ form.notes(class="form-control", rows="3", placeholder="Any initial thoughts or goals for
+                            this session?") }}
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                You can add more detailed notes after starting the session
+                            </div>
+                            {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.notes.errors %}
+                                <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('sessions.session_history') }}"
+                                class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Sessions
+                            </a>
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Study Tips -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Study Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Find a quiet, distraction-free environment
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Have all materials ready before starting
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Take short breaks every 25-30 minutes
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Set specific learning goals for this session
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use active learning techniques
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Review and summarize what you learned
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="text-center mt-4">
+                <p class="text-muted mb-3">Or use our study timer for guided sessions</p>
+                <a href="{{ url_for('sessions.study_timer') }}" class="btn btn-outline-success">
+                    <i class="fas fa-stopwatch me-2"></i>Use Study Timer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update confidence display when slider changes
+    document.getElementById('confidence_before').addEventListener('input', function () {
+        document.getElementById('confidence-display').textContent = this.value;
+    });
+
+    // Set duration helper function
+    function setDuration(minutes) {
+        document.getElementById('estimated_duration').value = minutes;
+    }
+
+    // Initialize confidence display
+    document.addEventListener('DOMContentLoaded', function () {
+        const slider = document.getElementById('confidence_before');
+        document.getElementById('confidence-display').textContent = slider.value;
+    });
+
+    // Function to select recommended topic
+    function selectRecommendedTopic(topicId) {
+        const topicSelect = document.getElementById('topic_id');
+        topicSelect.value = topicId;
+
+        // Scroll to form and highlight the selection
+        document.querySelector('.card.border-0.shadow-sm').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        // Add visual feedback
+        topicSelect.classList.add('border-success', 'border-3');
+        setTimeout(() => {
+            topicSelect.classList.remove('border-success', 'border-3');
+        }, 2000);
+
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show mt-3';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            Topic selected! You can now adjust other settings and start your session.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.card-body.p-4').appendChild(alert);
+    }
+</script>
+{% endblock %}

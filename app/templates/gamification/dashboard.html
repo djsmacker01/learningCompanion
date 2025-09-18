@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Gamification Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-trophy me-2"></i>Gamification Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Track your progress, earn badges, and climb the leaderboards!</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ url_for('gamification.badges_page') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-medal me-1"></i>Badges
+                    </a>
+                    <a href="{{ url_for('gamification.achievements_page') }}" class="btn btn-outline-success">
+                        <i class="fas fa-star me-1"></i>Achievements
+                    </a>
+                    <a href="{{ url_for('gamification.leaderboard_page') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-crown me-1"></i>Leaderboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- User Profile Overview -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="display-4 text-primary mb-2">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="card-title">{{ profile.current_level }}</h3>
+                            <p class="card-text text-muted">Level</p>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ (profile.total_xp % 100) }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ profile.get_xp_to_next_level() }} XP to next level</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="display-4 text-success mb-2">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <h3 class="card-title">{{ profile.study_streak }}</h3>
+                            <p class="card-text text-muted">Study Streak</p>
+                            <small class="text-muted">Longest: {{ profile.longest_streak }} days</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="display-4 text-info mb-2">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <h3 class="card-title">{{ profile.badges_earned }}</h3>
+                            <p class="card-text text-muted">Badges Earned</p>
+                            <small class="text-muted">{{ profile.achievements_unlocked }} achievements</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="display-4 text-warning mb-2">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h3 class="card-title">{{ "%.1f"|format(profile.total_study_time_minutes / 60) }}</h3>
+                            <p class="card-text text-muted">Study Hours</p>
+                            <small class="text-muted">{{ profile.quizzes_completed }} quizzes completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XP Progress Bar -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Experience Points (XP)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-gradient-primary progress-bar-striped progress-bar-animated"
+                                    role="progressbar" style="width: {{ (profile.total_xp % 100) }}%"
+                                    aria-valuenow="{{ profile.total_xp % 100 }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ profile.total_xp }} XP
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Level {{ profile.current_level }}</small>
+                                <small class="text-muted">{{ profile.get_xp_to_next_level() }} XP to Level {{
+                                    profile.current_level + 1 }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h2 class="text-primary mb-0">{{ profile.total_xp }}</h2>
+                            <p class="text-muted mb-0">Total XP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity and Achievements -->
+            <div class="row">
+                <!-- Recent Badges -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-medal me-2"></i>Recent Badges
+                            </h5>
+                            <a href="{{ url_for('gamification.badges_page') }}"
+                                class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="card-body">
+                            {% if user_badges %}
+                            {% for user_badge in user_badges[:5] %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i
+                                        class="{{ user_badge.badge.icon }} fa-2x text-{{ user_badge.badge.rarity == 'legendary' and 'warning' or user_badge.badge.rarity == 'epic' and 'purple' or user_badge.badge.rarity == 'rare' and 'info' or 'secondary' }}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ user_badge.badge.name }}</h6>
+                                    <p class="text-muted mb-1 small">{{ user_badge.badge.description }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-star me-1"></i>{{ user_badge.badge.xp_reward }} XP
+                                        <span class="ms-2">
+                                            <i class="fas fa-calendar me-1"></i>{{ user_badge.earned_at.strftime('%b %d,
+                                            %Y') }}
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-medal fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No badges earned yet. Start studying to earn your first badge!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Achievements -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-star me-2"></i>Recent Achievements
+                            </h5>
+                            <a href="{{ url_for('gamification.achievements_page') }}"
+                                class="btn btn-sm btn-outline-success">View All</a>
+                        </div>
+                        <div class="card-body">
+                            {% if user_achievements %}
+                            {% for user_achievement in user_achievements[:5] %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="{{ user_achievement.achievement.icon }} fa-2x text-success"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ user_achievement.achievement.name }}</h6>
+                                    <p class="text-muted mb-1 small">{{ user_achievement.achievement.description }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-star me-1"></i>{{ user_achievement.achievement.xp_reward }} XP
+                                        <span class="ms-2">
+                                            <i class="fas fa-calendar me-1"></i>{{
+                                            user_achievement.unlocked_at.strftime('%b %d, %Y') }}
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No achievements unlocked yet. Keep studying to unlock
+                                    achievements!</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-2">
+                                    <h4 class="text-primary">{{ profile.total_xp }}</h4>
+                                    <p class="text-muted mb-0">Total XP</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-success">{{ profile.study_streak }}</h4>
+                                    <p class="text-muted mb-0">Current Streak</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-info">{{ profile.badges_earned }}</h4>
+                                    <p class="text-muted mb-0">Badges</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-warning">{{ profile.achievements_unlocked }}</h4>
+                                    <p class="text-muted mb-0">Achievements</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-danger">{{ profile.quizzes_completed }}</h4>
+                                    <p class="text-muted mb-0">Quizzes</p>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4 class="text-secondary">{{ profile.topics_mastered }}</h4>
+                                    <p class="text-muted mb-0">Topics</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh profile data every 30 seconds
+    setInterval(function () {
+        fetch('/gamification/api/profile')
+            .then(response => response.json())
+            .then(data => {
+                if (data.total_xp) {
+                    // Update XP display
+                    document.querySelector('.display-4.text-primary').nextElementSibling.textContent = data.current_level;
+                    document.querySelector('h2.text-primary').textContent = data.total_xp;
+
+                    // Update progress bar
+                    const progressBar = document.querySelector('.progress-bar');
+                    progressBar.style.width = data.level_progress.progress_percentage + '%';
+                    progressBar.setAttribute('aria-valuenow', data.level_progress.progress_percentage);
+                    progressBar.textContent = data.total_xp + ' XP';
+
+                    // Update other stats
+                    document.querySelector('.text-success').nextElementSibling.textContent = data.study_streak;
+                    document.querySelector('.text-info').nextElementSibling.textContent = data.badges_earned;
+                    document.querySelector('.text-warning').nextElementSibling.textContent = data.achievements_unlocked;
+                }
+            })
+            .catch(error => console.error('Error updating profile:', error));
+    }, 30000);
+
+    // Check for new rewards periodically
+    setInterval(function () {
+        fetch('/gamification/api/check-rewards')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && (data.new_badges.length > 0 || data.new_achievements.length > 0)) {
+                    // Show notification for new rewards
+                    showRewardNotification(data.new_badges, data.new_achievements);
+                }
+            })
+            .catch(error => console.error('Error checking rewards:', error));
+    }, 60000); // Check every minute
+
+    function showRewardNotification(badges, achievements) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+
+        let message = '🎉 New rewards earned!<br>';
+        if (badges.length > 0) {
+            message += `🏆 ${badges.length} new badge${badges.length > 1 ? 's' : ''}<br>`;
+        }
+        if (achievements.length > 0) {
+            message += `⭐ ${achievements.length} new achievement${achievements.length > 1 ? 's' : ''}<br>`;
+        }
+
+        notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

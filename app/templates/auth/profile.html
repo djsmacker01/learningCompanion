@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">👤 My Profile</h1>
+                <div>
+                    <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">First Name</label>
+                            <p class="form-control-plaintext">{{ user.profile.first_name if user.profile else 'Not set'
+                                }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Last Name</label>
+                            <p class="form-control-plaintext">{{ user.profile.last_name if user.profile else 'Not set'
+                                }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <p class="form-control-plaintext">{{ user.email }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Bio</label>
+                        <p class="form-control-plaintext">{{ user.profile.bio if user.profile and user.profile.bio else
+                            'No bio provided' }}</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Timezone</label>
+                            <p class="form-control-plaintext">{{ user.profile.timezone if user.profile else 'UTC' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Language</label>
+                            <p class="form-control-plaintext">{{ user.profile.language if user.profile else 'English' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚙️ Account Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Account Status</label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                                {{ 'Active' if user.is_active else 'Inactive' }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Verified</label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-{{ 'success' if user.is_verified else 'warning' }}">
+                                {{ 'Verified' if user.is_verified else 'Not Verified' }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Member Since</label>
+                        <p class="form-control-plaintext">
+                            {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Unknown' }}
+                        </p>
+                    </div>
+
+                    {% if user.last_login %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Last Login</label>
+                        <p class="form-control-plaintext">
+                            {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never' }}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Notification Preferences -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🔔 Notification Preferences</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
+                            user.profile.email_notifications else '' }} disabled>
+                        <label class="form-check-label">
+                            Email Notifications
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
+                            user.profile.sms_notifications else '' }} disabled>
+                        <label class="form-check-label">
+                            SMS Notifications
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
+                            user.profile.study_reminders else '' }} disabled>
+                        <label class="form-check-label">
+                            Study Reminders
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🔒 Privacy Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Privacy Level</label>
+                        <p class="form-control-plaintext">
+                            <span
+                                class="badge bg-{{ 'danger' if user.profile and user.profile.privacy_level == 'private' else 'warning' if user.profile and user.profile.privacy_level == 'friends' else 'success' }}">
+                                {{ user.profile.privacy_level.title() if user.profile else 'Private' }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Profile Visibility</label>
+                        <p class="form-control-plaintext">
+                            {% if user.profile and user.profile.privacy_level == 'private' %}
+                            Only you can see your profile and data
+                            {% elif user.profile and user.profile.privacy_level == 'friends' %}
+                            Your profile is visible to study partners
+                            {% else %}
+                            Your profile is visible to everyone
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🚀 Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-key"></i> Change Password
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('auth.user_sessions') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-desktop"></i> Active Sessions
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add some interactive features
+        console.log('Profile page loaded');
+    });
+</script>

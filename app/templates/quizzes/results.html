@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Results Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-{{ 'success' if passed else 'danger' }} text-white">
+                    <div class="text-center">
+                        <h3 class="card-title mb-2">
+                            <i class="fas fa-{{ 'trophy' if passed else 'times-circle' }} me-2"></i>
+                            Quiz {{ 'Passed' if passed else 'Failed' }}!
+                        </h3>
+                        <h1 class="display-4 mb-0">{{ attempt.score }}%</h1>
+                        <p class="mb-0 opacity-75">
+                            {{ attempt.correct_answers }} out of {{ attempt.total_questions }} questions correct
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gamification Rewards -->
+            {% if rewards and (rewards.xp_earned > 0 or rewards.badges_earned or rewards.achievements_unlocked) %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-trophy me-2"></i>Rewards Earned!
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        {% if rewards.xp_earned > 0 %}
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <i class="fas fa-star fa-3x text-warning mb-2"></i>
+                                <h4 class="text-warning">{{ rewards.xp_earned }} XP</h4>
+                                <p class="text-muted mb-0">Experience Points</p>
+                                {% if rewards.level_up %}
+                                <span class="badge bg-success mt-1">🎉 Level Up!</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if rewards.badges_earned %}
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <i class="fas fa-medal fa-3x text-primary mb-2"></i>
+                                <h4 class="text-primary">{{ rewards.badges_earned|length }}</h4>
+                                <p class="text-muted mb-0">New Badges</p>
+                                {% for badge in rewards.badges_earned %}
+                                <div class="badge bg-primary me-1">{{ badge }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if rewards.achievements_unlocked %}
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <i class="fas fa-star fa-3x text-success mb-2"></i>
+                                <h4 class="text-success">{{ rewards.achievements_unlocked|length }}</h4>
+                                <p class="text-muted mb-0">New Achievements</p>
+                                {% for achievement in rewards.achievements_unlocked %}
+                                <div class="badge bg-success me-1">{{ achievement }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Score Breakdown -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-1">{{ attempt.score }}%</h4>
+                            <p class="text-muted mb-0">Final Score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="mb-1">{{ attempt.correct_answers }}</h4>
+                            <p class="text-muted mb-0">Correct Answers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                            <h4 class="mb-1">{{ attempt.time_taken_minutes }}</h4>
+                            <p class="text-muted mb-0">Minutes Taken</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Performance Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>Accuracy</span>
+                                    <span class="fw-bold">{{ attempt.score }}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-{{ 'success' if attempt.score >= 80 else 'warning' if attempt.score >= 60 else 'danger' }}"
+                                        style="width: {{ attempt.score }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span>Passing Score</span>
+                                    <span class="fw-bold">{{ quiz.passing_score }}%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: {{ quiz.passing_score }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Quiz Details</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1">
+                                        <i class="fas fa-folder me-2"></i>{{ topic.title }}
+                                    </li>
+                                    <li class="mb-1">
+                                        <i
+                                            class="fas fa-{{ 'list' if quiz.quiz_type == 'multiple_choice' else 'lightbulb' if quiz.quiz_type == 'flashcards' else 'clipboard-check' if quiz.quiz_type == 'practice_test' else 'graduation-cap' }} me-2"></i>
+                                        {{ quiz.quiz_type.replace('_', ' ').title() }}
+                                    </li>
+                                    <li class="mb-1">
+                                        <i
+                                            class="fas fa-{{ 'success' if quiz.difficulty_level == 'easy' else 'warning' if quiz.difficulty_level == 'medium' else 'danger' }} me-2"></i>
+                                        {{ quiz.difficulty_level.title() }} Difficulty
+                                    </li>
+                                    {% if quiz.time_limit_minutes %}
+                                    <li class="mb-1">
+                                        <i class="fas fa-clock me-2"></i>{{ quiz.time_limit_minutes }} min limit
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Review -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Question Review
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for question in questions %}
+                    {% set user_answer = qa_mapping.get(question.id) %}
+                    <div
+                        class="border rounded p-3 mb-3 {{ 'border-success bg-light' if user_answer and user_answer.is_correct else 'border-danger bg-light' if user_answer and not user_answer.is_correct else 'border-secondary' }}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <span
+                                    class="badge bg-{{ 'success' if user_answer and user_answer.is_correct else 'danger' if user_answer and not user_answer.is_correct else 'secondary' }} me-2">
+                                    Q{{ loop.index }}
+                                </span>
+                                <span
+                                    class="badge bg-{{ 'primary' if question.question_type == 'multiple_choice' else 'info' if question.question_type == 'true_false' else 'success' if question.question_type == 'fill_blank' else 'warning' }}">
+                                    {{ question.question_type.replace('_', ' ').title() }}
+                                </span>
+                                <span class="badge bg-outline-secondary ms-2">{{ question.points }} pt{{ 's' if
+                                    question.points != 1 else '' }}</span>
+                            </div>
+                            <div class="text-end">
+                                {% if user_answer %}
+                                {% if user_answer.is_correct %}
+                                <i class="fas fa-check-circle text-success fa-lg"></i>
+                                {% else %}
+                                <i class="fas fa-times-circle text-danger fa-lg"></i>
+                                {% endif %}
+                                {% else %}
+                                <i class="fas fa-question-circle text-secondary fa-lg"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <h6 class="mb-2">{{ question.question_text }}</h6>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <strong class="text-success">Correct Answer:</strong>
+                                    <p class="mb-0">{{ question.correct_answer }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <strong
+                                        class="text-{{ 'success' if user_answer and user_answer.is_correct else 'danger' if user_answer and not user_answer.is_correct else 'muted' }}">
+                                        Your Answer:
+                                    </strong>
+                                    <p class="mb-0">
+                                        {% if user_answer %}
+                                        {{ user_answer.user_answer }}
+                                        {% else %}
+                                        <em class="text-muted">Not answered</em>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if question.explanation %}
+                        <div class="alert alert-info mt-2 mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Explanation:</strong> {{ question.explanation }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mb-4">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Quiz
+                    </a>
+                    {% if not passed %}
+                    <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id) }}" class="btn btn-warning">
+                        <i class="fas fa-redo me-1"></i>Retake Quiz
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('quizzes.topic_quizzes', topic_id=topic.id) }}" class="btn btn-primary">
+                        <i class="fas fa-list me-1"></i>All Quizzes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Study Recommendations -->
+            {% if not passed %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Study Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Focus Areas</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-1">
+                                    <i class="fas fa-book me-2"></i>Review incorrect answers
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-clock me-2"></i>Practice time management
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Next Steps</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-1">
+                                    <i class="fas fa-redo me-2"></i>Retake the quiz
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-brain me-2"></i>Study related materials
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add some animation to the results
+        const scoreElement = document.querySelector('.display-4');
+        if (scoreElement) {
+            const finalScore = parseInt(scoreElement.textContent);
+            let currentScore = 0;
+            const increment = finalScore / 50; // Animate over 50 steps
+
+            const scoreAnimation = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= finalScore) {
+                    currentScore = finalScore;
+                    clearInterval(scoreAnimation);
+                }
+                scoreElement.textContent = Math.round(currentScore) + '%';
+            }, 20);
+        }
+
+        // Add confetti effect for passing score
+        {% if passed %}
+        setTimeout(() => {
+            // Simple confetti effect
+            for (let i = 0; i < 50; i++) {
+                createConfetti();
+            }
+        }, 1000);
+        {% endif %}
+    });
+
+    function createConfetti() {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'fixed';
+        confetti.style.width = '10px';
+        confetti.style.height = '10px';
+        confetti.style.backgroundColor = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)];
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = '-10px';
+        confetti.style.zIndex = '9999';
+        confetti.style.borderRadius = '50%';
+
+        document.body.appendChild(confetti);
+
+        const animation = confetti.animate([
+            { transform: 'translateY(0px) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(${window.innerHeight + 100}px) rotate(720deg)`, opacity: 0 }
+        ], {
+            duration: 3000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+
+        animation.onfinish = () => {
+            confetti.remove();
+        };
+    }
+</script>
+{% endblock %}

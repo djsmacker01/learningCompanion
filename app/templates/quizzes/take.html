@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Taking Quiz: {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Quiz Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">{{ quiz.title }}</h5>
+                            <small class="opacity-75">Question {{ question_index + 1 }} of {{ total_questions }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="progress mb-2" style="width: 200px; height: 8px;">
+                                <div class="progress-bar bg-white" role="progressbar" style="width: {{ progress }}%">
+                                </div>
+                            </div>
+                            <small class="opacity-75">{{ progress }}% Complete</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="card-title mb-0">
+                            <span class="badge bg-primary me-2">Q{{ question_index + 1 }}</span>
+                            <span
+                                class="badge bg-{{ 'primary' if question.question_type == 'multiple_choice' else 'info' if question.question_type == 'true_false' else 'success' if question.question_type == 'fill_blank' else 'warning' }}">
+                                {{ question.question_type.replace('_', ' ').title() }}
+                            </span>
+                            <span class="badge bg-outline-secondary ms-2">{{ question.points }} point{{ 's' if
+                                question.points != 1 else '' }}</span>
+                        </h6>
+                        {% if quiz.time_limit_minutes %}
+                        <div class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="time-remaining">{{ quiz.time_limit_minutes }}:00</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="quiz-form">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-4">
+                            <h5 class="mb-3">{{ question.question_text }}</h5>
+
+                            {% if question.question_type == 'multiple_choice' and question.options %}
+                            <div class="ms-3">
+                                {% for option in question.options %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="answer"
+                                        value="{{ option.option_text }}" id="option{{ loop.index }}">
+                                    <label class="form-check-label" for="option{{ loop.index }}">
+                                        {{ option.option_text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% elif question.question_type == 'true_false' %}
+                            <div class="ms-3">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="answer" value="True" id="true">
+                                    <label class="form-check-label" for="true">
+                                        True
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="answer" value="False" id="false">
+                                    <label class="form-check-label" for="false">
+                                        False
+                                    </label>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="ms-3">
+                                {{ form.answer(class="form-control" + (" is-invalid" if form.answer.errors else ""),
+                                placeholder="Enter your answer...") }}
+                                {% if form.answer.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.answer.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            {% if question_index > 0 %}
+                            <a href="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id, q=question_index-1) }}"
+                                class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Previous
+                            </a>
+                            {% else %}
+                            <div></div>
+                            {% endif %}
+
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Instructions -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Instructions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Answer each question carefully
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    You can navigate between questions
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Passing score: {{ quiz.passing_score }}%
+                                </li>
+                                {% if quiz.time_limit_minutes %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Time limit: {{ quiz.time_limit_minutes }} minutes
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Timer functionality
+        {% if quiz.time_limit_minutes %}
+        let timeRemaining = {{ quiz.time_limit_minutes * 60
+    }}; // Convert to seconds
+    const timeDisplay = document.getElementById('time-remaining');
+
+    function updateTimer() {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeRemaining <= 0) {
+            // Time's up - submit the form
+            document.getElementById('quiz-form').submit();
+            return;
+        }
+
+        timeRemaining--;
+    }
+
+    // Update timer every second
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer(); // Initial call
+    {% endif %}
+
+    // Form validation
+    const form = document.getElementById('quiz-form');
+    const submitBtn = form.querySelector('input[type="submit"]');
+
+    form.addEventListener('submit', function (e) {
+        // Check if an answer is selected/entered
+        const questionType = '{{ question.question_type }}';
+        let hasAnswer = false;
+
+        if (questionType === 'multiple_choice' || questionType === 'true_false') {
+            hasAnswer = form.querySelector('input[name="answer"]:checked') !== null;
+        } else {
+            const answerInput = form.querySelector('input[name="answer"]');
+            hasAnswer = answerInput && answerInput.value.trim() !== '';
+        }
+
+        if (!hasAnswer) {
+            e.preventDefault();
+            alert('Please select or enter an answer before proceeding.');
+            return false;
+        }
+
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.value = 'Submitting...';
+    });
+
+    // Auto-save functionality (optional)
+    let autoSaveTimeout;
+    function autoSave() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+            // TODO: Implement auto-save functionality
+            console.log('Auto-saving progress...');
+        }, 5000); // Auto-save every 5 seconds
+    }
+
+    // Trigger auto-save on any input change
+    form.addEventListener('input', autoSave);
+    form.addEventListener('change', autoSave);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        // Enter key to submit (if not in textarea)
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            form.submit();
+        }
+
+        // Number keys for multiple choice (1-9)
+        if (questionType === 'multiple_choice' && e.key >= '1' && e.key <= '9') {
+            const optionIndex = parseInt(e.key) - 1;
+            const options = form.querySelectorAll('input[name="answer"]');
+            if (options[optionIndex]) {
+                options[optionIndex].checked = true;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

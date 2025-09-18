@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule Study Reminder{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">⏰ Schedule Study Reminder</h1>
+                <a href="{{ url_for('reminders.reminders_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 Create New Reminder</h5>
+                </div>
+                <div class="card-body">
+                    <form id="scheduleReminderForm">
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label for="title" class="form-label"><strong>Reminder Title</strong></label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                    value="Study Session Reminder" required>
+                                <div class="form-text">A brief title for your reminder</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label for="message" class="form-label"><strong>Reminder Message</strong></label>
+                                <textarea class="form-control" id="message" name="message" rows="3"
+                                    placeholder="Time for your study session!">Time for your study session!</textarea>
+                                <div class="form-text">The message you'll receive in your reminder</div>
+                            </div>
+                        </div>
+
+                        <!-- Date and Time -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="scheduled_date" class="form-label"><strong>Date</strong></label>
+                                <input type="date" class="form-control" id="scheduled_date" name="scheduled_date"
+                                    value="{{ (now + timedelta(days=1)).strftime('%Y-%m-%d') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="scheduled_time" class="form-label"><strong>Time</strong></label>
+                                <input type="time" class="form-control" id="scheduled_time" name="scheduled_time"
+                                    value="09:00" required>
+                            </div>
+                        </div>
+
+                        <!-- Reminder Settings -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="reminder_type" class="form-label"><strong>Reminder Type</strong></label>
+                                <select class="form-select" id="reminder_type" name="reminder_type">
+                                    <option value="study">Study Session</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="review">Review</option>
+                                    <option value="practice">Practice</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reminder_method" class="form-label"><strong>Reminder Method</strong></label>
+                                <select class="form-select" id="reminder_method" name="reminder_method">
+                                    <option value="email">Email</option>
+                                    <option value="sms">SMS (Coming Soon)</option>
+                                    <option value="push">Push Notification (Coming Soon)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Topic and Session Type -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="topic_id" class="form-label"><strong>Topic (Optional)</strong></label>
+                                <select class="form-select" id="topic_id" name="topic_id">
+                                    <option value="">Select a topic...</option>
+                                    {% for topic in topics %}
+                                    <option value="{{ topic.id }}">{{ topic.title }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Link this reminder to a specific topic</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="session_type" class="form-label"><strong>Session Type</strong></label>
+                                <select class="form-select" id="session_type" name="session_type">
+                                    <option value="review">Review</option>
+                                    <option value="practice">Practice</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label"><strong>Priority</strong></label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-calendar-plus"></i> Schedule Reminder
+                                </button>
+                                <a href="{{ url_for('reminders.reminders_dashboard') }}"
+                                    class="btn btn-outline-secondary ms-2">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">💡 Quick Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-lightbulb text-warning"></i> Best Times</h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li>• Morning: 8:00 - 10:00 AM</li>
+                                <li>• Afternoon: 2:00 - 4:00 PM</li>
+                                <li>• Evening: 7:00 - 9:00 PM</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-magic text-primary"></i> Smart Scheduling</h6>
+                            <p class="small text-muted mb-0">
+                                For AI-powered optimal time suggestions, use our
+                                <a href="{{ url_for('reminders.smart_schedule') }}">Smart Schedule</a> feature!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('scheduleReminderForm');
+        const scheduledDateInput = document.getElementById('scheduled_date');
+        const scheduledTimeInput = document.getElementById('scheduled_time');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        scheduledDateInput.min = today;
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scheduling...';
+            button.disabled = true;
+
+            // Validate date and time
+            const selectedDate = new Date(scheduledDateInput.value + 'T' + scheduledTimeInput.value);
+            const now = new Date();
+
+            if (selectedDate <= now) {
+                showNotification('Please select a future date and time.', 'error');
+                button.innerHTML = originalText;
+                button.disabled = false;
+                return;
+            }
+
+            // Submit form
+            fetch('{{ url_for("reminders.create_scheduled_reminder") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Reminder scheduled successfully!', 'success');
+                        // Redirect to dashboard after a short delay
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("reminders.reminders_dashboard") }}';
+                        }, 1500);
+                    } else {
+                        showNotification('Error scheduling reminder: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error scheduling reminder', 'error');
+                })
+                .finally(() => {
+                    // Reset button
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+        });
+
+        // Real-time validation
+        scheduledDateInput.addEventListener('change', function () {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                this.classList.add('is-invalid');
+                showNotification('Please select a future date.', 'warning');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        scheduledTimeInput.addEventListener('change', function () {
+            const selectedDate = new Date(scheduledDateInput.value + 'T' + this.value);
+            const now = new Date();
+
+            if (selectedDate <= now) {
+                this.classList.add('is-invalid');
+                showNotification('Please select a future time.', 'warning');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+
+    function showNotification(message, type = 'info') {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

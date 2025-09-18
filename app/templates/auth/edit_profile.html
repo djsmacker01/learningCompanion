@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 mb-3">✏️ Edit Profile</h2>
+                        <p class="text-muted">Update your personal information and preferences</p>
+                    </div>
+
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.first_name.label(class="form-label") }}
+                                {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else
+                                "")) }}
+                                {% if form.first_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.first_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.last_name.label(class="form-label") }}
+                                {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else
+                                "")) }}
+                                {% if form.last_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.last_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.bio.label(class="form-label") }}
+                            {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else "")) }}
+                            {% if form.bio.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.bio.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.timezone.label(class="form-label") }}
+                                {{ form.timezone(class="form-select" + (" is-invalid" if form.timezone.errors else ""))
+                                }}
+                                {% if form.timezone.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.timezone.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.language.label(class="form-label") }}
+                                {{ form.language(class="form-select" + (" is-invalid" if form.language.errors else ""))
+                                }}
+                                {% if form.language.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.language.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold mb-3">🔔 Notification Preferences</h6>
+                            <div class="form-check form-switch mb-3">
+                                {{ form.email_notifications(class="form-check-input") }}
+                                {{ form.email_notifications.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                {{ form.sms_notifications(class="form-check-input") }}
+                                {{ form.sms_notifications.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                {{ form.study_reminders(class="form-check-input") }}
+                                {{ form.study_reminders.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.privacy_level.label(class="form-label fw-bold") }}
+                            {{ form.privacy_level(class="form-select" + (" is-invalid" if form.privacy_level.errors else
+                            "")) }}
+                            {% if form.privacy_level.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.privacy_level.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small>
+                                    <strong>Private:</strong> Only you can see your data<br>
+                                    <strong>Friends:</strong> Share with study partners<br>
+                                    <strong>Public:</strong> Share with everyone
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('auth.profile') }}" class="btn btn-outline-secondary me-md-2">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Focus on first name field
+        const firstNameField = document.querySelector('input[name="first_name"]');
+        if (firstNameField) {
+            firstNameField.focus();
+        }
+
+        // Add character counter for bio
+        const bioField = document.querySelector('textarea[name="bio"]');
+        if (bioField) {
+            const maxLength = 500;
+            const counter = document.createElement('small');
+            counter.className = 'form-text text-muted';
+            counter.textContent = `${bioField.value.length}/${maxLength} characters`;
+            bioField.parentNode.appendChild(counter);
+
+            bioField.addEventListener('input', function () {
+                counter.textContent = `${this.value.length}/${maxLength} characters`;
+                if (this.value.length > maxLength * 0.9) {
+                    counter.className = 'form-text text-warning';
+                } else {
+                    counter.className = 'form-text text-muted';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

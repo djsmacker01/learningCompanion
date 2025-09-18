@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Study Reminders & Scheduling{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">📅 Study Reminders & Scheduling</h1>
+                <div>
+                    <a href="{{ url_for('reminders.reminder_preferences') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-cog"></i> Preferences
+                    </a>
+                    <a href="{{ url_for('reminders.smart_schedule') }}" class="btn btn-primary">
+                        <i class="fas fa-magic"></i> Smart Schedule
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ upcoming_reminders|length }}</h4>
+                            <p class="card-text">Upcoming Reminders</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bell fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ upcoming_schedules|length }}</h4>
+                            <p class="card-text">Scheduled Sessions</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ optimal_times|length }}</h4>
+                            <p class="card-text">AI Suggestions</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-brain fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ preferences.study_goal_minutes }}m</h4>
+                            <p class="card-text">Daily Goal</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-target fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Reminders -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🔔 Upcoming Reminders</h5>
+                    <a href="{{ url_for('reminders.schedule_reminders') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus"></i> Add Reminder
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_reminders %}
+                    <div class="list-group list-group-flush">
+                        {% for reminder in upcoming_reminders %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ reminder.title }}</h6>
+                                <p class="mb-1 text-muted">{{ reminder.message }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i>
+                                    {% if reminder.scheduled_time %}
+                                    {% if reminder.scheduled_time is string %}
+                                    {{ reminder.scheduled_time[:16] }}
+                                    {% else %}
+                                    {{ reminder.scheduled_time.strftime('%Y-%m-%d %H:%M') }}
+                                    {% endif %}
+                                    {% else %}
+                                    No time set
+                                    {% endif %}
+                                    {% if reminder.topic_id %}
+                                    | <i class="fas fa-book"></i> Topic
+                                    {% endif %}
+                                    {% if reminder.session_type %}
+                                    | <i class="fas fa-play"></i> {{ reminder.session_type.title() }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div>
+                                <span
+                                    class="badge bg-{{ 'primary' if reminder.priority == 'high' else 'secondary' if reminder.priority == 'low' else 'info' }}">
+                                    {{ reminder.priority.title() }}
+                                </span>
+                                <a href="{{ url_for('reminders.cancel_reminder', reminder_id=reminder.id) }}"
+                                    class="btn btn-sm btn-outline-danger ms-2"
+                                    onclick="return confirm('Are you sure you want to cancel this reminder?')">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming reminders</p>
+                        <a href="{{ url_for('reminders.schedule_reminders') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create Your First Reminder
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Schedules -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📅 Scheduled Sessions</h5>
+                    <a href="{{ url_for('reminders.smart_schedule') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-magic"></i> Smart Schedule
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_schedules %}
+                    <div class="list-group list-group-flush">
+                        {% for schedule in upcoming_schedules %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ schedule.title }}</h6>
+                                {% if schedule.description %}
+                                <p class="mb-1 text-muted">{{ schedule.description }}</p>
+                                {% endif %}
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ schedule.scheduled_start.strftime('%Y-%m-%d %H:%M')
+                                    }} - {{ schedule.scheduled_end.strftime('%H:%M') }}
+                                    {% if schedule.topic_id %}
+                                    | <i class="fas fa-book"></i> Topic
+                                    {% endif %}
+                                    {% if schedule.session_type %}
+                                    | <i class="fas fa-play"></i> {{ schedule.session_type.title() }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div>
+                                <span
+                                    class="badge bg-{{ 'success' if schedule.status == 'completed' else 'warning' if schedule.status == 'in_progress' else 'primary' }}">
+                                    {{ schedule.status.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No scheduled sessions</p>
+                        <a href="{{ url_for('reminders.smart_schedule') }}" class="btn btn-primary">
+                            <i class="fas fa-magic"></i> Create Smart Schedule
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🧠 AI Study Time Suggestions</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="refreshSuggestions()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if optimal_times %}
+                    <div class="row">
+                        {% for suggestion in optimal_times %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title">{{ suggestion.suggested_time.strftime('%A, %B %d') }}
+                                        </h6>
+                                        <span class="badge bg-info">{{ (suggestion.confidence_score * 100)|round
+                                            }}%</span>
+                                    </div>
+                                    <p class="card-text">
+                                        <strong>{{ suggestion.suggested_time.strftime('%H:%M') }}</strong><br>
+                                        <small class="text-muted">{{ suggestion.reasoning }}</small>
+                                    </p>
+                                    {% if suggestion.factors %}
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>Factors:</strong>
+                                            {% for factor, value in suggestion.factors.items() %}
+                                            {{ factor.replace('_', ' ').title() }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">
+                                            <i class="fas fa-play"></i> {{ suggestion.session_type.title() }}
+                                        </small>
+                                        {% if not suggestion.is_accepted %}
+                                        <a href="{{ url_for('reminders.accept_optimal_suggestion', suggestion_id=suggestion.id) }}"
+                                            class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Accept
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-success">Accepted</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-brain fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No AI suggestions available yet</p>
+                        <p class="text-muted small">Complete a few study sessions to get personalized suggestions!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function refreshSuggestions() {
+        // Reload the page to refresh suggestions
+        window.location.reload();
+    }
+
+    // Auto-refresh every 5 minutes
+    setInterval(function () {
+        // Check for new suggestions
+        fetch('/api/reminders/optimal-times/{{ current_user.id if current_user else "mock-user" }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.optimal_times.length > 0) {
+                    // Show notification if new suggestions are available
+                    if (data.optimal_times.some(s => !s.is_accepted)) {
+                        showNotification('New study time suggestions available!', 'info');
+                    }
+                }
+            })
+            .catch(error => console.log('Error checking for new suggestions:', error));
+    }, 300000); // 5 minutes
+
+    function showNotification(message, type = 'info') {
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

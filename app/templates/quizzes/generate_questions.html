@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Smart Questions - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-magic me-2"></i>Generate Smart Questions
+                    </h1>
+                    <p class="text-muted mb-0">Quiz: {{ quiz.title }} | Topic: {{ topic.title }}</p>
+                </div>
+                <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Quiz
+                </a>
+            </div>
+
+            <!-- Topic Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Topic Content
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">{{ topic.title }}</h6>
+                    <p class="mb-0">{{ topic.description }}</p>
+                </div>
+            </div>
+
+            <!-- Generation Controls -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>Generation Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Number of Questions</label>
+                                <select class="form-select" id="num-questions">
+                                    <option value="3">3 Questions</option>
+                                    <option value="5" selected>5 Questions</option>
+                                    <option value="8">8 Questions</option>
+                                    <option value="10">10 Questions</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Difficulty Level</label>
+                                <select class="form-select" id="difficulty">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">Question Type</label>
+                                <select class="form-select" id="question-type">
+                                    <option value="mixed" selected>Mixed Types</option>
+                                    <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="true_false">True/False</option>
+                                    <option value="fill_blank">Fill in the Blank</option>
+                                    <option value="flashcards">Flashcards</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-success w-100" onclick="generateQuestions()">
+                                    <i class="fas fa-magic me-1"></i>Generate Questions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="text-center py-5" style="display: none;">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="text-muted">Generating Smart Questions...</h5>
+                <p class="text-muted">Our AI is analyzing the topic content and creating intelligent questions for you.
+                </p>
+            </div>
+
+            <!-- Generated Questions -->
+            <div id="generated-questions" style="display: none;">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Generated Questions
+                        </h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllQuestions()">
+                                <i class="fas fa-check-square me-1"></i>Select All
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllQuestions()">
+                                <i class="fas fa-square me-1"></i>Deselect All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="questions-list">
+                            <!-- Generated questions will be inserted here -->
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary btn-lg" onclick="addSelectedQuestions()">
+                                <i class="fas fa-plus me-2"></i>Add Selected Questions to Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-message" class="alert alert-success" style="display: none;">
+                <i class="fas fa-check-circle me-2"></i>
+                <span id="success-text">Questions added successfully!</span>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="alert alert-danger" style="display: none;">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="error-text">An error occurred while generating questions.</span>
+            </div>
+
+            <!-- How It Works -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>How Smart Question Generation Works
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-brain fa-2x text-primary mb-2"></i>
+                                <h6>AI Analysis</h6>
+                                <p class="text-muted small">Our AI analyzes your topic content to identify key concepts
+                                    and important information.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-cogs fa-2x text-success mb-2"></i>
+                                <h6>Smart Generation</h6>
+                                <p class="text-muted small">Questions are intelligently generated based on the content
+                                    analysis and your preferences.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-check-circle fa-2x text-info mb-2"></i>
+                                <h6>Quality Control</h6>
+                                <p class="text-muted small">Each question is validated for accuracy and relevance before
+                                    being presented to you.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let generatedQuestions = [];
+
+    function generateQuestions() {
+        const numQuestions = document.getElementById('num-questions').value;
+        const difficulty = document.getElementById('difficulty').value;
+        const questionType = document.getElementById('question-type').value;
+
+        // Show loading state
+        document.getElementById('loading-state').style.display = 'block';
+        document.getElementById('generated-questions').style.display = 'none';
+        document.getElementById('success-message').style.display = 'none';
+        document.getElementById('error-message').style.display = 'none';
+
+        // Generate API URL
+        const apiUrl = `/quizzes/api/generate-questions/{{ topic.id }}?num_questions=${numQuestions}&difficulty=${difficulty}&type=${questionType}`;
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-state').style.display = 'none';
+
+                if (data.success) {
+                    generatedQuestions = data.questions;
+                    displayGeneratedQuestions(data.questions);
+                    document.getElementById('generated-questions').style.display = 'block';
+                } else {
+                    showError(data.error || 'Failed to generate questions');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-state').style.display = 'none';
+                console.error('Error generating questions:', error);
+                showError('An error occurred while generating questions. Please try again.');
+            });
+    }
+
+    function displayGeneratedQuestions(questions) {
+        const questionsList = document.getElementById('questions-list');
+        questionsList.innerHTML = '';
+
+        questions.forEach((question, index) => {
+            const questionCard = createQuestionCard(question, index);
+            questionsList.appendChild(questionCard);
+        });
+    }
+
+    function createQuestionCard(question, index) {
+        const card = document.createElement('div');
+        card.className = 'border rounded p-3 mb-3';
+        card.innerHTML = `
+        <div class="d-flex align-items-start">
+            <div class="form-check me-3 mt-1">
+                <input class="form-check-input question-checkbox" type="checkbox" value="${index}" id="question-${index}">
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2">Q${index + 1}</span>
+                    <span class="badge bg-${getQuestionTypeColor(question.question_type)} me-2">
+                        ${question.question_type.replace('_', ' ').toUpperCase()}
+                    </span>
+                    <span class="badge bg-outline-secondary">${question.points} point${question.points !== 1 ? 's' : ''}</span>
+                </div>
+                <h6 class="mb-2">${question.question_text}</h6>
+                
+                ${createQuestionContent(question)}
+                
+                ${question.explanation ? `<div class="alert alert-info mt-2 mb-0"><i class="fas fa-info-circle me-2"></i>${question.explanation}</div>` : ''}
+            </div>
+        </div>
+    `;
+
+        return card;
+    }
+
+    function createQuestionContent(question) {
+        if (question.question_type === 'multiple_choice' && question.options) {
+            let optionsHtml = '<div class="ms-3">';
+            question.options.forEach((option, index) => {
+                const isCorrect = option.is_correct ? 'text-success fw-bold' : '';
+                const checkIcon = option.is_correct ? '<i class="fas fa-check ms-1"></i>' : '';
+                optionsHtml += `
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" disabled>
+                    <label class="form-check-label ${isCorrect}">
+                        ${option.text}${checkIcon}
+                    </label>
+                </div>
+            `;
+            });
+            optionsHtml += '</div>';
+            return optionsHtml;
+        } else {
+            return `<div class="ms-3"><p class="text-muted mb-1"><strong>Answer:</strong> ${question.correct_answer}</p></div>`;
+        }
+    }
+
+    function getQuestionTypeColor(type) {
+        const colors = {
+            'multiple_choice': 'primary',
+            'true_false': 'info',
+            'fill_blank': 'success',
+            'flashcard': 'warning'
+        };
+        return colors[type] || 'secondary';
+    }
+
+    function selectAllQuestions() {
+        const checkboxes = document.querySelectorAll('.question-checkbox');
+        checkboxes.forEach(checkbox => checkbox.checked = true);
+    }
+
+    function deselectAllQuestions() {
+        const checkboxes = document.querySelectorAll('.question-checkbox');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+    }
+
+    function addSelectedQuestions() {
+        const selectedCheckboxes = document.querySelectorAll('.question-checkbox:checked');
+        const selectedQuestions = Array.from(selectedCheckboxes).map(checkbox =>
+            generatedQuestions[parseInt(checkbox.value)]
+        );
+
+        if (selectedQuestions.length === 0) {
+            alert('Please select at least one question to add.');
+            return;
+        }
+
+        // Show loading state
+        const addButton = document.querySelector('button[onclick="addSelectedQuestions()"]');
+        const originalText = addButton.innerHTML;
+        addButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding Questions...';
+        addButton.disabled = true;
+
+        // Send request to add questions
+        fetch('/quizzes/api/add-generated-questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                quiz_id: '{{ quiz.id }}',
+                selected_questions: selectedQuestions
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(`Successfully added ${data.count} questions to your quiz!`);
+                    // Clear selections
+                    deselectAllQuestions();
+                } else {
+                    showError(data.error || 'Failed to add questions');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding questions:', error);
+                showError('An error occurred while adding questions. Please try again.');
+            })
+            .finally(() => {
+                // Restore button state
+                addButton.innerHTML = originalText;
+                addButton.disabled = false;
+            });
+    }
+
+    function showSuccess(message) {
+        document.getElementById('success-text').textContent = message;
+        document.getElementById('success-message').style.display = 'block';
+        document.getElementById('error-message').style.display = 'none';
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            document.getElementById('success-message').style.display = 'none';
+        }, 5000);
+    }
+
+    function showError(message) {
+        document.getElementById('error-text').textContent = message;
+        document.getElementById('error-message').style.display = 'block';
+        document.getElementById('success-message').style.display = 'none';
+    }
+
+    // Auto-generate questions on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Generate initial questions
+        generateQuestions();
+    });
+</script>
+{% endblock %}
