@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
 import uuid
 
-# In-memory storage for testing without Supabase
 _in_memory_sessions = []
 _next_session_id = 1
 
@@ -25,7 +24,6 @@ class StudySession:
     @staticmethod
     def create_session(user_id, topic_id, session_date, duration_minutes, 
                       confidence_before, confidence_after, notes, session_type, completed=True):
-        """Create a new study session"""
         # Get Supabase client dynamically
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
