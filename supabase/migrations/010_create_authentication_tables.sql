@@ -1,8 +1,4 @@
--- =====================================================
--- Authentication System Tables
--- =====================================================
 
--- User profiles table (extends the existing users table)
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
@@ -73,9 +69,6 @@ CREATE TABLE IF NOT EXISTS account_lockouts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- =====================================================
--- Indexes for Performance
--- =====================================================
 
 -- User profiles indexes
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
@@ -106,9 +99,6 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_created ON login_attempts(created_
 CREATE INDEX IF NOT EXISTS idx_account_lockouts_user_id ON account_lockouts(user_id);
 CREATE INDEX IF NOT EXISTS idx_account_lockouts_locked_until ON account_lockouts(locked_until);
 
--- =====================================================
--- Row Level Security (RLS) Policies
--- =====================================================
 
 -- Enable RLS on all tables
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
@@ -151,9 +141,6 @@ CREATE POLICY "No direct access to login attempts" ON login_attempts
 CREATE POLICY "No direct access to account lockouts" ON account_lockouts
     FOR ALL USING (false);
 
--- =====================================================
--- Functions and Triggers
--- =====================================================
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -190,11 +177,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- =====================================================
--- Sample Data for Testing
--- =====================================================
 
--- Create a test user profile for the existing mock user
 INSERT INTO user_profiles (user_id, first_name, last_name, bio, timezone, language, email_notifications, study_reminders)
 SELECT 
     u.id,
@@ -209,9 +192,6 @@ FROM users u
 WHERE u.email = 'flask-test@example.com'
 ON CONFLICT (user_id) DO NOTHING;
 
--- =====================================================
--- Comments
--- =====================================================
 
 COMMENT ON TABLE user_profiles IS 'Extended user profile information';
 COMMENT ON TABLE user_sessions IS 'Active user sessions for authentication';
