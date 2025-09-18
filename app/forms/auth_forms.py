@@ -1,6 +1,3 @@
-"""
-Authentication forms for user registration, login, and profile management
-"""
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, TextAreaField, SelectField, SubmitField
@@ -10,7 +7,6 @@ import re
 
 
 class LoginForm(FlaskForm):
-    """User login form"""
     email = StringField('Email', validators=[
         DataRequired(message='Email is required'),
         Email(message='Please enter a valid email address')
