@@ -4,7 +4,6 @@ from config import config
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
 load_dotenv()
 
 print(f"=== FLASK APP INITIALIZATION ===")
@@ -17,12 +16,10 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     
-    # Initialize extensions
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
     
-    # User loader for Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
         from app.models.auth import AuthUser
@@ -31,7 +28,6 @@ def create_app(config_name='default'):
     
     @app.template_filter('nl2br')
     def nl2br_filter(text):
-        """Convert newlines to <br> tags for HTML display"""
         if text is None:
             return ''
         return text.replace('\n', '<br>')
