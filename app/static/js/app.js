@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Tooltip initialization
 document.addEventListener("DOMContentLoaded", function () {
   const tooltipTriggerList = [].slice.call(
     document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -61,7 +60,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Popover initialization
 document.addEventListener("DOMContentLoaded", function () {
   const popoverTriggerList = [].slice.call(
     document.querySelectorAll('[data-bs-toggle="popover"]')
@@ -71,7 +69,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Auto-resize textareas
 document.addEventListener("DOMContentLoaded", function () {
   const textareas = document.querySelectorAll("textarea");
   textareas.forEach((textarea) => {
@@ -82,7 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Character counter for textareas with maxlength
 document.addEventListener("DOMContentLoaded", function () {
   const textareas = document.querySelectorAll("textarea[maxlength]");
   textareas.forEach((textarea) => {
@@ -107,11 +103,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     textarea.addEventListener("input", updateCounter);
-    updateCounter(); // Initial count
+    updateCounter();
   });
 });
 
-// Confirm delete actions
 document.addEventListener("DOMContentLoaded", function () {
   const deleteButtons = document.querySelectorAll("[data-confirm]");
   deleteButtons.forEach((button) => {
@@ -124,14 +119,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Auto-save form data to localStorage
 document.addEventListener("DOMContentLoaded", function () {
   const forms = document.querySelectorAll("form[data-autosave]");
   forms.forEach((form) => {
     const formId = form.getAttribute("data-autosave");
     const inputs = form.querySelectorAll("input, textarea, select");
 
-    // Load saved data
     const savedData = localStorage.getItem(`form_${formId}`);
     if (savedData) {
       const data = JSON.parse(savedData);
@@ -142,7 +135,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Save data on input change
     inputs.forEach((input) => {
       input.addEventListener("input", function () {
         const formData = {};
@@ -155,16 +147,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    // Clear saved data on form submit
     form.addEventListener("submit", function () {
       localStorage.removeItem(`form_${formId}`);
     });
   });
 });
 
-// Utility functions
 window.LearningCompanion = {
-  // Show toast notification
   showToast: function (message, type = "info") {
     const toast = document.createElement("div");
     toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
@@ -183,7 +172,6 @@ window.LearningCompanion = {
     }, 5000);
   },
 
-  // Format date
   formatDate: function (date) {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -192,14 +180,12 @@ window.LearningCompanion = {
     });
   },
 
-  // Format time
   formatTime: function (minutes) {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
   },
 
-  // Debounce function
   debounce: function (func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -212,30 +198,25 @@ window.LearningCompanion = {
     };
   },
 
-  // Update dashboard stats dynamically
   updateDashboardStats: function() {
     fetch('/api/dashboard-stats')
       .then(response => response.json())
       .then(data => {
-        // Update topic count
         const topicCountElement = document.querySelector('.dashboard-container .col-md-3:nth-child(1) h3');
         if (topicCountElement) {
           topicCountElement.textContent = data.topic_count;
         }
 
-        // Update session count
         const sessionCountElement = document.querySelector('.dashboard-container .col-md-3:nth-child(2) h3');
         if (sessionCountElement) {
           sessionCountElement.textContent = data.session_count;
         }
 
-        // Update total time
         const timeElement = document.querySelector('.dashboard-container .col-md-3:nth-child(3) h3');
         if (timeElement) {
           timeElement.textContent = data.total_time_hours + 'h';
         }
 
-        // Update study streak
         const streakElement = document.querySelector('.dashboard-container .col-md-3:nth-child(4) h3');
         if (streakElement) {
           streakElement.textContent = data.study_streak;

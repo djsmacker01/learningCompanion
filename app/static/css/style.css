@@ -45,7 +45,6 @@ body {
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Button enhancements */
 .btn {
     font-weight: 500;
     border-radius: 0.5rem;
@@ -66,7 +65,6 @@ body {
     box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
 }
 
-/* Form enhancements */
 .form-control {
     border-radius: 0.5rem;
     border: 1px solid #dee2e6;
@@ -82,20 +80,17 @@ body {
     font-size: 1.1rem;
 }
 
-/* Alert enhancements */
 .alert {
     border-radius: 0.5rem;
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Breadcrumb enhancements */
 .breadcrumb-item+.breadcrumb-item::before {
     content: "›";
     color: #6c757d;
 }
 
-/* Dropdown enhancements */
 .dropdown-menu {
     border-radius: 0.5rem;
     border: none;
@@ -111,7 +106,6 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Modal enhancements */
 .modal-content {
     border-radius: 0.75rem;
     border: none;
@@ -128,12 +122,10 @@ body {
     border-radius: 0 0 0.75rem 0.75rem;
 }
 
-/* Footer enhancements */
 footer {
     margin-top: auto;
 }
 
-/* Responsive enhancements */
 @media (max-width: 768px) {
     .card-body {
         padding: 1rem;
@@ -149,13 +141,11 @@ footer {
     }
 }
 
-/* Animation for loading states */
 .loading {
     opacity: 0.6;
     pointer-events: none;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -174,7 +164,6 @@ footer {
     background: #a8a8a8;
 }
 
-/* Focus styles for accessibility */
 .btn:focus,
 .form-control:focus,
 .dropdown-toggle:focus {
@@ -182,7 +171,6 @@ footer {
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-/* Text utilities */
 .text-truncate-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -190,20 +178,17 @@ footer {
     overflow: hidden;
 }
 
-/* Badge enhancements */
 .badge {
     font-weight: 500;
     padding: 0.5em 0.75em;
 }
 
-/* Icon enhancements */
 .fas,
 .far,
 .fab {
     line-height: 1;
 }
 
-/* Opacity utilities */
 .opacity-75 {
     opacity: 0.75 !important;
 }
