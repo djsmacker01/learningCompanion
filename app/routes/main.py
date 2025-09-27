@@ -64,13 +64,10 @@ def dashboard():
 
 @main.route('/api/dashboard-stats')
 def dashboard_stats():
-    """API endpoint to get real-time dashboard statistics"""
     try:
-        # Get topic count
         topics = Topic.get_all_by_user(mock_user.id)
         topic_count = len(topics)
         
-        # Get session statistics
         try:
             session_stats = StudySession.get_session_stats(mock_user.id, days=30)
             session_count = session_stats.get('total_sessions', 0)
@@ -79,7 +76,6 @@ def dashboard_stats():
             session_count = 0
             total_time = 0
         
-        # Get study streak
         try:
             study_streak = StudySession.get_session_streak(mock_user.id)
         except:
@@ -102,5 +98,4 @@ def dashboard_stats():
 
 @main.route('/test')
 def test():
-    """Test route to verify the app is working"""
     return "Learning Companion is working! You can now test the topic functionality."

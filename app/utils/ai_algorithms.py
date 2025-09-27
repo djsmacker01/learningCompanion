@@ -70,7 +70,7 @@ class LearningAnalytics:
                 duration_efficiency[duration] = []
             duration_efficiency[duration].append(session['efficiency'])
         
-        # Calculate average efficiency for each duration
+
         best_duration = 25
         best_efficiency = 0
         
@@ -80,7 +80,7 @@ class LearningAnalytics:
                 best_efficiency = avg_efficiency
                 best_duration = duration
         
-        # Round to common session lengths
+        
         if best_duration <= 15:
             return 15
         elif best_duration <= 25:
@@ -102,7 +102,7 @@ class LearningAnalytics:
                 'prediction': 'insufficient_data'
             }
         
-        # Sort sessions by date
+        
         sessions.sort(key=lambda x: x.session_date)
         
         confidence_data = []
@@ -423,4 +423,4 @@ class LearningAnalytics:
         priority_order = {'high': 0, 'medium': 1, 'low': 2}
         recommendations.sort(key=lambda x: priority_order.get(x['priority'], 3))
         
-        return recommendations[:5]  # Return top 5 recommendations
+        return recommendations[:5]      
