@@ -1,5 +1,3 @@
--- AI Algorithm Queries for Learning Companion
--- These queries support the AI recommendation system
 
 -- Query 1: Get topics that need review (spaced repetition algorithm)
 CREATE OR REPLACE FUNCTION public.get_topics_for_review(p_user_id UUID)
