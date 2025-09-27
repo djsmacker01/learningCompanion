@@ -6,23 +6,18 @@ import os
 
 topics = Blueprint('topics', __name__)
 
-# Mock user for testing (remove this later when implementing real auth)
-# Create a real user in the database for testing
 import uuid
 from app.models import get_supabase_client
 
 def get_or_create_mock_user():
-    """Get or create a mock user in the database"""
     mock_email = 'flask-test@example.com'
     
-    # Get Supabase client
     client = get_supabase_client()
     if not client:
         print("❌ Supabase client not available for mock user creation")
         return None
     
     try:
-        # Try to get existing user by email
         response = client.table('users').select('*').eq('email', mock_email).execute()
         if response.data:
             user_data = response.data[0]
@@ -31,7 +26,6 @@ def get_or_create_mock_user():
     except Exception as e:
         print(f"Error finding existing user: {e}")
     
-    # Create new user if doesn't exist
     try:
         import uuid
         mock_user_id = str(uuid.uuid4())
@@ -53,14 +47,12 @@ def get_or_create_mock_user():
     except Exception as e:
         print(f"❌ Error creating mock user: {e}")
     
-    # Fallback - this should not happen
     return User(id='12345678-1234-1234-1234-123456789012', email=mock_email, name='Flask Test')
 
 mock_user = get_or_create_mock_user()
 
 @topics.route('/topics')
 def list_topics():
-    """List all topics for the current user"""
     try:
         topics_list = Topic.get_all_by_user(mock_user.id)
         return render_template('topics/list.html', topics=topics_list)
@@ -70,7 +62,6 @@ def list_topics():
 
 @topics.route('/topics/debug')
 def debug_env():
-    """Debug route to check environment variables"""
     import os
     return {
         'SUPABASE_URL': os.getenv('SUPABASE_URL'),
@@ -80,7 +71,6 @@ def debug_env():
 
 @topics.route('/topics/new', methods=['GET', 'POST'])
 def create_topic():
-    """Create a new topic"""
     form = TopicForm()
     
     if form.validate_on_submit():
@@ -92,7 +82,6 @@ def create_topic():
             print(f"Supabase Service Role Key: {os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20]}...")
             print(f"Supabase Available: {os.getenv('SUPABASE_AVAILABLE', 'Not set')}")
             
-            # Test Supabase connection before creating topic
             from app.models import get_supabase_client, SUPABASE_AVAILABLE
             client = get_supabase_client()
             print(f"Supabase client available: {SUPABASE_AVAILABLE}")
@@ -117,7 +106,6 @@ def create_topic():
 
 @topics.route('/topics/<topic_id>')
 def view_topic(topic_id):
-    """View a specific topic"""
     try:
         print(f"=== VIEWING TOPIC ===")
         print(f"Topic ID: {topic_id}")
@@ -132,7 +120,6 @@ def view_topic(topic_id):
             flash('Topic not found.', 'error')
             return redirect(url_for('topics.list_topics'))
         
-        # Get session data for this topic
         print(f"Getting session data for topic: {topic_id}")
         try:
             topic_sessions = StudySession.get_topic_sessions(topic_id, mock_user.id)
@@ -148,7 +135,7 @@ def view_topic(topic_id):
             print(f"Error getting topic progress: {e}")
             topic_progress = {}
         
-        recent_sessions = topic_sessions[:5]  # Last 5 sessions
+        recent_sessions = topic_sessions[:5]
         
         print(f"Rendering template with topic: {topic.title}")
         return render_template('topics/view.html', 
@@ -165,7 +152,6 @@ def view_topic(topic_id):
 
 @topics.route('/topics/<topic_id>/edit', methods=['GET', 'POST'])
 def edit_topic(topic_id):
-    """Edit a topic"""
     try:
         topic = Topic.get_by_id(topic_id, mock_user.id)
         if not topic:
@@ -198,7 +184,6 @@ def edit_topic(topic_id):
 
 @topics.route('/topics/<topic_id>/delete', methods=['POST'])
 def delete_topic(topic_id):
-    """Delete a topic (soft delete)"""
     try:
         topic = Topic.get_by_id(topic_id, mock_user.id)
         if not topic:
