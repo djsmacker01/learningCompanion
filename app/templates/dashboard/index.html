@@ -362,7 +362,6 @@
 
 {% block extra_js %}
 <script>
-    // Load AI recommendations and gamification data when page loads
     document.addEventListener('DOMContentLoaded', function () {
         loadAIRecommendations();
         loadGamificationData();
@@ -393,7 +392,6 @@
             return;
         }
 
-        // Show top 3 recommendations
         const topRecommendations = recommendations.slice(0, 3);
         let html = '';
 
@@ -440,13 +438,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.total_xp !== undefined) {
-                    // Update gamification stats
                     document.getElementById('user-level').textContent = data.current_level;
                     document.getElementById('user-streak').textContent = data.study_streak;
                     document.getElementById('user-badges').textContent = data.badges_earned;
                     document.getElementById('user-achievements').textContent = data.achievements_unlocked;
 
-                    // Update XP progress
                     const progressBar = document.getElementById('xp-progress-bar');
                     const xpText = document.getElementById('xp-text');
                     const xpToNext = document.getElementById('xp-to-next');
@@ -460,7 +456,6 @@
             })
             .catch(error => {
                 console.error('Error loading gamification data:', error);
-                // Set default values on error
                 document.getElementById('user-level').textContent = '1';
                 document.getElementById('user-streak').textContent = '0';
                 document.getElementById('user-badges').textContent = '0';
