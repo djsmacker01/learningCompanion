@@ -42,14 +42,14 @@ class UserProfile:
     @property
     def full_name(self) -> str:
         """Get the user's full name"""
-        if self.first_name and self.last_name:
-            return f"{self.first_name} {self.last_name}"
-        elif self.first_name:
-            return self.first_name
-        elif self.last_name:
-            return self.last_name
-        else:
-            return "Anonymous User"
+        if hasattr(self, 'first_name') and hasattr(self, 'last_name'):
+            if self.first_name and self.last_name:
+                return f"{self.first_name} {self.last_name}"
+            elif self.first_name:
+                return self.first_name
+            elif self.last_name:
+                return self.last_name
+        return self.email or "Anonymous User"
     
     @classmethod
     def get_by_user_id(cls, user_id: str) -> Optional['UserProfile']:
@@ -365,13 +365,21 @@ class AuthUser:
         self.email = data.get('email')
         self.password_hash = data.get('password_hash')
         self.is_active = data.get('is_active', True)
-        self.is_verified = data.get('is_verified', False)
+        self.username = data.get('username')
+        self.first_name = data.get('first_name')
+        self.last_name = data.get('last_name')
         self.created_at = data.get('created_at')
         self.updated_at = data.get('updated_at')
         self.last_login = data.get('last_login')
         
-        # Load profile if available
-        self.profile = UserProfile.get_by_user_id(self.id) if self.id else None
+        # Load profile if available (using gamification profile for now)
+        self.profile = None
+        if self.id:
+            try:
+                from app.models.gamification import UserProfile as GamificationProfile
+                self.profile = GamificationProfile.get_or_create_profile(self.id)
+            except Exception as e:
+                print(f"Warning: Could not load profile: {e}")
     
     @property
     def is_authenticated(self) -> bool:
@@ -382,6 +390,18 @@ class AuthUser:
     def is_anonymous(self) -> bool:
         """Check if user is anonymous"""
         return not self.is_authenticated
+    
+    @property
+    def full_name(self) -> str:
+        """Get the user's full name"""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        else:
+            return self.email or "Anonymous User"
     
     def get_id(self) -> str:
         """Get user ID for Flask-Login"""
@@ -445,12 +465,30 @@ class AuthUser:
             if existing_user:
                 return None
             
+            # Generate unique username
+            base_username = email.split('@')[0]
+            username = base_username
+            counter = 1
+            
+            # Check if username exists and generate unique one
+            while True:
+                existing_user = supabase.table('users').select('id').eq('username', username).execute()
+                if not existing_user.data:
+                    break
+                username = f"{base_username}_{counter}"
+                counter += 1
+                if counter > 1000:  # Safety limit
+                    username = f"{base_username}_{secrets.token_hex(4)}"
+                    break
+            
             # Create user data
             user_data = {
                 'email': email,
                 'password_hash': generate_password_hash(password),
                 'is_active': kwargs.get('is_active', True),
-                'is_verified': kwargs.get('is_verified', False)
+                'username': username,
+                'first_name': kwargs.get('first_name', ''),
+                'last_name': kwargs.get('last_name', '')
             }
             
             response = supabase.table('users').insert(user_data).execute()
@@ -458,13 +496,12 @@ class AuthUser:
             if response.data:
                 user = cls(response.data[0])
                 
-                # Create user profile
-                UserProfile.create_profile(
-                    user.id,
-                    first_name=kwargs.get('first_name'),
-                    last_name=kwargs.get('last_name'),
-                    bio=kwargs.get('bio')
-                )
+                # Create gamification profile (basic profile)
+                try:
+                    from app.models.gamification import UserProfile as GamificationProfile
+                    GamificationProfile.create_profile(user.id)
+                except Exception as e:
+                    print(f"Warning: Could not create gamification profile: {e}")
                 
                 return user
             return None
