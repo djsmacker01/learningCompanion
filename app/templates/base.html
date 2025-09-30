@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_accessibility.css') }}">
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -16,7 +17,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <a class="navbar-brand"
+                href="{% if current_user.is_authenticated %}{{ url_for('main.dashboard') }}{% else %}{{ url_for('auth.login') }}{% endif %}">
                 <i class="fas fa-graduation-cap me-2"></i>Learning Companion
             </a>
 
@@ -25,16 +27,47 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if current_user.is_authenticated %}
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.dashboard') }}">
                             <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('topics.list_topics') }}">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="topicsDropdown" role="button"
+                            data-bs-toggle="dropdown">
                             <i class="fas fa-book me-1"></i>Topics
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('topics.list_topics') }}">
+                                    <i class="fas fa-list me-2"></i>My Topics
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.shared_topics') }}">
+                                    <i class="fas fa-share-alt me-2"></i>Shared Topics
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.join_topic') }}">
+                                    <i class="fas fa-plus me-2"></i>Join Topic
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.import_topics_csv') }}">
+                                    <i class="fas fa-file-csv me-2"></i>Import from CSV
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.import_topics_bulk') }}">
+                                    <i class="fas fa-edit me-2"></i>Bulk Create
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.import_materials') }}">
+                                    <i class="fas fa-upload me-2"></i>Upload Materials
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('topics.search_content') }}">
+                                    <i class="fas fa-search me-2"></i>Search Content
+                                </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('sessions.session_history') }}">
@@ -42,41 +75,59 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('analytics.analytics_dashboard') }}">
-                            <i class="fas fa-chart-bar me-1"></i>Analytics
+                        <a class="nav-link" href="{{ url_for('social.social_dashboard') }}">
+                            <i class="fas fa-users me-1"></i>Social
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('ai_recommendations.recommendations_dashboard') }}">
-                            <i class="fas fa-brain me-1"></i>AI Recommendations
+                        <a class="nav-link" href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}">
+                            <i class="fas fa-universal-access me-1"></i>Accessibility
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('quizzes.quiz_list') }}">
-                            <i class="fas fa-question-circle me-1"></i>Quizzes
+                        <a class="nav-link" href="{{ url_for('ai_chat.chat_interface') }}">
+                            <i class="fas fa-robot me-1"></i>AI Assistant
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="toolsDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            <i class="fas fa-tools me-1"></i>Tools
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('analytics.analytics_dashboard') }}">
+                                    <i class="fas fa-chart-bar me-2"></i>Analytics
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('advanced_analytics.advanced_dashboard') }}">
+                                    <i class="fas fa-chart-line me-2"></i>Advanced Analytics
+                                </a></li>
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for('ai_recommendations.recommendations_dashboard') }}">
+                                    <i class="fas fa-brain me-2"></i>AI Recommendations
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('quizzes.quiz_list') }}">
+                                    <i class="fas fa-question-circle me-2"></i>Quizzes
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reminders.reminders_dashboard') }}">
+                                    <i class="fas fa-bell me-2"></i>Reminders
+                                </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('gamification.gamification_dashboard') }}">
                             <i class="fas fa-trophy me-1"></i>Gamification
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('reminders.reminders_dashboard') }}">
-                            <i class="fas fa-bell me-1"></i>Reminders
-                        </a>
-                    </li>
                 </ul>
 
                 <ul class="navbar-nav">
-                    {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
                             <i class="fas fa-user me-1"></i>
-                            {{ current_user.profile.full_name if current_user.profile else current_user.email }}
+                            {{ current_user.full_name }}
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
                                     <i class="fas fa-user me-2"></i>Profile
                                 </a></li>
@@ -86,7 +137,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">
                                     <i class="fas fa-key me-2"></i>Change Password
                                 </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.user_sessions') }}">
+                            <li><a class="dropdown-item" href="{{ url_for('sessions.session_history') }}">
                                     <i class="fas fa-desktop me-2"></i>Active Sessions
                                 </a></li>
                             <li>
@@ -97,7 +148,9 @@
                                 </a></li>
                         </ul>
                     </li>
-                    {% else %}
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('auth.login') }}">
                             <i class="fas fa-sign-in-alt me-1"></i>Sign In
@@ -108,8 +161,8 @@
                             <i class="fas fa-user-plus me-1"></i>Sign Up
                         </a>
                     </li>
-                    {% endif %}
                 </ul>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -149,6 +202,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mobile_accessibility.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>
