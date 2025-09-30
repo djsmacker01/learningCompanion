@@ -1,66 +1,44 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
+from flask_login import login_required, current_user
 from app.models import Topic, User
 from app.models.study_session import StudySession
-from app.forms import TopicForm
+from app.forms import (
+    TopicForm, ShareTopicForm, JoinTopicForm, CSVImportForm, BulkTopicForm, FileUploadForm,
+    TopicNoteForm, TopicAttachmentForm, TopicTagForm, TopicContentForm, TopicVersionForm, ContentSearchForm
+)
 import os
+import csv
+import io
+from werkzeug.utils import secure_filename
 
 topics = Blueprint('topics', __name__)
 
 import uuid
 from app.models import get_supabase_client
 
-def get_or_create_mock_user():
-    mock_email = 'flask-test@example.com'
-    
-    client = get_supabase_client()
-    if not client:
-        print("❌ Supabase client not available for mock user creation")
-        return None
-    
-    try:
-        response = client.table('users').select('*').eq('email', mock_email).execute()
-        if response.data:
-            user_data = response.data[0]
-            print(f"✅ Found existing mock user: {user_data['email']}")
-            return User(id=user_data['id'], email=user_data['email'], name=f"{user_data['first_name']} {user_data['last_name']}")
-    except Exception as e:
-        print(f"Error finding existing user: {e}")
-    
-    try:
-        import uuid
-        mock_user_id = str(uuid.uuid4())
-        user_data = {
-            'id': mock_user_id,
-            'email': mock_email,
-            'username': f'testuser_{mock_user_id[:8]}',
-            'password_hash': 'hashed_password',
-            'first_name': 'Flask',
-            'last_name': 'Test'
-        }
-        response = client.table('users').insert(user_data).execute()
-        if response.data:
-            user_data = response.data[0]
-            print(f"✅ Created mock user: {user_data['email']}")
-            return User(id=user_data['id'], email=user_data['email'], name=f"{user_data['first_name']} {user_data['last_name']}")
-        else:
-            print("❌ Failed to create mock user - no data returned")
-    except Exception as e:
-        print(f"❌ Error creating mock user: {e}")
-    
-    return User(id='12345678-1234-1234-1234-123456789012', email=mock_email, name='Flask Test')
-
-mock_user = get_or_create_mock_user()
+def get_current_user():
+    """Get the current authenticated user"""
+    if current_user.is_authenticated:
+        return current_user
+    return None
 
 @topics.route('/topics')
+@login_required
 def list_topics():
     try:
-        topics_list = Topic.get_all_by_user(mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topics_list = Topic.get_all_by_user(user.id)
         return render_template('topics/list.html', topics=topics_list)
     except Exception as e:
         flash('Error loading topics. Please try again.', 'error')
         return render_template('topics/list.html', topics=[])
 
 @topics.route('/topics/debug')
+@login_required
 def debug_env():
     import os
     return {
@@ -70,6 +48,7 @@ def debug_env():
     }
 
 @topics.route('/topics/new', methods=['GET', 'POST'])
+@login_required
 def create_topic():
     form = TopicForm()
     
@@ -77,7 +56,12 @@ def create_topic():
         try:
             print(f"=== TOPIC CREATION REQUEST ===")
             print(f"Attempting to create topic: {form.title.data.strip()}")
-            print(f"User ID: {mock_user.id}")
+            user = get_current_user()
+            if not user:
+                flash('User not authenticated.', 'error')
+                return redirect(url_for('auth.login'))
+            
+            print(f"User ID: {user.id}")
             print(f"Supabase URL: {os.getenv('SUPABASE_URL')}")
             print(f"Supabase Service Role Key: {os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20]}...")
             print(f"Supabase Available: {os.getenv('SUPABASE_AVAILABLE', 'Not set')}")
@@ -90,7 +74,7 @@ def create_topic():
             topic = Topic.create(
                 title=form.title.data.strip(),
                 description=form.description.data.strip(),
-                user_id=mock_user.id
+                user_id=user.id
             )
             
             if topic:
@@ -105,13 +89,24 @@ def create_topic():
     return render_template('topics/form.html', form=form, title='Create New Topic')
 
 @topics.route('/topics/<topic_id>')
+@login_required
 def view_topic(topic_id):
     try:
         print(f"=== VIEWING TOPIC ===")
         print(f"Topic ID: {topic_id}")
-        print(f"User ID: {mock_user.id}")
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         
-        topic = Topic.get_by_id(topic_id, mock_user.id)
+        print(f"User ID: {user.id}")
+        
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
         print(f"Topic found: {topic is not None}")
         if topic:
             print(f"Topic title: {topic.title}")
@@ -122,14 +117,14 @@ def view_topic(topic_id):
         
         print(f"Getting session data for topic: {topic_id}")
         try:
-            topic_sessions = StudySession.get_topic_sessions(topic_id, mock_user.id)
+            topic_sessions = StudySession.get_topic_sessions(topic_id, user.id)
             print(f"Got {len(topic_sessions)} sessions")
         except Exception as e:
             print(f"Error getting topic sessions: {e}")
             topic_sessions = []
         
         try:
-            topic_progress = StudySession.get_topic_progress(topic_id, mock_user.id)
+            topic_progress = StudySession.get_topic_progress(topic_id, user.id)
             print(f"Got topic progress: {topic_progress}")
         except Exception as e:
             print(f"Error getting topic progress: {e}")
@@ -151,9 +146,15 @@ def view_topic(topic_id):
         return redirect(url_for('topics.list_topics'))
 
 @topics.route('/topics/<topic_id>/edit', methods=['GET', 'POST'])
+@login_required
 def edit_topic(topic_id):
     try:
-        topic = Topic.get_by_id(topic_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
         if not topic:
             flash('Topic not found.', 'error')
             return redirect(url_for('topics.list_topics'))
@@ -183,9 +184,15 @@ def edit_topic(topic_id):
         return redirect(url_for('topics.list_topics'))
 
 @topics.route('/topics/<topic_id>/delete', methods=['POST'])
+@login_required
 def delete_topic(topic_id):
     try:
-        topic = Topic.get_by_id(topic_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
         if not topic:
             flash('Topic not found.', 'error')
             return redirect(url_for('topics.list_topics'))
@@ -201,4 +208,537 @@ def delete_topic(topic_id):
     
     except Exception as e:
         flash('Error deleting topic. Please try again.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/share', methods=['GET', 'POST'])
+@login_required
+def share_topic(topic_id):
+    """Share a topic and generate share code"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
+        if not topic:
+            flash('Topic not found.', 'error')
+            return redirect(url_for('topics.list_topics'))
+        
+        form = ShareTopicForm()
+        
+        if form.validate_on_submit():
+            expires_at = form.expires_at.data
+            max_uses = form.max_uses.data
+            
+            share_code = Topic.share_topic(
+                topic_id, 
+                user.id, 
+                expires_at=expires_at, 
+                max_uses=max_uses
+            )
+            
+            if share_code:
+                flash(f'Topic shared successfully! Share code: {share_code}', 'success')
+                return redirect(url_for('topics.view_topic', topic_id=topic_id))
+            else:
+                flash('Failed to share topic. Please try again.', 'error')
+        
+        return render_template('topics/share.html', topic=topic, form=form)
+    
+    except Exception as e:
+        flash('Error sharing topic. Please try again.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/revoke-sharing', methods=['POST'])
+@login_required
+def revoke_topic_sharing(topic_id):
+    """Revoke topic sharing"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        success = Topic.revoke_topic_sharing(topic_id, user.id)
+        
+        if success:
+            flash('Topic sharing revoked successfully.', 'success')
+        else:
+            flash('Failed to revoke topic sharing. Please try again.', 'error')
+        
+        return redirect(url_for('topics.view_topic', topic_id=topic_id))
+    
+    except Exception as e:
+        flash('Error revoking topic sharing. Please try again.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/join', methods=['GET', 'POST'])
+@login_required
+def join_topic():
+    """Join a topic using share code"""
+    form = JoinTopicForm()
+    
+    if form.validate_on_submit():
+        share_code = form.share_code.data.strip().upper()
+        
+        try:
+            user = get_current_user()
+            if not user:
+                flash('User not authenticated.', 'error')
+                return redirect(url_for('auth.login'))
+            
+            topic_id = Topic.join_topic_with_code(share_code, user.id)
+            
+            if topic_id:
+                flash('Successfully joined the topic!', 'success')
+                return redirect(url_for('topics.view_topic', topic_id=topic_id))
+            else:
+                flash('Invalid or expired share code. Please check and try again.', 'error')
+        
+        except Exception as e:
+            flash(f'Error joining topic: {str(e)}', 'error')
+    
+    return render_template('topics/join.html', form=form)
+
+
+@topics.route('/topics/shared')
+@login_required
+def shared_topics():
+    """View topics shared with the user"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        shared_topics_list = Topic.get_shared_topics(user.id)
+        return render_template('topics/shared.html', topics=shared_topics_list)
+    
+    except Exception as e:
+        flash('Error loading shared topics. Please try again.', 'error')
+        return render_template('topics/shared.html', topics=[])
+
+
+@topics.route('/topics/import/csv', methods=['GET', 'POST'])
+@login_required
+def import_topics_csv():
+    """Import topics from CSV file"""
+    form = CSVImportForm()
+    
+    if form.validate_on_submit():
+        try:
+            csv_file = form.csv_file.data
+            if not csv_file:
+                flash('No file selected.', 'error')
+                return render_template('topics/import_csv.html', form=form)
+            
+            # Read CSV content
+            csv_content = csv_file.read().decode('utf-8')
+            csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
+            imported_count = 0
+            errors = []
+            
+            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 for header
+                try:
+                    title = row.get('title', '').strip()
+                    description = row.get('description', '').strip()
+                    
+                    if not title:
+                        errors.append(f"Row {row_num}: Title is required")
+                        continue
+                    
+                    # Create topic
+                    topic = Topic.create(
+                        title=title,
+                        description=description,
+                        user_id=user.id
+                    )
+                    
+                    if topic:
+                        imported_count += 1
+                    else:
+                        errors.append(f"Row {row_num}: Failed to create topic")
+                        
+                except Exception as e:
+                    errors.append(f"Row {row_num}: {str(e)}")
+            
+            if imported_count > 0:
+                flash(f'Successfully imported {imported_count} topics!', 'success')
+            if errors:
+                flash(f'Some topics failed to import: {len(errors)} errors', 'warning')
+                for error in errors[:5]:  # Show first 5 errors
+                    flash(error, 'error')
+            
+            return redirect(url_for('topics.list_topics'))
+            
+        except Exception as e:
+            flash(f'Error importing CSV: {str(e)}', 'error')
+    
+    return render_template('topics/import_csv.html', form=form)
+
+
+@topics.route('/topics/import/bulk', methods=['GET', 'POST'])
+@login_required
+def import_topics_bulk():
+    """Import topics from text input"""
+    form = BulkTopicForm()
+    
+    if form.validate_on_submit():
+        try:
+            topics_data = form.topics_data.data.strip()
+            lines = [line.strip() for line in topics_data.split('\n') if line.strip()]
+            
+            imported_count = 0
+            errors = []
+            
+            for line_num, line in enumerate(lines, start=1):
+                try:
+                    if '|' in line:
+                        title, description = line.split('|', 1)
+                        title = title.strip()
+                        description = description.strip()
+                    else:
+                        title = line.strip()
+                        description = f"Imported topic: {title}"
+                    
+                    if not title:
+                        errors.append(f"Line {line_num}: Title is required")
+                        continue
+                    
+                    # Create topic
+                    topic = Topic.create(
+                        title=title,
+                        description=description,
+                        user_id=user.id
+                    )
+                    
+                    if topic:
+                        imported_count += 1
+                    else:
+                        errors.append(f"Line {line_num}: Failed to create topic")
+                        
+                except Exception as e:
+                    errors.append(f"Line {line_num}: {str(e)}")
+            
+            if imported_count > 0:
+                flash(f'Successfully created {imported_count} topics!', 'success')
+            if errors:
+                flash(f'Some topics failed to create: {len(errors)} errors', 'warning')
+                for error in errors[:5]:  # Show first 5 errors
+                    flash(error, 'error')
+            
+            return redirect(url_for('topics.list_topics'))
+            
+        except Exception as e:
+            flash(f'Error creating topics: {str(e)}', 'error')
+    
+    return render_template('topics/import_bulk.html', form=form)
+
+
+@topics.route('/topics/import/materials', methods=['GET', 'POST'])
+@login_required
+def import_materials():
+    """Upload study materials"""
+    form = FileUploadForm()
+    
+    if form.validate_on_submit():
+        try:
+            file = form.file.data
+            title = form.title.data.strip()
+            description = form.description.data.strip()
+            
+            if not file:
+                flash('No file selected.', 'error')
+                return render_template('topics/import_materials.html', form=form)
+            
+            # For now, just create a topic with the material info
+            # In a real implementation, you'd save the file and store the path
+            topic = Topic.create(
+                title=title,
+                description=f"{description}\n\nUploaded file: {file.filename}",
+                user_id=user.id
+            )
+            
+            if topic:
+                flash(f'Material "{title}" uploaded successfully!', 'success')
+                return redirect(url_for('topics.view_topic', topic_id=topic.id))
+            else:
+                flash('Failed to create topic for material.', 'error')
+                
+        except Exception as e:
+            flash(f'Error uploading material: {str(e)}', 'error')
+    
+    return render_template('topics/import_materials.html', form=form)
+
+
+@topics.route('/topics/<topic_id>/content', methods=['GET', 'POST'])
+@login_required
+def topic_content(topic_id):
+    """Manage topic content (notes, attachments, tags)"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
+        if not topic:
+            flash('Topic not found.', 'error')
+            return redirect(url_for('topics.list_topics'))
+        
+        # Get content management data
+        from app.models.content_management import TopicAttachment, TopicNote, TopicVersion, TopicTag
+        
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        attachments = TopicAttachment.get_topic_attachments(topic_id, user.id)
+        notes = TopicNote.get_topic_notes(topic_id, user.id)
+        versions = TopicVersion.get_topic_versions(topic_id, user.id)
+        available_tags = TopicTag.get_all_tags()
+        
+        # Content update form
+        content_form = TopicContentForm()
+        content_form.tags.choices = [(tag.name, tag.name) for tag in available_tags]
+        content_form.tags.data = topic.tags
+        
+        if content_form.validate_on_submit():
+            # Update topic content
+            success = Topic.update_topic_content(
+                topic_id, user.id,
+                title=content_form.title.data,
+                description=content_form.description.data,
+                notes=content_form.notes.data,
+                tags=content_form.tags.data
+            )
+            
+            if success:
+                flash('Topic content updated successfully!', 'success')
+                return redirect(url_for('topics.topic_content', topic_id=topic_id))
+            else:
+                flash('Error updating topic content.', 'error')
+        
+        # Pre-populate form
+        content_form.title.data = topic.title
+        content_form.description.data = topic.description
+        content_form.notes.data = topic.notes
+        
+        return render_template('topics/content.html', 
+                             topic=topic, 
+                             attachments=attachments,
+                             notes=notes,
+                             versions=versions,
+                             content_form=content_form)
+    
+    except Exception as e:
+        flash('Error loading topic content.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/notes/add', methods=['GET', 'POST'])
+@login_required
+def add_topic_note(topic_id):
+    """Add a note to a topic"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
+        if not topic:
+            flash('Topic not found.', 'error')
+            return redirect(url_for('topics.list_topics'))
+        
+        form = TopicNoteForm()
+        
+        if form.validate_on_submit():
+            from app.models.content_management import TopicNote
+            
+            note = TopicNote.create_note(
+                topic_id=topic_id,
+                user_id=user.id,
+                title=form.title.data,
+                content=form.content.data,
+                note_type=form.note_type.data,
+                is_public=form.is_public.data
+            )
+            
+            if note:
+                flash('Note added successfully!', 'success')
+                return redirect(url_for('topics.topic_content', topic_id=topic_id))
+            else:
+                flash('Error adding note.', 'error')
+        
+        return render_template('topics/add_note.html', topic=topic, form=form)
+    
+    except Exception as e:
+        flash('Error adding note.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/attachments/upload', methods=['GET', 'POST'])
+@login_required
+def upload_topic_attachment(topic_id):
+    """Upload an attachment to a topic"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
+        if not topic:
+            flash('Topic not found.', 'error')
+            return redirect(url_for('topics.list_topics'))
+        
+        form = TopicAttachmentForm()
+        
+        if form.validate_on_submit():
+            from app.models.content_management import TopicAttachment
+            
+            file = form.file.data
+            if file:
+                # Generate secure filename
+                filename = secure_filename(file.filename)
+                unique_filename = f"{uuid.uuid4()}_{filename}"
+                
+                # For now, just store the filename (in production, save to storage)
+                file_path = f"uploads/{unique_filename}"
+                
+                attachment = TopicAttachment.create_attachment(
+                    topic_id=topic_id,
+                    user_id=user.id,
+                    filename=unique_filename,
+                    original_filename=file.filename,
+                    file_path=file_path,
+                    file_size=len(file.read()),
+                    file_type=filename.split('.')[-1].lower(),
+                    mime_type=file.content_type,
+                    description=form.description.data,
+                    is_public=form.is_public.data
+                )
+                
+                if attachment:
+                    flash('File uploaded successfully!', 'success')
+                    return redirect(url_for('topics.topic_content', topic_id=topic_id))
+                else:
+                    flash('Error uploading file.', 'error')
+        
+        return render_template('topics/upload_attachment.html', topic=topic, form=form)
+    
+    except Exception as e:
+        flash('Error uploading attachment.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/versions')
+@login_required
+def topic_versions(topic_id):
+    """View topic version history"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        topic = Topic.get_by_id(topic_id, user.id)
+        if not topic:
+            flash('Topic not found.', 'error')
+            return redirect(url_for('topics.list_topics'))
+        
+        from app.models.content_management import TopicVersion
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        versions = TopicVersion.get_topic_versions(topic_id, user.id)
+        
+        return render_template('topics/versions.html', topic=topic, versions=versions)
+    
+    except Exception as e:
+        flash('Error loading version history.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/<topic_id>/versions/<int:version_number>/restore', methods=['POST'])
+@login_required
+def restore_topic_version(topic_id, version_number):
+    """Restore a topic to a specific version"""
+    try:
+        from app.models.content_management import TopicVersion
+        
+        success = TopicVersion.restore_version(topic_id, version_number)
+        
+        if success:
+            flash(f'Topic restored to version {version_number}!', 'success')
+        else:
+            flash('Error restoring version.', 'error')
+        
+        return redirect(url_for('topics.topic_versions', topic_id=topic_id))
+    
+    except Exception as e:
+        flash('Error restoring version.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/search')
+@login_required
+def search_content():
+    """Search topics and content"""
+    try:
+        form = ContentSearchForm()
+        
+        # Get available tags for filter
+        from app.models.content_management import TopicTag
+        available_tags = TopicTag.get_all_tags()
+        form.tags.choices = [(tag.name, tag.name) for tag in available_tags]
+        
+        results = []
+        query = request.args.get('query', '')
+        selected_tags = request.args.getlist('tags')
+        content_type = request.args.get('content_type', 'all')
+        
+        if query or selected_tags:
+            if content_type in ['all', 'topics']:
+                # Search topics
+                if selected_tags:
+                    user = get_current_user()
+                    if not user:
+                        flash('User not authenticated.', 'error')
+                        return redirect(url_for('auth.login'))
+                    
+                    topics = Topic.search_topics_by_tags(user.id, selected_tags)
+                else:
+                    user = get_current_user()
+                    if not user:
+                        flash('User not authenticated.', 'error')
+                        return redirect(url_for('auth.login'))
+                    
+                    topics = Topic.get_all_by_user(user.id)
+                    
+                    # Filter by query if provided
+                    if query:
+                        topics = [t for t in topics if query.lower() in t.title.lower() or 
+                                 query.lower() in (t.description or '').lower()]
+                    
+                    results.extend([{'type': 'topic', 'data': t} for t in topics])
+        
+        return render_template('topics/search.html', 
+                             form=form, 
+                             results=results,
+                             query=query,
+                             selected_tags=selected_tags,
+                             content_type=content_type)
+    
+    except Exception as e:
+        flash('Error searching content.', 'error')
         return redirect(url_for('topics.list_topics'))
