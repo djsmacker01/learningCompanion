@@ -84,9 +84,21 @@
                                 <i class="fas fa-question-circle me-2"></i>Practice Quiz
                             </a>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <a href="#" class="btn btn-secondary w-100">
-                                <i class="fas fa-bookmark me-2"></i>Add to Favorites
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('topics.share_topic', topic_id=topic.id) }}" class="btn btn-info w-100">
+                                <i class="fas fa-share-alt me-2"></i>Share Topic
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('topics.topic_content', topic_id=topic.id) }}"
+                                class="btn btn-primary w-100">
+                                <i class="fas fa-edit me-2"></i>Manage Content
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('topics.topic_versions', topic_id=topic.id) }}"
+                                class="btn btn-outline-info w-100">
+                                <i class="fas fa-history me-2"></i>Version History
                             </a>
                         </div>
                     </div>
