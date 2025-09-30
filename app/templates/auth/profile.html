@@ -95,7 +95,15 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Member Since</label>
                         <p class="form-control-plaintext">
-                            {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Unknown' }}
+                            {% if user.created_at %}
+                            {% if user.created_at is string %}
+                            {{ user.created_at }}
+                            {% else %}
+                            {{ user.created_at.strftime('%B %d, %Y') }}
+                            {% endif %}
+                            {% else %}
+                            Unknown
+                            {% endif %}
                         </p>
                     </div>
 
@@ -103,7 +111,11 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Last Login</label>
                         <p class="form-control-plaintext">
-                            {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never' }}
+                            {% if user.last_login is string %}
+                            {{ user.last_login }}
+                            {% else %}
+                            {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') }}
+                            {% endif %}
                         </p>
                     </div>
                     {% endif %}
@@ -225,3 +237,4 @@
         console.log('Profile page loaded');
     });
 </script>
+{% endblock %}

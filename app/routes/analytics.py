@@ -1,24 +1,29 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
+from flask_login import login_required
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
-from app.routes.topics import get_or_create_mock_user
+from app.routes.topics import get_current_user
 from datetime import datetime, timedelta
 import json
 
 analytics = Blueprint('analytics', __name__)
 
 @analytics.route('/analytics')
+@login_required
 def analytics_dashboard():
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return render_template('analytics/dashboard.html', 
                                  error="Analytics not available - Supabase connection failed")
         
-        analytics_data = get_user_analytics(mock_user.id, client)
-        topic_analytics = get_topic_analytics(mock_user.id, client)
-        learning_insights = get_learning_insights(mock_user.id, client)
+        analytics_data = get_user_analytics(user.id, client)
+        topic_analytics = get_topic_analytics(user.id, client)
+        learning_insights = get_learning_insights(user.id, client)
         
         
         return render_template('analytics/dashboard.html',
@@ -32,31 +37,39 @@ def analytics_dashboard():
                              error="Error loading analytics data")
 
 @analytics.route('/analytics/api/overview')
+@login_required
 def analytics_overview():
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Analytics not available'}), 500
         
-        overview_data = get_analytics_overview(mock_user.id, client)
+        overview_data = get_analytics_overview(user.id, client)
         return jsonify(overview_data)
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @analytics.route('/analytics/api/topic-progress')
+@login_required
 def topic_progress():
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Analytics not available'}), 500
         
         
-        progress_data = get_topic_progress_data(mock_user.id, client)
+        progress_data = get_topic_progress_data(user.id, client)
         return jsonify(progress_data)
     
     except Exception as e:
@@ -67,14 +80,17 @@ def topic_progress():
 def learning_trends():
     """API endpoint for learning trends data"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Analytics not available'}), 500
         
         
-        trends_data = get_learning_trends_data(mock_user.id, client)
+        trends_data = get_learning_trends_data(user.id, client)
         return jsonify(trends_data)
     
     except Exception as e:
