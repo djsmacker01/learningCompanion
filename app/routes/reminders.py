@@ -2,47 +2,54 @@
 Routes for Study Reminders and Scheduling System
 """
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, make_response
+from flask_login import login_required
 from datetime import datetime, timedelta
+import uuid
 from app.models.reminders import (
     StudyReminderPreferences, StudyReminder, StudySchedule, 
     OptimalStudyTime, StudyPattern
 )
 from app.utils.smart_scheduling import SmartSchedulingEngine
+from app.utils.calendar_integration import GoogleCalendarIntegration, CalendarWidget
 from app.utils.reminder_delivery import ReminderScheduler
-from app.routes.topics import get_or_create_mock_user
+from app.routes.topics import get_current_user
 
 reminders_bp = Blueprint('reminders', __name__)
 
 
 @reminders_bp.route('/reminders')
+@login_required
 def reminders_dashboard():
     """Main reminders dashboard"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
         # Get user's reminder preferences
-        preferences = StudyReminderPreferences.get_or_create_preferences(mock_user.id)
+        preferences = StudyReminderPreferences.get_or_create_preferences(user.id)
         
         # Get upcoming reminders
         upcoming_reminders = StudyReminder.get_user_reminders(
-            mock_user.id, 
+            user.id, 
             status='pending',
             limit=10
         )
         
         # Get upcoming schedules
         upcoming_schedules = StudySchedule.get_user_schedules(
-            mock_user.id,
+            user.id,
             start_date=datetime.now(),
             end_date=datetime.now() + timedelta(days=7)
         )
         
         # Get recent optimal study time suggestions
-        optimal_times = OptimalStudyTime.get_user_suggestions(mock_user.id, limit=5)
+        optimal_times = OptimalStudyTime.get_user_suggestions(user.id, limit=5)
         
         return render_template('reminders/dashboard.html',
                              preferences=preferences,
@@ -60,12 +67,15 @@ def reminders_dashboard():
 def reminder_preferences():
     """Manage reminder preferences"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
-        preferences = StudyReminderPreferences.get_or_create_preferences(mock_user.id)
+        preferences = StudyReminderPreferences.get_or_create_preferences(user.id)
         
         if request.method == 'POST':
             # Update preferences
@@ -108,14 +118,17 @@ def reminder_preferences():
 def schedule_reminders():
     """Schedule new reminders"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
         # Get user's topics for scheduling
         from app.models import Topic
-        topics = Topic.get_all_by_user(mock_user.id)
+        topics = Topic.get_all_by_user(user.id)
         
         # Add current datetime for template
         from datetime import datetime, timedelta
@@ -138,8 +151,11 @@ def schedule_reminders():
 def create_scheduled_reminder():
     """Create a new scheduled reminder"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             return jsonify({'success': False, 'message': 'User not found'})
         
         # Get form data
@@ -184,21 +200,24 @@ def create_scheduled_reminder():
 def smart_schedule():
     """Smart scheduling based on AI analysis"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
         # Get smart scheduling suggestions
         scheduling_engine = SmartSchedulingEngine()
-        optimal_times = scheduling_engine.suggest_optimal_study_times(mock_user.id, days_ahead=7)
+        optimal_times = scheduling_engine.suggest_optimal_study_times(user.id, days_ahead=7)
         
         # Get user's topics
         from app.models import Topic
-        topics = Topic.get_all_by_user(mock_user.id)
+        topics = Topic.get_all_by_user(user.id)
         
         # Get study patterns
-        patterns = scheduling_engine.analyze_study_patterns(mock_user.id)
+        patterns = scheduling_engine.analyze_study_patterns(user.id)
         
         return render_template('reminders/smart_schedule.html',
                              optimal_times=optimal_times,
@@ -215,8 +234,11 @@ def smart_schedule():
 def create_smart_schedule():
     """Create a smart scheduled session"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             return jsonify({'success': False, 'message': 'User not found'})
         
         # Get form data
@@ -253,13 +275,16 @@ def create_smart_schedule():
 def accept_optimal_suggestion(suggestion_id):
     """Accept an optimal study time suggestion"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
         # Get the suggestion
-        optimal_times = OptimalStudyTime.get_user_suggestions(mock_user.id, limit=100)
+        optimal_times = OptimalStudyTime.get_user_suggestions(user.id, limit=100)
         suggestion = next((s for s in optimal_times if s.id == suggestion_id), None)
         
         if not suggestion:
@@ -298,13 +323,16 @@ def accept_optimal_suggestion(suggestion_id):
 def cancel_reminder(reminder_id):
     """Cancel a reminder"""
     try:
-        mock_user = get_or_create_mock_user()
-        if not mock_user:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
             flash('User not found', 'error')
             return redirect(url_for('main.dashboard'))
         
         # Get the reminder
-        reminders = StudyReminder.get_user_reminders(mock_user.id, limit=100)
+        reminders = StudyReminder.get_user_reminders(user.id, limit=100)
         reminder = next((r for r in reminders if r.id == reminder_id), None)
         
         if not reminder:
@@ -419,3 +447,195 @@ def create_daily_reminders_api(user_id):
             'success': False,
             'message': str(e)
         })
+
+
+@reminders_bp.route('/reminders/export/ical')
+@login_required
+def export_schedule_ical():
+    """Export study schedule as iCal file"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
+            flash('User not found.', 'error')
+            return redirect(url_for('reminders.reminders_dashboard'))
+        
+        # Get user's study schedules
+        schedules = StudySchedule.get_user_schedules(user.id)
+        
+        # Generate iCal content
+        ical_content = generate_ical_content(schedules, user.id)
+        
+        # Create response
+        response = make_response(ical_content)
+        response.headers['Content-Type'] = 'text/calendar; charset=utf-8'
+        response.headers['Content-Disposition'] = f'attachment; filename=study_schedule_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ics'
+        
+        return response
+    
+    except Exception as e:
+        flash('Error exporting schedule. Please try again.', 'error')
+        return redirect(url_for('reminders.reminders_dashboard'))
+
+
+def generate_ical_content(schedules, user_id):
+    """Generate iCal content from study schedules"""
+    ical_lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Learning Companion//Study Schedule//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH'
+    ]
+    
+    for schedule in schedules:
+        # Format dates for iCal
+        start_dt = schedule.scheduled_start.strftime('%Y%m%dT%H%M%SZ')
+        end_dt = schedule.scheduled_end.strftime('%Y%m%dT%H%M%SZ')
+        created_dt = schedule.created_at.strftime('%Y%m%dT%H%M%SZ') if schedule.created_at else datetime.now().strftime('%Y%m%dT%H%M%SZ')
+        
+        # Generate unique ID
+        uid = f"{schedule.id}@learningcompanion.app"
+        
+        ical_lines.extend([
+            'BEGIN:VEVENT',
+            f'UID:{uid}',
+            f'DTSTART:{start_dt}',
+            f'DTEND:{end_dt}',
+            f'DTSTAMP:{created_dt}',
+            f'SUMMARY:{schedule.title}',
+            f'DESCRIPTION:{schedule.description or "Study session"}',
+            f'STATUS:CONFIRMED',
+            f'SEQUENCE:0',
+            'END:VEVENT'
+        ])
+    
+    ical_lines.append('END:VCALENDAR')
+    
+    return '\r\n'.join(ical_lines)
+
+
+@reminders_bp.route('/reminders/google-calendar/auth')
+@login_required
+def google_calendar_auth():
+    """Initiate Google Calendar OAuth flow"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
+            flash('User not found.', 'error')
+            return redirect(url_for('reminders.reminders_dashboard'))
+        
+        # Generate state for security
+        state = str(uuid.uuid4())
+        
+        # Store state in session (in production, use proper session storage)
+        # For now, we'll skip state validation
+        
+        # Get Google Calendar integration
+        gcal = GoogleCalendarIntegration()
+        auth_url = gcal.get_auth_url(state=state)
+        
+        return redirect(auth_url)
+    
+    except Exception as e:
+        flash('Error initiating Google Calendar authentication.', 'error')
+        return redirect(url_for('reminders.reminders_dashboard'))
+
+
+@reminders_bp.route('/reminders/google-calendar/callback')
+@login_required
+def google_calendar_callback():
+    """Handle Google Calendar OAuth callback"""
+    try:
+        code = request.args.get('code')
+        state = request.args.get('state')
+        
+        if not code:
+            flash('Authorization failed. Please try again.', 'error')
+            return redirect(url_for('reminders.reminders_dashboard'))
+        
+        # Exchange code for tokens
+        gcal = GoogleCalendarIntegration()
+        token_data = gcal.exchange_code_for_token(code)
+        
+        if 'error' in token_data:
+            flash(f'Authentication failed: {token_data.get("error_description", "Unknown error")}', 'error')
+            return redirect(url_for('reminders.reminders_dashboard'))
+        
+        # Store tokens (in production, store in database)
+        access_token = token_data.get('access_token')
+        refresh_token = token_data.get('refresh_token')
+        
+        # Get user's study schedules
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        schedules = StudySchedule.get_user_schedules(user.id)
+        
+        # Sync schedules to Google Calendar
+        created_events = gcal.sync_study_schedule(access_token, schedules)
+        
+        flash(f'Successfully synced {len(created_events)} study sessions to Google Calendar!', 'success')
+        return redirect(url_for('reminders.reminders_dashboard'))
+    
+    except Exception as e:
+        flash('Error syncing with Google Calendar.', 'error')
+        return redirect(url_for('reminders.reminders_dashboard'))
+
+
+@reminders_bp.route('/reminders/calendar-widget')
+@login_required
+def calendar_widget():
+    """Get calendar widget data"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Get study schedules for current month
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        end_of_month = datetime(now.year, now.month + 1, 1) - timedelta(days=1)
+        
+        schedules = StudySchedule.get_user_schedules(
+            user.id, 
+            start_date=start_of_month, 
+            end_date=end_of_month
+        )
+        
+        # Convert to calendar widget format
+        events = []
+        for schedule in schedules:
+            events.append({
+                'id': schedule.id,
+                'title': schedule.title,
+                'start': {
+                    'dateTime': schedule.scheduled_start.isoformat()
+                },
+                'end': {
+                    'dateTime': schedule.scheduled_end.isoformat()
+                },
+                'description': schedule.description
+            })
+        
+        # Generate calendar HTML
+        calendar_html = CalendarWidget.generate_calendar_html(events, now.month, now.year)
+        
+        return jsonify({
+            'calendar_html': calendar_html,
+            'events': events,
+            'month': now.month,
+            'year': now.year
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
