@@ -34,3 +34,33 @@ from .auth_forms import (
     ForgotPasswordForm, ResetPasswordForm
 )
 
+# Import sharing forms
+from .sharing_forms import ShareTopicForm, JoinTopicForm
+
+# Import import forms
+from .import_forms import CSVImportForm, BulkTopicForm, FileUploadForm
+
+# Import content management forms
+from .content_forms import (
+    TopicNoteForm, TopicAttachmentForm, TopicTagForm, 
+    TopicContentForm, TopicVersionForm, ContentSearchForm
+)
+
+# Import social features forms
+from .social_forms import (
+    FriendRequestForm, StudyGroupForm, SocialChallengeForm, ShareAchievementForm,
+    StudySessionSocialForm, SocialSearchForm, GroupInviteForm, ChallengeProgressForm
+)
+
+# Import mobile and accessibility forms
+from .mobile_accessibility_forms import (
+    AccessibilityPreferencesForm, MobilePreferencesForm, DeviceRegistrationForm,
+    OfflineDataForm, AccessibilityTestForm, SyncStatusForm
+)
+
+# Import support forms
+from .support_forms import (
+    ContactForm, SupportTicketForm, DataExportForm, DataDeletionForm, 
+    FeedbackForm, ReportIssueForm
+)
+

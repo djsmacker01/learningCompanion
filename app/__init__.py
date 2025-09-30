@@ -9,6 +9,7 @@ load_dotenv()
 print(f"=== FLASK APP INITIALIZATION ===")
 print(f"SUPABASE_URL: {os.getenv('SUPABASE_URL')}")
 print(f"SUPABASE_SERVICE_ROLE_KEY: {os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20]}...")
+print(f"OPENAI_API_KEY: {os.getenv('OPENAI_API_KEY', 'Not set')[:20]}...")
 
 login_manager = LoginManager()
 
@@ -60,4 +61,19 @@ def create_app(config_name='default'):
     from app.routes.reminders import reminders_bp as reminders_blueprint
     app.register_blueprint(reminders_blueprint)
     
+    from app.routes.social import social as social_blueprint
+    app.register_blueprint(social_blueprint)
+    
+    from app.routes.mobile_accessibility import mobile_accessibility as mobile_accessibility_blueprint
+    app.register_blueprint(mobile_accessibility_blueprint)
+
+    from app.routes.support import support as support_blueprint
+    app.register_blueprint(support_blueprint)
+
+    from app.routes.ai_chat import ai_chat as ai_chat_blueprint
+    app.register_blueprint(ai_chat_blueprint)
+
+    from app.routes.advanced_analytics import advanced_analytics_bp as advanced_analytics_blueprint
+    app.register_blueprint(advanced_analytics_blueprint)
+
     return app
