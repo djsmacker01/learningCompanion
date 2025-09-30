@@ -1,18 +1,21 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify
-from flask_login import current_user
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response
+from flask_login import current_user, login_required
 from app.models import Topic, User
 from app.models.study_session import StudySession
 from app.forms.session_forms import StartSessionForm, CompleteSessionForm, EditSessionForm, SessionFilterForm
 from app.models.gamification import GamificationEngine
 from datetime import datetime, date, timedelta
+import csv
+import io
+import json
 
 sessions = Blueprint('sessions', __name__)
 
-# Mock user for testing (remove this later when implementing real auth)
-# Import the mock user from topics module
-from app.routes.topics import mock_user
+# Import the current user function from topics module
+from app.routes.topics import get_current_user
 
 @sessions.route('/sessions/debug')
+@login_required
 def debug_sessions():
     """Debug route to check session state"""
     try:
@@ -24,7 +27,11 @@ def debug_sessions():
             print(f"Session {session.id}: {session.session_type} for user {session.user_id}")
         
         # Check user sessions
-        user_sessions = StudySession.get_user_sessions(mock_user.id)
+        user = get_current_user()
+        if not user:
+            return "User not authenticated"
+        
+        user_sessions = StudySession.get_user_sessions(user.id)
         print(f"User sessions found: {len(user_sessions)}")
         
         return f"Debug info: {len(_in_memory_sessions)} sessions in memory, {len(user_sessions)} user sessions"
@@ -32,6 +39,7 @@ def debug_sessions():
         return f"Debug error: {e}"
 
 @sessions.route('/sessions')
+@login_required
 def session_history():
     """Session history page with filtering and pagination"""
     try:
@@ -44,7 +52,12 @@ def session_history():
         per_page = 10
         
         # Get all user sessions
-        all_sessions = StudySession.get_user_sessions(mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        all_sessions = StudySession.get_user_sessions(user.id)
         
         # Apply filters
         filtered_sessions = all_sessions
@@ -72,7 +85,7 @@ def session_history():
         sessions_page = filtered_sessions[start_idx:end_idx]
         
         # Get topics for filter form
-        topics = Topic.get_all_by_user(mock_user.id)
+        topics = Topic.get_all_by_user(user.id)
         
         # Create filter form
         filter_form = SessionFilterForm(topics=topics)
@@ -83,19 +96,19 @@ def session_history():
         
         # Get summary statistics with error handling
         try:
-            stats = StudySession.get_session_stats(mock_user.id, days=30)
+            stats = StudySession.get_session_stats(user.id, days=30)
         except Exception as e:
             print(f"Error getting session stats: {e}")
             stats = {'total_sessions': 0, 'total_time_minutes': 0, 'total_time_hours': 0, 'confidence_improvement': 0, 'last_session_date': None, 'avg_session_duration': 0, 'completion_rate': 0}
         
         try:
-            streak = StudySession.get_session_streak(mock_user.id)
+            streak = StudySession.get_session_streak(user.id)
         except Exception as e:
             print(f"Error getting session streak: {e}")
             streak = 0
         
         try:
-            weekly_time = StudySession.get_weekly_study_time(mock_user.id)
+            weekly_time = StudySession.get_weekly_study_time(user.id)
         except Exception as e:
             print(f"Error getting weekly study time: {e}")
             weekly_time = 0
@@ -123,7 +136,7 @@ def session_history():
         flash('Error loading session history. Please try again.', 'error')
         # Get topics for filter form even in error case
         try:
-            topics = Topic.get_all_by_user(mock_user.id)
+            topics = Topic.get_all_by_user(user.id)
             filter_form = SessionFilterForm(topics=topics)
         except:
             filter_form = SessionFilterForm()
@@ -140,8 +153,13 @@ def start_session():
     """Start new session page"""
     try:
         # Get user's topics
-        print(f"Getting topics for user: {mock_user.id}")
-        topics = Topic.get_all_by_user(mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        print(f"Getting topics for user: {user.id}")
+        topics = Topic.get_all_by_user(user.id)
         print(f"Found {len(topics)} topics for user")
         if not topics:
             print("No topics found, redirecting to create topic")
@@ -154,7 +172,7 @@ def start_session():
         ai_recommendations = []
         try:
             from app.utils.ai_algorithms import LearningAnalytics
-            ai_recommendations = LearningAnalytics.get_learning_recommendations(mock_user.id)
+            ai_recommendations = LearningAnalytics.get_learning_recommendations(user.id)
         except Exception as e:
             print(f"Error getting AI recommendations: {e}")
         
@@ -163,11 +181,11 @@ def start_session():
             print(f"Form errors: {form.errors}")
         
         if form.validate_on_submit():
-            print(f"Creating session for user: {mock_user.id}, topic: {form.topic_id.data}")
+            print(f"Creating session for user: {user.id}, topic: {form.topic_id.data}")
             print(f"Form data: {form.data}")
             # Create initial session record
             session = StudySession.create_session(
-                user_id=mock_user.id,
+                user_id=user.id,
                 topic_id=form.topic_id.data,
                 session_date=datetime.now(),
                 duration_minutes=form.estimated_duration.data or 25,
@@ -197,22 +215,27 @@ def start_session():
 def session_detail(session_id):
     """Session detail view"""
     try:
-        print(f"Looking for session ID: {session_id} for user: {mock_user.id}")
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        print(f"Looking for session ID: {session_id} for user: {user.id}")
+        session = StudySession.get_session_by_id(session_id, user.id)
         print(f"Found session: {session}")
         if not session:
             flash('Session not found.', 'error')
             return redirect(url_for('sessions.session_history'))
         
         # Get topic information
-        topic = Topic.get_by_id(session.topic_id, mock_user.id)
+        topic = Topic.get_by_id(session.topic_id, user.id)
         
         # Get related sessions for the same topic
-        related_sessions = StudySession.get_topic_sessions(session.topic_id, mock_user.id)
+        related_sessions = StudySession.get_topic_sessions(session.topic_id, user.id)
         related_sessions = [s for s in related_sessions if s.id != session_id][:5]
         
         # Get topic progress
-        topic_progress = StudySession.get_topic_progress(session.topic_id, mock_user.id)
+        topic_progress = StudySession.get_topic_progress(session.topic_id, user.id)
         
         return render_template('sessions/detail.html', 
                              session=session, 
@@ -224,11 +247,184 @@ def session_detail(session_id):
         flash('Error loading session details. Please try again.', 'error')
         return redirect(url_for('sessions.session_history'))
 
+
+@sessions.route('/sessions/export/csv')
+@login_required
+def export_sessions_csv():
+    """Export study sessions as CSV"""
+    try:
+        # Get all user sessions
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        all_sessions = StudySession.get_user_sessions(user.id)
+        
+        # Get topics for mapping
+        topics = Topic.get_all_by_user(user.id)
+        topic_map = {topic.id: topic.title for topic in topics}
+        
+        # Create CSV output
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'Session ID', 'Topic', 'Date', 'Duration (minutes)', 
+            'Confidence Before', 'Confidence After', 'Session Type', 
+            'Completed', 'Notes', 'Created At'
+        ])
+        
+        # Write data
+        for session in all_sessions:
+            writer.writerow([
+                session.id,
+                topic_map.get(session.topic_id, 'Unknown Topic'),
+                session.session_date.strftime('%Y-%m-%d'),
+                session.duration_minutes,
+                session.confidence_before,
+                session.confidence_after,
+                session.session_type,
+                'Yes' if session.completed else 'No',
+                session.notes or '',
+                session.created_at.strftime('%Y-%m-%d %H:%M:%S') if session.created_at else ''
+            ])
+        
+        # Create response
+        output.seek(0)
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = f'attachment; filename=study_sessions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        
+        return response
+    
+    except Exception as e:
+        flash('Error exporting sessions. Please try again.', 'error')
+        return redirect(url_for('sessions.session_history'))
+
+
+@sessions.route('/sessions/export/json')
+@login_required
+def export_sessions_json():
+    """Export study sessions as JSON"""
+    try:
+        # Get all user sessions
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        all_sessions = StudySession.get_user_sessions(user.id)
+        
+        # Get topics for mapping
+        topics = Topic.get_all_by_user(user.id)
+        topic_map = {topic.id: topic.title for topic in topics}
+        
+        # Prepare data
+        sessions_data = []
+        for session in all_sessions:
+            sessions_data.append({
+                'id': session.id,
+                'topic': topic_map.get(session.topic_id, 'Unknown Topic'),
+                'topic_id': session.topic_id,
+                'date': session.session_date.isoformat(),
+                'duration_minutes': session.duration_minutes,
+                'confidence_before': session.confidence_before,
+                'confidence_after': session.confidence_after,
+                'session_type': session.session_type,
+                'completed': session.completed,
+                'notes': session.notes,
+                'created_at': session.created_at.isoformat() if session.created_at else None
+            })
+        
+        # Create response
+        response = make_response(json.dumps(sessions_data, indent=2))
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Content-Disposition'] = f'attachment; filename=study_sessions_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        
+        return response
+    
+    except Exception as e:
+        flash('Error exporting sessions. Please try again.', 'error')
+        return redirect(url_for('sessions.session_history'))
+
+
+@sessions.route('/sessions/export/complete')
+@login_required
+def export_complete_data():
+    """Export complete user data as JSON"""
+    try:
+        # Get all user data
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        sessions = StudySession.get_user_sessions(user.id)
+        topics = Topic.get_all_by_user(user.id)
+        
+        # Prepare complete data
+        complete_data = {
+            'export_info': {
+                'exported_at': datetime.now().isoformat(),
+                'user_id': user.id,
+                'total_sessions': len(sessions),
+                'total_topics': len(topics)
+            },
+            'topics': [],
+            'sessions': []
+        }
+        
+        # Add topics data
+        for topic in topics:
+            complete_data['topics'].append({
+                'id': topic.id,
+                'title': topic.title,
+                'description': topic.description,
+                'created_at': topic.created_at.isoformat() if topic.created_at else None,
+                'is_active': topic.is_active,
+                'is_shared': getattr(topic, 'is_shared', False),
+                'share_code': getattr(topic, 'share_code', None)
+            })
+        
+        # Add sessions data
+        for session in sessions:
+            complete_data['sessions'].append({
+                'id': session.id,
+                'topic_id': session.topic_id,
+                'date': session.session_date.isoformat(),
+                'duration_minutes': session.duration_minutes,
+                'confidence_before': session.confidence_before,
+                'confidence_after': session.confidence_after,
+                'session_type': session.session_type,
+                'completed': session.completed,
+                'notes': session.notes,
+                'created_at': session.created_at.isoformat() if session.created_at else None
+            })
+        
+        # Create response
+        response = make_response(json.dumps(complete_data, indent=2))
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Content-Disposition'] = f'attachment; filename=complete_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        
+        return response
+    
+    except Exception as e:
+        flash('Error exporting complete data. Please try again.', 'error')
+        return redirect(url_for('sessions.session_history'))
+
+
 @sessions.route('/sessions/<session_id>/edit', methods=['GET', 'POST'])
 def edit_session(session_id):
     """Edit session form"""
     try:
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        session = StudySession.get_session_by_id(session_id, user.id)
         if not session:
             flash('Session not found.', 'error')
             return redirect(url_for('sessions.session_history'))
@@ -273,7 +469,12 @@ def edit_session(session_id):
 def complete_session(session_id):
     """Complete a study session"""
     try:
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        session = StudySession.get_session_by_id(session_id, user.id)
         if not session:
             flash('Session not found.', 'error')
             return redirect(url_for('sessions.session_history'))
@@ -293,7 +494,7 @@ def complete_session(session_id):
                 confidence_gain = form.confidence_after.data - session.confidence_before
                 
                 # Process gamification rewards
-                rewards = GamificationEngine.process_study_session(mock_user.id, form.duration_minutes.data)
+                rewards = GamificationEngine.process_study_session(user.id, form.duration_minutes.data)
                 
                 # Create success message with gamification info
                 success_message = f'Session completed! Confidence improved by {confidence_gain} points.'
@@ -322,12 +523,17 @@ def complete_session(session_id):
 def delete_session(session_id):
     """Delete session"""
     try:
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        session = StudySession.get_session_by_id(session_id, user.id)
         if not session:
             flash('Session not found.', 'error')
             return redirect(url_for('sessions.session_history'))
         
-        success = StudySession.delete_session(session_id, mock_user.id)
+        success = StudySession.delete_session(session_id, user.id)
         
         if success:
             flash('Session deleted successfully.', 'success')
@@ -345,7 +551,7 @@ def study_timer():
     """Optional study timer page"""
     try:
         # Get user's topics for quick session start
-        topics = Topic.get_all_by_user(mock_user.id)
+        topics = Topic.get_all_by_user(user.id)
         if not topics:
             flash('You need to create a topic before using the timer.', 'warning')
             return redirect(url_for('topics.create_topic'))
@@ -369,13 +575,13 @@ def start_timer_session():
             return jsonify({'error': 'Topic ID is required'}), 400
         
         # Verify topic belongs to user
-        topic = Topic.get_by_id(topic_id, mock_user.id)
+        topic = Topic.get_by_id(topic_id, user.id)
         if not topic:
             return jsonify({'error': 'Topic not found'}), 404
         
         # Create session
         session = StudySession.create_session(
-            user_id=mock_user.id,
+            user_id=user.id,
             topic_id=topic_id,
             session_date=datetime.now(),
             duration_minutes=25,  # Default Pomodoro time
@@ -411,7 +617,12 @@ def complete_timer_session():
         if not all([session_id, duration_minutes, confidence_after]):
             return jsonify({'error': 'Missing required fields'}), 400
         
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        session = StudySession.get_session_by_id(session_id, user.id)
         if not session:
             return jsonify({'error': 'Session not found'}), 404
         
@@ -440,7 +651,12 @@ def complete_timer_session():
 def update_notes(session_id):
     """Update session notes"""
     try:
-        session = StudySession.get_session_by_id(session_id, mock_user.id)
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        session = StudySession.get_session_by_id(session_id, user.id)
         if not session:
             flash('Session not found.', 'error')
             return redirect(url_for('sessions.session_history'))

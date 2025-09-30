@@ -4,11 +4,12 @@ Handles quiz creation, taking quizzes, and results
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from flask_login import login_required
 from datetime import datetime, timedelta
 from app.models import Topic
 from app.models.quiz import Quiz, QuizQuestion, QuizQuestionOption, QuizAttempt, QuizAttemptAnswer, FlashcardProgress
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
-from app.routes.topics import get_or_create_mock_user
+from app.routes.topics import get_current_user
 from app.forms.quiz_forms import (
     CreateQuizForm, CreateQuestionForm, MultipleChoiceOptionForm, 
     TakeQuizForm, FlashcardReviewForm, QuizSearchForm, QuizSettingsForm
@@ -21,20 +22,24 @@ quizzes = Blueprint('quizzes', __name__, url_prefix='/quizzes')
 
 
 @quizzes.route('/')
+@login_required
 def quiz_list():
     """Display list of all quizzes"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get all topics for the user
-    topics = Topic.get_topics_by_user(mock_user.id)
+    topics = Topic.get_topics_by_user(user.id)
     
     # Get all quizzes for each topic
     all_quizzes = []
     for topic in topics:
-        topic_quizzes = Quiz.get_quizzes_by_topic(topic.id, mock_user.id)
+        topic_quizzes = Quiz.get_quizzes_by_topic(topic.id, user.id)
         for quiz in topic_quizzes:
             quiz.topic_title = topic.title
             all_quizzes.append(quiz)
@@ -46,21 +51,25 @@ def quiz_list():
 
 
 @quizzes.route('/topic/<topic_id>')
+@login_required
 def topic_quizzes(topic_id):
     """Display quizzes for a specific topic"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get topic
-    topic = Topic.get_topic_by_id(topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(topic_id, user.id)
     if not topic:
         flash('Topic not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get quizzes for this topic
-    quizzes_list = Quiz.get_quizzes_by_topic(topic_id, mock_user.id)
+    quizzes_list = Quiz.get_quizzes_by_topic(topic_id, user.id)
     
     return render_template('quizzes/topic_quizzes.html', topic=topic, quizzes=quizzes_list)
 
@@ -68,13 +77,16 @@ def topic_quizzes(topic_id):
 @quizzes.route('/create/<topic_id>', methods=['GET', 'POST'])
 def create_quiz(topic_id):
     """Create a new quiz for a topic"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get topic
-    topic = Topic.get_topic_by_id(topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(topic_id, user.id)
     if not topic:
         flash('Topic not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
@@ -84,7 +96,7 @@ def create_quiz(topic_id):
     if form.validate_on_submit():
         quiz = Quiz.create_quiz(
             topic_id=topic_id,
-            user_id=mock_user.id,
+            user_id=user.id,
             title=form.title.data,
             description=form.description.data,
             quiz_type=form.quiz_type.data,
@@ -105,19 +117,22 @@ def create_quiz(topic_id):
 @quizzes.route('/<quiz_id>')
 def quiz_detail(quiz_id):
     """Display quiz details and questions"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get topic
-    topic = Topic.get_topic_by_id(quiz.topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(quiz.topic_id, user.id)
     
     # Get questions
     questions = QuizQuestion.get_questions_by_quiz(quiz_id)
@@ -128,13 +143,16 @@ def quiz_detail(quiz_id):
 @quizzes.route('/<quiz_id>/add-question', methods=['GET', 'POST'])
 def add_question(quiz_id):
     """Add a question to a quiz"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
@@ -173,8 +191,11 @@ def add_question(quiz_id):
 @quizzes.route('/question/<question_id>/add-options', methods=['GET', 'POST'])
 def add_options(question_id):
     """Add options to a multiple choice question"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
@@ -186,7 +207,7 @@ def add_options(question_id):
     supabase = get_supabase_client()
     
     try:
-        result = supabase.table('quiz_questions').select('*, quizzes!inner(*)').eq('id', question_id).eq('quizzes.user_id', mock_user.id).execute()
+        result = supabase.table('quiz_questions').select('*, quizzes!inner(*)').eq('id', question_id).eq('quizzes.user_id', user.id).execute()
         if not result.data:
             flash('Question not found', 'error')
             return redirect(url_for('quizzes.quiz_list'))
@@ -221,13 +242,16 @@ def add_options(question_id):
 @quizzes.route('/<quiz_id>/take', methods=['GET', 'POST'])
 def take_quiz(quiz_id):
     """Take a quiz"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
@@ -243,14 +267,14 @@ def take_quiz(quiz_id):
     attempt = None
     
     if attempt_id:
-        attempt = QuizAttempt.get_attempt_by_id(attempt_id, mock_user.id)
+        attempt = QuizAttempt.get_attempt_by_id(attempt_id, user.id)
         if not attempt or attempt.status != 'in_progress':
             attempt = None
             session.pop(f'quiz_attempt_{quiz_id}', None)
     
     # Start new attempt if none exists
     if not attempt:
-        attempt = QuizAttempt.start_attempt(quiz_id, mock_user.id)
+        attempt = QuizAttempt.start_attempt(quiz_id, user.id)
         if attempt:
             session[f'quiz_attempt_{quiz_id}'] = attempt.id
         else:
@@ -267,7 +291,7 @@ def take_quiz(quiz_id):
         # Process gamification rewards
         if attempt.score is not None:
             time_taken_minutes = attempt.time_taken_minutes or 0
-            rewards = GamificationEngine.process_quiz_completion(mock_user.id, attempt.score, time_taken_minutes)
+            rewards = GamificationEngine.process_quiz_completion(user.id, attempt.score, time_taken_minutes)
             
             # Store rewards in session for display in results
             session[f'quiz_rewards_{attempt.id}'] = rewards
@@ -293,7 +317,7 @@ def take_quiz(quiz_id):
             # Process gamification rewards
             if attempt.score is not None:
                 time_taken_minutes = attempt.time_taken_minutes or 0
-                rewards = GamificationEngine.process_quiz_completion(mock_user.id, attempt.score, time_taken_minutes)
+                rewards = GamificationEngine.process_quiz_completion(user.id, attempt.score, time_taken_minutes)
                 
                 # Store rewards in session for display in results
                 session[f'quiz_rewards_{attempt.id}'] = rewards
@@ -317,25 +341,28 @@ def take_quiz(quiz_id):
 @quizzes.route('/results/<attempt_id>')
 def quiz_results(attempt_id):
     """Display quiz results"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get attempt
-    attempt = QuizAttempt.get_attempt_by_id(attempt_id, mock_user.id)
+    attempt = QuizAttempt.get_attempt_by_id(attempt_id, user.id)
     if not attempt:
         flash('Quiz attempt not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(attempt.quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(attempt.quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get topic
-    topic = Topic.get_topic_by_id(quiz.topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(quiz.topic_id, user.id)
     
     # Get questions and answers
     questions = QuizQuestion.get_questions_by_quiz(quiz.id)
@@ -364,13 +391,16 @@ def quiz_results(attempt_id):
 @quizzes.route('/flashcards/<quiz_id>')
 def flashcards(quiz_id):
     """Study flashcards"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
@@ -402,8 +432,11 @@ def flashcards(quiz_id):
 @quizzes.route('/flashcards/<quiz_id>/review', methods=['POST'])
 def review_flashcard(quiz_id):
     """Review a flashcard and update progress"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('main.dashboard'))
     
@@ -414,7 +447,7 @@ def review_flashcard(quiz_id):
         quality = form.quality.data
         
         # Update flashcard progress
-        FlashcardProgress.create_or_update_progress(mock_user.id, question_id, quality)
+        FlashcardProgress.create_or_update_progress(user.id, question_id, quality)
         
         # Get current card index
         current_index = int(request.form.get('card_index', 0))
@@ -434,12 +467,15 @@ def review_flashcard(quiz_id):
 @quizzes.route('/api/due-flashcards')
 def api_due_flashcards():
     """API endpoint to get due flashcards"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get due flashcards
-    due_flashcards = FlashcardProgress.get_due_flashcards(mock_user.id, limit=10)
+    due_flashcards = FlashcardProgress.get_due_flashcards(user.id, limit=10)
     
     # Get question details for each flashcard
     flashcards_data = []
@@ -478,8 +514,11 @@ def api_due_flashcards():
 @quizzes.route('/api/quiz-stats')
 def api_quiz_stats():
     """API endpoint to get quiz statistics"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     if not SUPABASE_AVAILABLE:
@@ -489,11 +528,11 @@ def api_quiz_stats():
     
     try:
         # Get total quizzes
-        quizzes_result = supabase.table('quizzes').select('id').eq('user_id', mock_user.id).eq('is_active', True).execute()
+        quizzes_result = supabase.table('quizzes').select('id').eq('user_id', user.id).eq('is_active', True).execute()
         total_quizzes = len(quizzes_result.data)
         
         # Get total attempts
-        attempts_result = supabase.table('quiz_attempts').select('id, score, status').eq('user_id', mock_user.id).execute()
+        attempts_result = supabase.table('quiz_attempts').select('id, score, status').eq('user_id', user.id).execute()
         total_attempts = len(attempts_result.data)
         
         # Get completed attempts
@@ -507,7 +546,7 @@ def api_quiz_stats():
             avg_score = 0
         
         # Get due flashcards count
-        due_flashcards = FlashcardProgress.get_due_flashcards(mock_user.id, limit=100)
+        due_flashcards = FlashcardProgress.get_due_flashcards(user.id, limit=100)
         due_count = len(due_flashcards)
         
         return jsonify({
@@ -526,12 +565,15 @@ def api_quiz_stats():
 @quizzes.route('/api/generate-questions/<topic_id>')
 def api_generate_questions(topic_id):
     """API endpoint to generate smart questions for a topic"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get topic
-    topic = Topic.get_topic_by_id(topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(topic_id, user.id)
     if not topic:
         return jsonify({'error': 'Topic not found'}), 404
     
@@ -568,8 +610,11 @@ def api_generate_questions(topic_id):
 @quizzes.route('/api/add-generated-questions', methods=['POST'])
 def api_add_generated_questions():
     """API endpoint to add generated questions to a quiz"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     try:
@@ -581,7 +626,7 @@ def api_add_generated_questions():
             return jsonify({'error': 'Missing required data'}), 400
         
         # Verify quiz ownership
-        quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+        quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
         if not quiz:
             return jsonify({'error': 'Quiz not found'}), 404
         
@@ -633,18 +678,21 @@ def api_add_generated_questions():
 @quizzes.route('/<quiz_id>/generate-questions')
 def generate_questions_page(quiz_id):
     """Page for generating and selecting smart questions"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         flash('User not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get quiz
-    quiz = Quiz.get_quiz_by_id(quiz_id, mock_user.id)
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
     if not quiz:
         flash('Quiz not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     # Get topic
-    topic = Topic.get_topic_by_id(quiz.topic_id, mock_user.id)
+    topic = Topic.get_topic_by_id(quiz.topic_id, user.id)
     
     return render_template('quizzes/generate_questions.html', quiz=quiz, topic=topic)
