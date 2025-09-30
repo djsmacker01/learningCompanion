@@ -4,6 +4,7 @@ Handles badges, achievements, XP system, and leaderboards
 """
 
 from flask import Blueprint, render_template, request, jsonify, session
+from flask_login import login_required
 from datetime import datetime, date, timedelta
 from typing import List, Dict
 from app.models.gamification import (
@@ -11,30 +12,34 @@ from app.models.gamification import (
     Leaderboard, GamificationEngine
 )
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
-from app.routes.topics import get_or_create_mock_user
+from app.routes.topics import get_current_user
 import json
 
 gamification = Blueprint('gamification', __name__, url_prefix='/gamification')
 
 
 @gamification.route('/')
+@login_required
 def gamification_dashboard():
     """Main gamification dashboard"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get user profile
-    profile = UserProfile.get_or_create_profile(mock_user.id)
+    profile = UserProfile.get_or_create_profile(user.id)
     if not profile:
         return jsonify({'error': 'Failed to load profile'}), 500
     
     # Get user badges and achievements
-    user_badges = UserBadge.get_user_badges(mock_user.id)
-    user_achievements = UserAchievement.get_user_achievements(mock_user.id)
+    user_badges = UserBadge.get_user_badges(user.id)
+    user_achievements = UserAchievement.get_user_achievements(user.id)
     
     # Get recent XP transactions
-    recent_xp = GamificationEngine._get_recent_xp_transactions(mock_user.id, limit=10)
+    recent_xp = GamificationEngine._get_recent_xp_transactions(user.id, limit=10)
     
     return render_template('gamification/dashboard.html', 
                          profile=profile,
@@ -46,17 +51,20 @@ def gamification_dashboard():
 @gamification.route('/badges')
 def badges_page():
     """Badges page showing all available badges"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get all badges
     all_badges = Badge.get_all_badges()
-    user_badges = UserBadge.get_user_badges(mock_user.id)
+    user_badges = UserBadge.get_user_badges(user.id)
     user_badge_ids = {badge.badge_id for badge in user_badges}
     
     # Get user profile for progress tracking
-    profile = UserProfile.get_or_create_profile(mock_user.id)
+    profile = UserProfile.get_or_create_profile(user.id)
     
     return render_template('gamification/badges.html',
                          all_badges=all_badges,
@@ -67,17 +75,20 @@ def badges_page():
 @gamification.route('/achievements')
 def achievements_page():
     """Achievements page showing all available achievements"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get all achievements
     all_achievements = Achievement.get_all_achievements()
-    user_achievements = UserAchievement.get_user_achievements(mock_user.id)
+    user_achievements = UserAchievement.get_user_achievements(user.id)
     user_achievement_ids = {achievement.achievement_id for achievement in user_achievements}
     
     # Get user profile for progress tracking
-    profile = UserProfile.get_or_create_profile(mock_user.id)
+    profile = UserProfile.get_or_create_profile(user.id)
     
     return render_template('gamification/achievements.html',
                          all_achievements=all_achievements,
@@ -88,8 +99,11 @@ def achievements_page():
 @gamification.route('/leaderboard')
 def leaderboard_page():
     """Leaderboard page showing rankings"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     # Get leaderboard data for different categories
@@ -101,11 +115,11 @@ def leaderboard_page():
     
     # Get user's rank in each category
     user_ranks = {}
-    profile = UserProfile.get_or_create_profile(mock_user.id)
+    profile = UserProfile.get_or_create_profile(user.id)
     
     if profile:
         for category in categories:
-            user_ranks[category] = GamificationEngine._get_user_rank(mock_user.id, category)
+            user_ranks[category] = GamificationEngine._get_user_rank(user.id, category)
     
     return render_template('gamification/leaderboard.html',
                          leaderboards=leaderboards,
@@ -116,11 +130,14 @@ def leaderboard_page():
 @gamification.route('/api/profile')
 def api_user_profile():
     """API endpoint to get user profile data"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    profile = UserProfile.get_or_create_profile(mock_user.id)
+    profile = UserProfile.get_or_create_profile(user.id)
     if not profile:
         return jsonify({'error': 'Failed to load profile'}), 500
     
@@ -143,11 +160,14 @@ def api_user_profile():
 @gamification.route('/api/badges')
 def api_user_badges():
     """API endpoint to get user badges"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    user_badges = UserBadge.get_user_badges(mock_user.id)
+    user_badges = UserBadge.get_user_badges(user.id)
     
     badges_data = []
     for user_badge in user_badges:
@@ -170,11 +190,14 @@ def api_user_badges():
 @gamification.route('/api/achievements')
 def api_user_achievements():
     """API endpoint to get user achievements"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    user_achievements = UserAchievement.get_user_achievements(mock_user.id)
+    user_achievements = UserAchievement.get_user_achievements(user.id)
     
     achievements_data = []
     for user_achievement in user_achievements:
@@ -212,12 +235,15 @@ def api_leaderboard(category):
 @gamification.route('/api/xp-history')
 def api_xp_history():
     """API endpoint to get XP transaction history"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     limit = int(request.args.get('limit', 20))
-    recent_xp = GamificationEngine._get_recent_xp_transactions(mock_user.id, limit)
+    recent_xp = GamificationEngine._get_recent_xp_transactions(user.id, limit)
     
     return jsonify({'xp_transactions': recent_xp})
 
@@ -225,8 +251,11 @@ def api_xp_history():
 @gamification.route('/api/process-study-session', methods=['POST'])
 def api_process_study_session():
     """API endpoint to process study session and award rewards"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     try:
@@ -237,7 +266,7 @@ def api_process_study_session():
             return jsonify({'error': 'Invalid duration'}), 400
         
         # Process study session
-        rewards = GamificationEngine.process_study_session(mock_user.id, duration_minutes)
+        rewards = GamificationEngine.process_study_session(user.id, duration_minutes)
         
         return jsonify({
             'success': True,
@@ -252,8 +281,11 @@ def api_process_study_session():
 @gamification.route('/api/process-quiz-completion', methods=['POST'])
 def api_process_quiz_completion():
     """API endpoint to process quiz completion and award rewards"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     try:
@@ -265,7 +297,7 @@ def api_process_quiz_completion():
             return jsonify({'error': 'Invalid quiz score'}), 400
         
         # Process quiz completion
-        rewards = GamificationEngine.process_quiz_completion(mock_user.id, quiz_score, time_taken_minutes)
+        rewards = GamificationEngine.process_quiz_completion(user.id, quiz_score, time_taken_minutes)
         
         return jsonify({
             'success': True,
@@ -280,14 +312,17 @@ def api_process_quiz_completion():
 @gamification.route('/api/check-rewards')
 def api_check_rewards():
     """API endpoint to check for new badges and achievements"""
-    mock_user = get_or_create_mock_user()
-    if not mock_user:
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    if not user:
         return jsonify({'error': 'User not found'}), 404
     
     try:
         # Check for new badges and achievements
-        new_badges = GamificationEngine._check_badges(mock_user.id)
-        new_achievements = GamificationEngine._check_achievements(mock_user.id)
+        new_badges = GamificationEngine._check_badges(user.id)
+        new_achievements = GamificationEngine._check_achievements(user.id)
         
         return jsonify({
             'success': True,

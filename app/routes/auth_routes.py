@@ -72,7 +72,7 @@ def login():
             if next_page and next_page.startswith('/'):
                 return redirect(next_page)
             
-            flash(f'Welcome back, {user.profile.full_name if user.profile else user.email}!', 'success')
+            flash(f'Welcome back, {user.full_name}!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
             # Login failed
@@ -125,7 +125,7 @@ def register():
             user_agent = request.headers.get('User-Agent', '')
             UserSession.create_session(user.id, ip_address=ip_address, user_agent=user_agent)
             
-            flash(f'Welcome to Learning Companion, {user.profile.full_name}! Your account has been created successfully.', 'success')
+            flash(f'Welcome to Learning Companion, {user.full_name}! Your account has been created successfully.', 'success')
             return redirect(url_for('main.dashboard'))
         else:
             flash('Failed to create account. Please try again.', 'error')
@@ -319,26 +319,14 @@ def reset_password(token):
     return render_template('auth/reset_password.html', form=form, token=token)
 
 
-@auth_bp.route('/sessions')
-@login_required
-def user_sessions():
-    """View user sessions"""
-    # Get user's active sessions
-    # This would require implementing a method to get sessions by user_id
-    # For now, we'll show a placeholder
-    sessions = []
-    
-    return render_template('auth/sessions.html', sessions=sessions)
-
-
 @auth_bp.route('/sessions/<session_id>/revoke', methods=['POST'])
 @login_required
 def revoke_session(session_id):
     """Revoke a specific session"""
     # This would require implementing session revocation
-    # For now, we'll just redirect back
+    # For now, we'll just redirect back to sessions history
     flash('Session revoked successfully.', 'success')
-    return redirect(url_for('auth.user_sessions'))
+    return redirect(url_for('sessions.session_history'))
 
 
 # API endpoints for AJAX requests
