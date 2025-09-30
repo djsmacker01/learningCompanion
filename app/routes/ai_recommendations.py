@@ -1,29 +1,26 @@
-"""
-AI Recommendations and Smart Features for Learning Companion
 
-This module provides intelligent recommendations and smart features including:
-- Spaced repetition scheduling
-- Personalized study recommendations
-- Learning pattern analysis
-- Optimal study timing suggestions
-"""
 
 from flask import Blueprint, render_template, jsonify, request
+from flask_login import login_required
 from datetime import datetime, timedelta, date
 from app.models import Topic
 from app.models.study_session import StudySession
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
-from app.routes.topics import get_or_create_mock_user
+from app.routes.topics import get_current_user
 from app.utils.ai_algorithms import LearningAnalytics
 import json
 
 ai_recommendations = Blueprint('ai_recommendations', __name__)
 
 @ai_recommendations.route('/ai/recommendations')
+@login_required
 def recommendations_dashboard():
     """AI Recommendations Dashboard"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
@@ -32,15 +29,15 @@ def recommendations_dashboard():
                                  error="AI recommendations not available")
         
 
-        recommendations = LearningAnalytics.get_learning_recommendations(mock_user.id)
+        recommendations = LearningAnalytics.get_learning_recommendations(user.id)
         
         
-        study_patterns = LearningAnalytics.get_study_pattern_insights(mock_user.id)
+        study_patterns = LearningAnalytics.get_study_pattern_insights(user.id)
         
         
-        topics_for_review = get_topics_for_review(mock_user.id, client)
+        topics_for_review = get_topics_for_review(user.id, client)
         
-        study_schedule = get_study_schedule(mock_user.id, client)
+        study_schedule = get_study_schedule(user.id, client)
         
         return render_template('ai/recommendations.html',
                              recommendations=recommendations,
@@ -58,9 +55,12 @@ def recommendations_dashboard():
 def api_recommendations():
     """API endpoint for AI recommendations"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         
-        recommendations = LearningAnalytics.get_learning_recommendations(mock_user.id)
+        recommendations = LearningAnalytics.get_learning_recommendations(user.id)
         return jsonify({
             'recommendations': recommendations,
             'timestamp': datetime.now().isoformat()
@@ -73,9 +73,12 @@ def api_recommendations():
 def api_study_patterns():
     """API endpoint for study pattern analysis"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         
-        patterns = LearningAnalytics.get_study_pattern_insights(mock_user.id)
+        patterns = LearningAnalytics.get_study_pattern_insights(user.id)
         return jsonify(patterns)
     
     except Exception as e:
@@ -85,13 +88,16 @@ def api_study_patterns():
 def api_topics_for_review():
     """API endpoint for spaced repetition recommendations"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Database not available'}), 500
         
-        topics = get_topics_for_review(mock_user.id, client)
+        topics = get_topics_for_review(user.id, client)
         return jsonify({'topics': topics})
     
     except Exception as e:
@@ -101,14 +107,17 @@ def api_topics_for_review():
 def api_study_schedule():
     """API endpoint for optimal study schedule"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Database not available'}), 500
         
         days = request.args.get('days', 7, type=int)
-        schedule = get_study_schedule(mock_user.id, client, days)
+        schedule = get_study_schedule(user.id, client, days)
         return jsonify({'schedule': schedule})
     
     except Exception as e:
@@ -118,12 +127,15 @@ def api_study_schedule():
 def api_topic_mastery(topic_id):
     """API endpoint for topic mastery analysis"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         
-        mastery = LearningAnalytics.get_topic_mastery_level(topic_id, mock_user.id)
-        confidence_trend = LearningAnalytics.calculate_confidence_trends(mock_user.id, topic_id)
-        next_session_date = LearningAnalytics.recommend_next_session_date(topic_id, mock_user.id)
-        optimal_duration = LearningAnalytics.get_optimal_session_length(mock_user.id, topic_id)
+        mastery = LearningAnalytics.get_topic_mastery_level(topic_id, user.id)
+        confidence_trend = LearningAnalytics.calculate_confidence_trends(user.id, topic_id)
+        next_session_date = LearningAnalytics.recommend_next_session_date(topic_id, user.id)
+        optimal_duration = LearningAnalytics.get_optimal_session_length(user.id, topic_id)
         
         return jsonify({
             'mastery': mastery,
@@ -215,13 +227,13 @@ def calculate_topics_for_review_fallback(user_id, client):
 def get_study_schedule(user_id, client, days=7):
     """Get optimal study schedule for the next N days"""
     try:
-        # Use the database function for study schedule
+       
         response = client.rpc('get_study_schedule', {'p_user_id': user_id, 'p_days': days}).execute()
         
         if response.data:
             return response.data
         
-        # Fallback: manual calculation
+       
         return calculate_study_schedule_fallback(user_id, client, days)
     
     except Exception as e:
@@ -231,21 +243,21 @@ def get_study_schedule(user_id, client, days=7):
 def calculate_study_schedule_fallback(user_id, client, days=7):
     """Fallback method to calculate study schedule"""
     try:
-        # Get topics for review
+        
         topics_for_review = get_topics_for_review(user_id, client)
         
         schedule = []
         current_date = datetime.now().date()
         
-        # Distribute topics across the next N days
+        
         for i, topic in enumerate(topics_for_review[:days]):
             study_date = current_date + timedelta(days=i)
             
-            # Calculate priority score
+           
             priority_score = 100 - (topic['days_since_last_session'] - topic['recommended_interval'])
             priority_score = max(10, min(100, priority_score))
             
-            # Calculate recommended duration based on mastery level
+           
             if topic['mastery_level'] <= 2:
                 recommended_duration = 45  # Longer for beginners
             elif topic['mastery_level'] <= 4:
@@ -280,7 +292,10 @@ def calculate_study_schedule_fallback(user_id, client, days=7):
 def api_learning_insights():
     """API endpoint for comprehensive learning insights"""
     try:
-        mock_user = get_or_create_mock_user()
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
@@ -288,11 +303,11 @@ def api_learning_insights():
         
         # Get comprehensive insights
         insights = {
-            'study_streak': LearningAnalytics.calculate_study_streak(mock_user.id),
-            'study_patterns': LearningAnalytics.get_study_pattern_insights(mock_user.id),
-            'topics_for_review': get_topics_for_review(mock_user.id, client),
-            'study_schedule': get_study_schedule(mock_user.id, client, 7),
-            'recommendations': LearningAnalytics.get_learning_recommendations(mock_user.id)
+            'study_streak': LearningAnalytics.calculate_study_streak(user.id),
+            'study_patterns': LearningAnalytics.get_study_pattern_insights(user.id),
+            'topics_for_review': get_topics_for_review(user.id, client),
+            'study_schedule': get_study_schedule(user.id, client, 7),
+            'recommendations': LearningAnalytics.get_learning_recommendations(user.id)
         }
         
         return jsonify(insights)
