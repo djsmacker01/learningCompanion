@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Share Topic - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 mb-3">Share Topic</h2>
+                        <p class="text-muted">Generate a share code for: <strong>{{ topic.title }}</strong></p>
+                    </div>
+
+                    {% if topic.is_shared %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This topic is already shared with code: <strong>{{ topic.share_code }}</strong>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.expires_at.label(class="form-label") }}
+                            {{ form.expires_at(class="form-control" + (" is-invalid" if form.expires_at.errors else ""))
+                            }}
+                            {% if form.expires_at.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.expires_at.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Leave empty for no expiration date
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.max_uses.label(class="form-label") }}
+                            {{ form.max_uses(class="form-control" + (" is-invalid" if form.max_uses.errors else "")) }}
+                            {% if form.max_uses.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.max_uses.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Leave empty for unlimited uses
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('topics.view_topic', topic_id=topic.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Topic
+                            </a>
+                        </div>
+                    </form>
+
+                    {% if topic.is_shared %}
+                    <hr class="my-4">
+                    <div class="text-center">
+                        <form method="POST" action="{{ url_for('topics.revoke_topic_sharing', topic_id=topic.id) }}"
+                            onsubmit="return confirm('Are you sure you want to revoke sharing for this topic?')">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-ban me-2"></i>Revoke Sharing
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

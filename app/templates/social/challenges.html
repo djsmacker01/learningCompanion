@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Social Challenges{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-trophy text-warning me-2"></i>Social Challenges
+                </h1>
+                <div>
+                    <a href="{{ url_for('social.create_challenge') }}" class="btn btn-warning">
+                        <i class="fas fa-plus me-2"></i>Create Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Active Challenges -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-fire me-2"></i>Active Challenges ({{ global_challenges|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if global_challenges %}
+                    <div class="row">
+                        {% for challenge in global_challenges %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">{{ challenge.title }}</h6>
+                                    <span class="badge bg-warning">{{ challenge.challenge_type.replace('_', ' ').title()
+                                        }}</span>
+                                </div>
+                                <p class="text-muted small mb-3">{{ challenge.description[:100] }}{% if
+                                    challenge.description|length > 100 %}...{% endif %}</p>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Target</small>
+                                        <strong>{{ challenge.target_value }} {{ challenge.target_unit }}</strong>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 6px;">
+                                        <div class="progress-bar bg-warning" style="width: 0%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ challenge.end_date.strftime('%Y-%m-%d') }}
+                                    </small>
+                                    <form method="POST"
+                                        action="{{ url_for('social.join_challenge', challenge_id=challenge.id) }}"
+                                        class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-plus me-1"></i>Join
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy fa-2x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Active Challenges</h5>
+                        <p class="text-muted">There are no active challenges at the moment.</p>
+                        <a href="{{ url_for('social.create_challenge') }}" class="btn btn-warning">
+                            <i class="fas fa-plus me-2"></i>Create the First Challenge
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- My Participations -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user-check me-2"></i>My Challenge Participations ({{ user_participations|length
+                        }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user_participations %}
+                    <div class="row">
+                        {% for participation in user_participations %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">Challenge {{ loop.index }}</h6>
+                                    {% if participation.is_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Progress</small>
+                                        <strong>{{ participation.current_progress }} / 100</strong>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div class="progress-bar bg-primary"
+                                            style="width: {{ (participation.current_progress / 100) * 100 }}%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>{{
+                                        participation.joined_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                    <a href="{{ url_for('social.update_challenge_progress', challenge_id=participation.challenge_id) }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit me-1"></i>Update
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-check fa-2x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Challenge Participations</h5>
+                        <p class="text-muted">You haven't joined any challenges yet.</p>
+                        <a href="{{ url_for('social.create_challenge') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Join a Challenge
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

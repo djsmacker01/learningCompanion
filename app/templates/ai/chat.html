@@ -1,0 +1,574 @@
+{% extends "base.html" %}
+
+{% block title %}AI Study Assistant - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row h-100">
+        <!-- Chat Interface -->
+        <div class="col-lg-8">
+            <div class="card h-100 d-flex flex-column">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2"></i>AI Study Assistant</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="clearChat()">
+                            <i class="fas fa-trash me-1"></i>Clear Chat
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportChat()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="card-body flex-grow-1 overflow-auto" id="chat-messages" style="max-height: 70vh;">
+                    <div class="chat-container">
+                        <!-- Welcome Message -->
+                        <div class="message ai-message mb-3">
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <i class="fas fa-robot text-primary me-2"></i>
+                                    <strong>AI Assistant</strong>
+                                    <small class="text-muted ms-2">Just now</small>
+                                </div>
+                                <div class="message-body">
+                                    <p>Hello! I'm your AI Study Assistant. I can help you with:</p>
+                                    <ul class="mb-0">
+                                        <li>Summarizing your study materials</li>
+                                        <li>Explaining complex concepts</li>
+                                        <li>Creating study guides</li>
+                                        <li>Answering questions about your topics</li>
+                                        <li>Generating practice questions</li>
+                                    </ul>
+                                    <p class="mt-2">What would you like to learn about today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="card-footer">
+                    <form id="chat-form" class="d-flex gap-2">
+                        <div class="flex-grow-1">
+                            <textarea class="form-control" id="message-input" rows="2"
+                                placeholder="Ask me anything about your studies..." style="resize: none;"></textarea>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            <button type="submit" class="btn btn-primary" id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="attachTopic()"
+                                title="Attach Topic">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-2">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-primary" onclick="quickAction('summarize')">
+                                <i class="fas fa-file-text me-1"></i>Summarize
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="quickAction('explain')">
+                                <i class="fas fa-lightbulb me-1"></i>Explain
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="quickAction('questions')">
+                                <i class="fas fa-question-circle me-1"></i>Generate Questions
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="quickAction('study_guide')">
+                                <i class="fas fa-book me-1"></i>Study Guide
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Topics Panel -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-book me-2"></i>Your Topics</h6>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <div id="topics-list">
+                        <!-- Topics will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Settings -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-cog me-2"></i>AI Settings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Response Style</label>
+                        <select class="form-select form-select-sm" id="response-style">
+                            <option value="detailed">Detailed</option>
+                            <option value="concise" selected>Concise</option>
+                            <option value="beginner">Beginner-friendly</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Context Length</label>
+                        <select class="form-select form-select-sm" id="context-length">
+                            <option value="short" selected>Short (1-2 sentences)</option>
+                            <option value="medium">Medium (1-2 paragraphs)</option>
+                            <option value="long">Long (Detailed explanation)</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="include-examples" checked>
+                        <label class="form-check-label" for="include-examples">
+                            Include examples
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Conversations -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-history me-2"></i>Recent Conversations</h6>
+                </div>
+                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                    <div id="recent-conversations">
+                        <!-- Recent conversations will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chat-container {
+        padding: 1rem 0;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-content {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .ai-message .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .user-message .message-content {
+        background: #007bff;
+        color: white;
+        border: none;
+        margin-left: auto;
+        max-width: 80%;
+    }
+
+    .message-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .message-body {
+        line-height: 1.6;
+    }
+
+    .message-body ul {
+        margin-bottom: 0;
+    }
+
+    .message-body li {
+        margin-bottom: 0.25rem;
+    }
+
+    .typing-indicator {
+        display: none;
+        align-items: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .typing-indicator .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    .topic-item {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .topic-item:hover {
+        background-color: #f8f9fa;
+        border-color: #007bff;
+    }
+
+    .topic-item.selected {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .conversation-item {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .conversation-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .conversation-item .conversation-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .conversation-item .conversation-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+</style>
+
+<script>
+    let selectedTopic = null;
+    let conversationHistory = [];
+
+    // Initialize chat
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTopics();
+        loadRecentConversations();
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('message-input');
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        // Handle form submission
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        // Handle Enter key (Shift+Enter for new line)
+        textarea.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    });
+
+    function loadTopics() {
+        // In a real application, this would fetch from the API
+        const topics = [
+            { id: 1, title: 'Machine Learning Fundamentals', description: 'Introduction to ML concepts' },
+            { id: 2, title: 'Python Programming', description: 'Python basics and advanced topics' },
+            { id: 3, title: 'Data Structures', description: 'Arrays, linked lists, trees, graphs' },
+            { id: 4, title: 'Algorithms', description: 'Sorting, searching, and optimization' }
+        ];
+
+        const topicsList = document.getElementById('topics-list');
+        topicsList.innerHTML = topics.map(topic => `
+        <div class="topic-item" onclick="selectTopic(${topic.id}, '${topic.title}')">
+            <div class="fw-bold">${topic.title}</div>
+            <small class="text-muted">${topic.description}</small>
+        </div>
+    `).join('');
+    }
+
+    function selectTopic(topicId, topicTitle) {
+        selectedTopic = { id: topicId, title: topicTitle };
+
+        // Update UI
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        event.target.closest('.topic-item').classList.add('selected');
+
+        // Add context to message input
+        const messageInput = document.getElementById('message-input');
+        messageInput.placeholder = `Ask about ${topicTitle}...`;
+    }
+
+    function loadRecentConversations() {
+        // In a real application, this would fetch from the API
+        const conversations = [
+            { id: 1, title: 'Machine Learning Summary', date: '2 hours ago' },
+            { id: 2, title: 'Python Data Structures', date: '1 day ago' },
+            { id: 3, title: 'Algorithm Complexity', date: '3 days ago' }
+        ];
+
+        const conversationsList = document.getElementById('recent-conversations');
+        conversationsList.innerHTML = conversations.map(conv => `
+        <div class="conversation-item" onclick="loadConversation(${conv.id})">
+            <div class="conversation-title">${conv.title}</div>
+            <div class="conversation-date">${conv.date}</div>
+        </div>
+    `).join('');
+    }
+
+    function loadConversation(conversationId) {
+        // In a real application, this would load the conversation from the API
+        console.log('Loading conversation:', conversationId);
+    }
+
+    function quickAction(action) {
+        const actions = {
+            'summarize': 'Please summarize the key points of this topic',
+            'explain': 'Can you explain this concept in simple terms?',
+            'questions': 'Generate some practice questions for this topic',
+            'study_guide': 'Create a study guide for this topic'
+        };
+
+        const messageInput = document.getElementById('message-input');
+        messageInput.value = actions[action];
+        messageInput.focus();
+    }
+
+    function attachTopic() {
+        if (!selectedTopic) {
+            alert('Please select a topic first');
+            return;
+        }
+
+        const messageInput = document.getElementById('message-input');
+        messageInput.value = `[Topic: ${selectedTopic.title}] ${messageInput.value}`;
+    }
+
+    async function sendMessage() {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value.trim();
+
+        if (!message) return;
+
+        // Add user message to chat
+        addMessage('user', message);
+
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        try {
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+            // Send to AI API
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    topic_id: selectedTopic?.id,
+                    context: getContext(),
+                    settings: getAISettings()
+                }),
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Hide typing indicator
+            hideTypingIndicator();
+
+            // Check if response has error
+            if (data.error) {
+                addMessage('ai', 'Sorry, I encountered an error: ' + data.error);
+                return;
+            }
+
+            // Add AI response
+            addMessage('ai', data.response || 'I received an empty response. Please try again.');
+
+            // Add to conversation history
+            conversationHistory.push({ role: 'user', content: message });
+            conversationHistory.push({ role: 'assistant', content: data.response });
+
+        } catch (error) {
+            hideTypingIndicator();
+            if (error.name === 'AbortError') {
+                addMessage('ai', 'Request timed out. Please try again with a shorter question.');
+            } else {
+                addMessage('ai', 'Sorry, I encountered an error. Please try again. Error: ' + error.message);
+            }
+            console.error('Error:', error);
+        }
+    }
+
+    function addMessage(sender, content) {
+        const chatMessages = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message mb-3`;
+
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        messageDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-header">
+                <i class="fas fa-${sender === 'user' ? 'user' : 'robot'} text-${sender === 'user' ? 'white' : 'white'} me-2"></i>
+                <strong>${sender === 'user' ? 'You' : 'AI Assistant'}</strong>
+                <small class="text-muted ms-2">${timeString}</small>
+            </div>
+            <div class="message-body">
+                ${formatMessage(content)}
+            </div>
+        </div>
+    `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function formatMessage(content) {
+        // Convert markdown-like formatting to HTML
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+            .replace(/`(.*?)`/g, '<code>$1</code>');
+    }
+
+    function showTypingIndicator() {
+        const chatMessages = document.getElementById('chat-messages');
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message ai-message mb-3';
+        typingDiv.id = 'typing-indicator';
+
+        typingDiv.innerHTML = `
+        <div class="message-content">
+            <div class="typing-indicator">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                AI is thinking...
+            </div>
+        </div>
+    `;
+
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    function getContext() {
+        // Get context from selected topic and recent messages
+        let context = '';
+
+        if (selectedTopic) {
+            context += `Current topic: ${selectedTopic.title}\n`;
+        }
+
+        // Add recent conversation context
+        if (conversationHistory.length > 0) {
+            context += 'Recent conversation:\n';
+            conversationHistory.slice(-4).forEach(msg => {
+                context += `${msg.role}: ${msg.content}\n`;
+            });
+        }
+
+        return context;
+    }
+
+    function getAISettings() {
+        return {
+            response_style: document.getElementById('response-style').value,
+            context_length: document.getElementById('context-length').value,
+            include_examples: document.getElementById('include-examples').checked
+        };
+    }
+
+    function clearChat() {
+        if (confirm('Are you sure you want to clear the chat? This action cannot be undone.')) {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = `
+            <div class="message ai-message mb-3">
+                <div class="message-content">
+                    <div class="message-header">
+                        <i class="fas fa-robot text-primary me-2"></i>
+                        <strong>AI Assistant</strong>
+                        <small class="text-muted ms-2">Just now</small>
+                    </div>
+                    <div class="message-body">
+                        <p>Chat cleared. How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+        `;
+            conversationHistory = [];
+        }
+    }
+
+    function exportChat() {
+        // Export conversation as text file
+        const chatMessages = document.getElementById('chat-messages');
+        const messages = Array.from(chatMessages.querySelectorAll('.message')).map(msg => {
+            const header = msg.querySelector('.message-header').textContent.trim();
+            const body = msg.querySelector('.message-body').textContent.trim();
+            return `${header}\n${body}\n`;
+        }).join('\n');
+
+        const blob = new Blob([messages], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ai-chat-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Update Challenge Progress{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Update Challenge Progress
+                        </h5>
+                        <a href="{{ url_for('social.social_challenges') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Challenges
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.progress.label(class="form-label") }}
+                            {{ form.progress(class="form-control" + (" is-invalid" if form.progress.errors else "")) }}
+                            {% if form.progress.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.progress.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Enter your current progress for this challenge
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('social.social_challenges') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-warning") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Progress Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Update your progress regularly to stay motivated</li>
+                        <li>Be honest about your progress - it helps you track improvement</li>
+                        <li>Celebrate milestones as you work toward your goal</li>
+                        <li>Compare your progress with other participants for motivation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

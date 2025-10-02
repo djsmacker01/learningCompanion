@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Create Study Group{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus me-2"></i>Create Study Group
+                        </h5>
+                        <a href="{{ url_for('social.study_groups') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Groups
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else
+                            "")) }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.is_public.label(class="form-label") }}
+                                {{ form.is_public(class="form-control" + (" is-invalid" if form.is_public.errors else
+                                "")) }}
+                                {% if form.is_public.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.is_public.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.max_members.label(class="form-label") }}
+                                {{ form.max_members(class="form-control" + (" is-invalid" if form.max_members.errors
+                                else "")) }}
+                                {% if form.max_members.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.max_members.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('social.study_groups') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Study Group Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Public Groups:</strong> Anyone can find and join your group</li>
+                        <li><strong>Private Groups:</strong> Only invited members can join</li>
+                        <li><strong>Group Size:</strong> Consider the optimal size for your study goals</li>
+                        <li><strong>Description:</strong> Be clear about the group's purpose and expectations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

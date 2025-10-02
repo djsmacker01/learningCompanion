@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Share Achievement{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-share-alt me-2"></i>Share Achievement
+                        </h5>
+                        <a href="{{ url_for('social.social_achievements') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Achievements
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.achievement_type.label(class="form-label") }}
+                            {{ form.achievement_type(class="form-control" + (" is-invalid" if
+                            form.achievement_type.errors else "")) }}
+                            {% if form.achievement_type.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.achievement_type.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.achievement_title.label(class="form-label") }}
+                            {{ form.achievement_title(class="form-control" + (" is-invalid" if
+                            form.achievement_title.errors else "")) }}
+                            {% if form.achievement_title.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.achievement_title.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.achievement_description.label(class="form-label") }}
+                            {{ form.achievement_description(class="form-control" + (" is-invalid" if
+                            form.achievement_description.errors else "")) }}
+                            {% if form.achievement_description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.achievement_description.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="mb-3">Sharing Options</h6>
+                            <div class="form-check mb-2">
+                                {{ form.share_with_friends(class="form-check-input") }}
+                                {{ form.share_with_friends.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-check mb-2">
+                                {{ form.share_with_groups(class="form-check-input") }}
+                                {{ form.share_with_groups.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('social.social_achievements') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-info") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Achievement Types
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Badge Earned:</strong> Share when you earn a new badge or milestone</li>
+                        <li><strong>Level Up:</strong> Share when you level up in your learning journey</li>
+                        <li><strong>Streak Milestone:</strong> Share when you reach a study streak milestone</li>
+                        <li><strong>Challenge Completed:</strong> Share when you complete a social challenge</li>
+                        <li><strong>Study Goal Achieved:</strong> Share when you achieve a personal study goal</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Cookie Policy - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-cookie-bite me-2"></i>Cookie Policy</h4>
+                    <p class="text-muted mb-0">Last updated: January 1, 2024</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>We use cookies to enhance your experience.</strong> This Cookie Policy explains how
+                        Learning Companion uses cookies and similar technologies.
+                    </div>
+
+                    <h5>1. What Are Cookies?</h5>
+                    <p>Cookies are small text files that are stored on your device when you visit our website. They help
+                        us:</p>
+                    <ul>
+                        <li>Remember your preferences and settings</li>
+                        <li>Improve your user experience</li>
+                        <li>Analyze how you use our platform</li>
+                        <li>Provide personalized content and features</li>
+                    </ul>
+
+                    <h5>2. Types of Cookies We Use</h5>
+
+                    <h6>2.1 Essential Cookies</h6>
+                    <p>These cookies are necessary for our website to function properly. They include:</p>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cookie Name</th>
+                                    <th>Purpose</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>session_id</code></td>
+                                    <td>Maintains your login session</td>
+                                    <td>Session</td>
+                                </tr>
+                                <tr>
+                                    <td><code>csrf_token</code></td>
+                                    <td>Protects against cross-site request forgery</td>
+                                    <td>Session</td>
+                                </tr>
+                                <tr>
+                                    <td><code>user_preferences</code></td>
+                                    <td>Stores your accessibility and display preferences</td>
+                                    <td>1 year</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6>2.2 Analytics Cookies</h6>
+                    <p>These cookies help us understand how you use our platform:</p>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cookie Name</th>
+                                    <th>Purpose</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>_ga</code></td>
+                                    <td>Google Analytics - distinguishes users</td>
+                                    <td>2 years</td>
+                                </tr>
+                                <tr>
+                                    <td><code>_ga_*</code></td>
+                                    <td>Google Analytics - session state</td>
+                                    <td>2 years</td>
+                                </tr>
+                                <tr>
+                                    <td><code>_gid</code></td>
+                                    <td>Google Analytics - distinguishes users</td>
+                                    <td>24 hours</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6>2.3 Functional Cookies</h6>
+                    <p>These cookies enable enhanced functionality and personalization:</p>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cookie Name</th>
+                                    <th>Purpose</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>theme_preference</code></td>
+                                    <td>Remembers your theme choice (light/dark)</td>
+                                    <td>1 year</td>
+                                </tr>
+                                <tr>
+                                    <td><code>language</code></td>
+                                    <td>Stores your language preference</td>
+                                    <td>1 year</td>
+                                </tr>
+                                <tr>
+                                    <td><code>study_reminders</code></td>
+                                    <td>Remembers your study reminder settings</td>
+                                    <td>6 months</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6>2.4 Marketing Cookies</h6>
+                    <p>These cookies are used to deliver relevant advertisements and track marketing campaigns:</p>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cookie Name</th>
+                                    <th>Purpose</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>_fbp</code></td>
+                                    <td>Facebook Pixel - tracks conversions</td>
+                                    <td>3 months</td>
+                                </tr>
+                                <tr>
+                                    <td><code>_gcl_au</code></td>
+                                    <td>Google Ads - conversion tracking</td>
+                                    <td>3 months</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5>3. Third-Party Cookies</h5>
+                    <p>We may use third-party services that set their own cookies:</p>
+                    <ul>
+                        <li><strong>Google Analytics:</strong> For website analytics and performance monitoring</li>
+                        <li><strong>Google Ads:</strong> For advertising and conversion tracking</li>
+                        <li><strong>Facebook Pixel:</strong> For social media advertising</li>
+                        <li><strong>Intercom:</strong> For customer support and messaging</li>
+                        <li><strong>Stripe:</strong> For payment processing (if applicable)</li>
+                    </ul>
+
+                    <h5>4. Local Storage and Similar Technologies</h5>
+                    <p>We also use similar technologies to cookies:</p>
+                    <ul>
+                        <li><strong>Local Storage:</strong> Stores larger amounts of data on your device</li>
+                        <li><strong>Session Storage:</strong> Temporary storage for your current session</li>
+                        <li><strong>IndexedDB:</strong> For offline data storage and synchronization</li>
+                        <li><strong>Web Beacons:</strong> Small images that track email opens and page views</li>
+                    </ul>
+
+                    <h5>5. Cookie Consent</h5>
+                    <p>When you first visit our website, we will ask for your consent to use non-essential cookies. You
+                        can:</p>
+                    <ul>
+                        <li><strong>Accept All:</strong> Allow all cookies for the best experience</li>
+                        <li><strong>Essential Only:</strong> Only allow necessary cookies</li>
+                        <li><strong>Customize:</strong> Choose which types of cookies to allow</li>
+                        <li><strong>Manage Later:</strong> Change your preferences at any time</li>
+                    </ul>
+
+                    <h5>6. Managing Your Cookie Preferences</h5>
+                    <h6>6.1 Through Our Website</h6>
+                    <p>You can manage your cookie preferences by:</p>
+                    <ul>
+                        <li>Clicking the "Cookie Settings" link in our footer</li>
+                        <li>Going to your account settings (if logged in)</li>
+                        <li>Using our cookie consent banner</li>
+                    </ul>
+
+                    <h6>6.2 Through Your Browser</h6>
+                    <p>You can control cookies through your browser settings:</p>
+                    <ul>
+                        <li><strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site data</li>
+                        <li><strong>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data</li>
+                        <li><strong>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
+                        <li><strong>Edge:</strong> Settings → Cookies and site permissions</li>
+                    </ul>
+
+                    <h5>7. Impact of Disabling Cookies</h5>
+                    <p>If you disable cookies, some features may not work properly:</p>
+                    <ul>
+                        <li><strong>Login Issues:</strong> You may need to log in repeatedly</li>
+                        <li><strong>Lost Preferences:</strong> Your settings may not be remembered</li>
+                        <li><strong>Limited Personalization:</strong> Content may not be customized</li>
+                        <li><strong>Analytics:</strong> We cannot improve our service based on usage data</li>
+                    </ul>
+
+                    <h5>8. Mobile App Cookies</h5>
+                    <p>Our mobile app may use similar technologies:</p>
+                    <ul>
+                        <li><strong>App Analytics:</strong> Track app usage and performance</li>
+                        <li><strong>Crash Reporting:</strong> Identify and fix app issues</li>
+                        <li><strong>Push Notifications:</strong> Send relevant updates and reminders</li>
+                        <li><strong>Offline Sync:</strong> Store data for offline access</li>
+                    </ul>
+
+                    <h5>9. Data Protection and Privacy</h5>
+                    <p>We are committed to protecting your privacy:</p>
+                    <ul>
+                        <li><strong>Minimal Data:</strong> We only collect necessary information</li>
+                        <li><strong>Secure Storage:</strong> Cookies are stored securely</li>
+                        <li><strong>No Personal Data:</strong> Cookies do not contain personal information</li>
+                        <li><strong>Regular Review:</strong> We regularly review our cookie usage</li>
+                    </ul>
+
+                    <h5>10. Updates to This Policy</h5>
+                    <p>We may update this Cookie Policy from time to time. Changes will be:</p>
+                    <ul>
+                        <li>Posted on this page with an updated date</li>
+                        <li>Communicated through our platform</li>
+                        <li>Notified via email for significant changes</li>
+                    </ul>
+
+                    <h5>11. Contact Us</h5>
+                    <p>If you have questions about our use of cookies, please contact us:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Email</h6>
+                            <p><a href="mailto:privacy@learningcompanion.com">privacy@learningcompanion.com</a></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Address</h6>
+                            <p>
+                                Learning Companion Inc.<br>
+                                32 Chepstow Road<br>
+                                NP19 8EA<br>
+                                United Kingdom
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Your Choice Matters:</strong> You have control over cookies. You can change your
+                        preferences at any time through our cookie settings or your browser.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-book me-2"></i>Documentation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#api-reference" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-code me-2"></i>API Reference
+                    </a>
+                    <a href="#user-guide" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i>User Guide
+                    </a>
+                    <a href="#developer-guide" class="list-group-item list-group-item-action">
+                        <i class="fas fa-cog me-2"></i>Developer Guide
+                    </a>
+                    <a href="#integrations" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plug me-2"></i>Integrations
+                    </a>
+                    <a href="#tutorials" class="list-group-item list-group-item-action">
+                        <i class="fas fa-play me-2"></i>Tutorials
+                    </a>
+                    <a href="#examples" class="list-group-item list-group-item-action">
+                        <i class="fas fa-lightbulb me-2"></i>Examples
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Learning Companion Documentation</h4>
+                    <p class="text-muted mb-0">Complete documentation for using and integrating with Learning Companion.
+                    </p>
+                </div>
+                <div class="card-body">
+                    <!-- API Reference -->
+                    <section id="api-reference" class="mb-5">
+                        <h3><i class="fas fa-code text-primary me-2"></i>API Reference</h3>
+
+                        <h5>Authentication</h5>
+                        <p>All API requests require authentication using your API key.</p>
+                        <div class="bg-dark text-light p-3 rounded mb-3">
+                            <code>Authorization: Bearer YOUR_API_KEY</code>
+                        </div>
+
+                        <h5>Base URL</h5>
+                        <div class="bg-dark text-light p-3 rounded mb-3">
+                            <code>https://api.learningcompanion.com/v1</code>
+                        </div>
+
+                        <h5>Endpoints</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Method</th>
+                                        <th>Endpoint</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td><code>/topics</code></td>
+                                        <td>Get user's topics</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-success">POST</span></td>
+                                        <td><code>/topics</code></td>
+                                        <td>Create a new topic</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td><code>/sessions</code></td>
+                                        <td>Get user's study sessions</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-success">POST</span></td>
+                                        <td><code>/sessions</code></td>
+                                        <td>Start a new study session</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-warning">PUT</span></td>
+                                        <td><code>/sessions/{id}</code></td>
+                                        <td>Update a study session</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-primary">GET</span></td>
+                                        <td><code>/analytics</code></td>
+                                        <td>Get user analytics</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h5>Example Request</h5>
+                        <div class="bg-dark text-light p-3 rounded">
+                            <pre><code>curl -X GET "https://api.learningcompanion.com/v1/topics" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"</code></pre>
+                        </div>
+
+                        <h5>Example Response</h5>
+                        <div class="bg-dark text-light p-3 rounded">
+                            <pre><code>{
+  "topics": [
+    {
+      "id": "123",
+      "title": "Machine Learning",
+      "description": "Introduction to ML concepts",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-20T14:45:00Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "per_page": 20
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- User Guide -->
+                    <section id="user-guide" class="mb-5">
+                        <h3><i class="fas fa-user text-primary me-2"></i>User Guide</h3>
+
+                        <h5>Getting Started</h5>
+                        <ol>
+                            <li><strong>Create Account:</strong> Sign up with your email and create a strong password
+                            </li>
+                            <li><strong>Complete Profile:</strong> Add your name and preferences</li>
+                            <li><strong>Create First Topic:</strong> Add a subject you want to study</li>
+                            <li><strong>Start Studying:</strong> Begin your first study session</li>
+                        </ol>
+
+                        <h5>Core Features</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-book me-2"></i>Topics</h6>
+                                        <p class="card-text">Organize your study materials by subject. Add notes,
+                                            attachments, and tags.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-clock me-2"></i>Study Sessions</h6>
+                                        <p class="card-text">Track your study time with the Pomodoro technique and
+                                            confidence tracking.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-chart-line me-2"></i>Analytics</h6>
+                                        <p class="card-text">View detailed insights about your learning progress and
+                                            patterns.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-users me-2"></i>Social</h6>
+                                        <p class="card-text">Study with friends, join groups, and participate in
+                                            challenges.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5>Best Practices</h5>
+                        <ul>
+                            <li><strong>Regular Sessions:</strong> Study for 25-30 minutes at a time</li>
+                            <li><strong>Track Progress:</strong> Rate your confidence before and after sessions</li>
+                            <li><strong>Organize Content:</strong> Use tags and categories to organize topics</li>
+                            <li><strong>Social Learning:</strong> Join study groups and share knowledge</li>
+                            <li><strong>Review Analytics:</strong> Check your progress regularly</li>
+                        </ul>
+                    </section>
+
+                    <!-- Developer Guide -->
+                    <section id="developer-guide" class="mb-5">
+                        <h3><i class="fas fa-cog text-primary me-2"></i>Developer Guide</h3>
+
+                        <h5>SDK Installation</h5>
+                        <div class="bg-dark text-light p-3 rounded mb-3">
+                            <pre><code># Python
+pip install learning-companion-sdk
+
+# JavaScript
+npm install learning-companion-sdk
+
+# PHP
+composer require learning-companion/sdk</code></pre>
+                        </div>
+
+                        <h5>Python Example</h5>
+                        <div class="bg-dark text-light p-3 rounded mb-3">
+                            <pre><code>from learning_companion import LearningCompanion
+
+# Initialize client
+client = LearningCompanion(api_key='YOUR_API_KEY')
+
+# Create a topic
+topic = client.topics.create(
+    title='Python Programming',
+    description='Learning Python basics'
+)
+
+# Start a study session
+session = client.sessions.start(
+    topic_id=topic.id,
+    duration_minutes=25
+)
+
+# Complete the session
+client.sessions.complete(
+    session_id=session.id,
+    confidence_after=8
+)</code></pre>
+                        </div>
+
+                        <h5>JavaScript Example</h5>
+                        <div class="bg-dark text-light p-3 rounded mb-3">
+                            <pre><code>import LearningCompanion from 'learning-companion-sdk';
+
+// Initialize client
+const client = new LearningCompanion({
+  apiKey: 'YOUR_API_KEY'
+});
+
+// Create a topic
+const topic = await client.topics.create({
+  title: 'JavaScript Fundamentals',
+  description: 'Learning JS basics'
+});
+
+// Start a study session
+const session = await client.sessions.start({
+  topicId: topic.id,
+  durationMinutes: 25
+});
+
+// Complete the session
+await client.sessions.complete({
+  sessionId: session.id,
+  confidenceAfter: 8
+});</code></pre>
+                        </div>
+
+                        <h5>Webhooks</h5>
+                        <p>Set up webhooks to receive real-time notifications about events in your account.</p>
+                        <div class="bg-dark text-light p-3 rounded">
+                            <pre><code># Webhook payload example
+{
+  "event": "session.completed",
+  "data": {
+    "session_id": "123",
+    "user_id": "456",
+    "duration_minutes": 25,
+    "confidence_before": 5,
+    "confidence_after": 8,
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}</code></pre>
+                        </div>
+                    </section>
+
+                    <!-- Integrations -->
+                    <section id="integrations" class="mb-5">
+                        <h3><i class="fas fa-plug text-primary me-2"></i>Integrations</h3>
+
+                        <h5>Calendar Integration</h5>
+                        <p>Sync your study schedule with popular calendar applications.</p>
+                        <ul>
+                            <li><strong>Google Calendar:</strong> Export study sessions to Google Calendar</li>
+                            <li><strong>Outlook:</strong> Sync with Microsoft Outlook</li>
+                            <li><strong>iCal:</strong> Download .ics files for any calendar app</li>
+                        </ul>
+
+                        <h5>Learning Management Systems</h5>
+                        <p>Integrate with popular LMS platforms.</p>
+                        <ul>
+                            <li><strong>Moodle:</strong> Import/export course content</li>
+                            <li><strong>Canvas:</strong> Sync assignments and grades</li>
+                            <li><strong>Blackboard:</strong> Connect with Blackboard Learn</li>
+                        </ul>
+
+                        <h5>Third-party Apps</h5>
+                        <p>Connect with other productivity and learning tools.</p>
+                        <ul>
+                            <li><strong>Notion:</strong> Export notes and content</li>
+                            <li><strong>Obsidian:</strong> Sync with your knowledge base</li>
+                            <li><strong>Anki:</strong> Import flashcards</li>
+                        </ul>
+                    </section>
+
+                    <!-- Tutorials -->
+                    <section id="tutorials" class="mb-5">
+                        <h3><i class="fas fa-play text-primary me-2"></i>Tutorials</h3>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-play-circle me-2"></i>Getting Started
+                                        </h6>
+                                        <p class="card-text">Learn the basics of using Learning Companion effectively.
+                                        </p>
+                                        <a href="#" class="btn btn-sm btn-primary">Watch Tutorial</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-play-circle me-2"></i>Advanced Features
+                                        </h6>
+                                        <p class="card-text">Master advanced features like analytics and social
+                                            learning.</p>
+                                        <a href="#" class="btn btn-sm btn-primary">Watch Tutorial</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-play-circle me-2"></i>API Integration
+                                        </h6>
+                                        <p class="card-text">Learn how to integrate Learning Companion with your
+                                            applications.</p>
+                                        <a href="#" class="btn btn-sm btn-primary">Watch Tutorial</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-play-circle me-2"></i>Mobile App</h6>
+                                        <p class="card-text">Get the most out of the mobile experience.</p>
+                                        <a href="#" class="btn btn-sm btn-primary">Watch Tutorial</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Examples -->
+                    <section id="examples" class="mb-5">
+                        <h3><i class="fas fa-lightbulb text-primary me-2"></i>Examples</h3>
+
+                        <h5>Study Session Workflow</h5>
+                        <div class="bg-light p-3 rounded mb-3">
+                            <ol>
+                                <li>Create a topic for your subject</li>
+                                <li>Add study materials and notes</li>
+                                <li>Start a 25-minute study session</li>
+                                <li>Rate your confidence before starting</li>
+                                <li>Study with focus</li>
+                                <li>Rate your confidence after studying</li>
+                                <li>Review your progress in analytics</li>
+                            </ol>
+                        </div>
+
+                        <h5>Social Learning Setup</h5>
+                        <div class="bg-light p-3 rounded mb-3">
+                            <ol>
+                                <li>Add friends to your network</li>
+                                <li>Create or join a study group</li>
+                                <li>Share topics with group members</li>
+                                <li>Participate in study challenges</li>
+                                <li>Share achievements and progress</li>
+                            </ol>
+                        </div>
+
+                        <h5>Content Organization</h5>
+                        <div class="bg-light p-3 rounded">
+                            <ol>
+                                <li>Use descriptive titles for topics</li>
+                                <li>Add relevant tags for easy searching</li>
+                                <li>Attach files and resources</li>
+                                <li>Write detailed notes</li>
+                                <li>Use version control for important changes</li>
+                            </ol>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

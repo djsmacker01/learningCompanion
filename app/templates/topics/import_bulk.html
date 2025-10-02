@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Create Topics - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 mb-3">Bulk Create Topics</h2>
+                        <p class="text-muted">Create multiple topics at once using text input</p>
+                    </div>
+
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.topics_data.label(class="form-label") }}
+                            {{ form.topics_data(class="form-control" + (" is-invalid" if form.topics_data.errors else
+                            "")) }}
+                            {% if form.topics_data.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.topics_data.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('topics.list_topics') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Topics
+                            </a>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Format Examples:</h6>
+                        <p><strong>Simple format (title only):</strong></p>
+                        <pre class="mb-2"><code>Python Basics
+Data Structures
+Machine Learning</code></pre>
+
+                        <p><strong>Detailed format (title|description):</strong></p>
+                        <pre class="mb-0"><code>Python Basics|Learn the fundamentals of Python programming
+Data Structures|Study arrays, lists, and trees
+Machine Learning|Introduction to ML algorithms</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

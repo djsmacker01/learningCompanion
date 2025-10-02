@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}Community - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="text-center mb-5">
+                <h2><i class="fas fa-users me-2"></i>Learning Companion Community</h2>
+                <p class="lead text-muted">Connect with fellow learners, share knowledge, and grow together in our
+                    vibrant community.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Stats -->
+    <div class="row mb-5">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h3 class="text-primary">10,000+</h3>
+                    <p class="text-muted">Active Members</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-comments fa-3x text-success mb-3"></i>
+                    <h3 class="text-success">50,000+</h3>
+                    <p class="text-muted">Discussions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
+                    <h3 class="text-warning">5,000+</h3>
+                    <p class="text-muted">Study Groups</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-trophy fa-3x text-danger mb-3"></i>
+                    <h3 class="text-danger">1,000+</h3>
+                    <p class="text-muted">Challenges</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Features -->
+    <div class="row mb-5">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+                    <h5>Discussion Forums</h5>
+                    <p class="text-muted">Join conversations about study techniques, subject-specific topics, and
+                        learning strategies.</p>
+                    <a href="#" class="btn btn-primary">Browse Forums</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h5>Study Groups</h5>
+                    <p class="text-muted">Create or join study groups with students who share your interests and goals.
+                    </p>
+                    <a href="#" class="btn btn-success">Find Groups</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
+                    <h5>Challenges</h5>
+                    <p class="text-muted">Participate in learning challenges and competitions to stay motivated.</p>
+                    <a href="#" class="btn btn-warning">View Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Community Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                SJ
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Sarah Johnson started a new discussion</h6>
+                                <p class="mb-1 text-muted">"Best study techniques for computer science students"</p>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="avatar bg-success text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                MC
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Michael Chen joined a study group</h6>
+                                <p class="mb-1 text-muted">"Machine Learning Study Group"</p>
+                                <small class="text-muted">4 hours ago</small>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="avatar bg-warning text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                ER
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Emily Rodriguez completed a challenge</h6>
+                                <p class="mb-1 text-muted">"30-Day Study Streak Challenge"</p>
+                                <small class="text-muted">6 hours ago</small>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="avatar bg-info text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                DJ
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">David Kim shared a resource</h6>
+                                <p class="mb-1 text-muted">"Useful Python libraries for data science"</p>
+                                <small class="text-muted">8 hours ago</small>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex align-items-center">
+                            <div class="avatar bg-danger text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px;">
+                                AL
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Alex Lee created a new study group</h6>
+                                <p class="mb-1 text-muted">"Advanced Mathematics Study Group"</p>
+                                <small class="text-muted">1 day ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Trending Topics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>#MachineLearning</span>
+                        <span class="badge bg-primary">245 posts</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>#StudyTips</span>
+                        <span class="badge bg-success">189 posts</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>#Python</span>
+                        <span class="badge bg-warning">156 posts</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>#Mathematics</span>
+                        <span class="badge bg-info">134 posts</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>#Productivity</span>
+                        <span class="badge bg-danger">98 posts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Top Contributors</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                            style="width: 35px; height: 35px;">
+                            SJ
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">Sarah Johnson</h6>
+                            <small class="text-muted">1,245 points</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar bg-success text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                            style="width: 35px; height: 35px;">
+                            MC
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">Michael Chen</h6>
+                            <small class="text-muted">1,189 points</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar bg-warning text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                            style="width: 35px; height: 35px;">
+                            ER
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">Emily Rodriguez</h6>
+                            <small class="text-muted">1,156 points</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-info text-white rounded-circle me-3 d-flex align-items-center justify-content-center"
+                            style="width: 35px; height: 35px;">
+                            DJ
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">David Kim</h6>
+                            <small class="text-muted">1,134 points</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Guidelines -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-gavel me-2"></i>Community Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check text-success me-2"></i>Do's</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Be respectful and kind</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Share helpful resources</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Ask thoughtful questions</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Help fellow learners</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Stay on topic</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-times text-danger me-2"></i>Don'ts</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-danger me-2"></i>Spam or self-promote</li>
+                                <li><i class="fas fa-arrow-right text-danger me-2"></i>Share inappropriate content</li>
+                                <li><i class="fas fa-arrow-right text-danger me-2"></i>Harass or bully others</li>
+                                <li><i class="fas fa-arrow-right text-danger me-2"></i>Share personal information</li>
+                                <li><i class="fas fa-arrow-right text-danger me-2"></i>Violate academic integrity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Community CTA -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h4 class="mb-3">Ready to Join Our Community?</h4>
+                    <p class="mb-4">Connect with thousands of learners, share knowledge, and grow together.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Join Now
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

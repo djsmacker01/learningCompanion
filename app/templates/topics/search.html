@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Search Content{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-search text-primary me-2"></i>Search Content
+                </h1>
+                <a href="{{ url_for('topics.list_topics') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Topics
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Search Form -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Search & Filter
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="GET" novalidate>
+                        <div class="mb-3">
+                            {{ form.query.label(class="form-label") }}
+                            {{ form.query(class="form-control" + (" is-invalid" if form.query.errors else ""),
+                            value=query) }}
+                            {% if form.query.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.query.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.tags.label(class="form-label") }}
+                            {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else "")) }}
+                            {% if form.tags.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.tags.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Hold Ctrl/Cmd to select multiple tags
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.content_type.label(class="form-label") }}
+                            {{ form.content_type(class="form-control" + (" is-invalid" if form.content_type.errors else
+                            ""), value=content_type) }}
+                            {% if form.content_type.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.content_type.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Search Results
+                        {% if results %}
+                        <span class="badge bg-primary ms-2">{{ results|length }} found</span>
+                        {% endif %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                    {% for result in results %}
+                    {% if result.type == 'topic' %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-book me-2 text-primary"></i>
+                                    <a href="{{ url_for('topics.view_topic', topic_id=result.data.id) }}"
+                                        class="text-decoration-none">
+                                        {{ result.data.title }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted mb-2">{{ result.data.description }}</p>
+
+                                {% if result.data.tags %}
+                                <div class="mb-2">
+                                    {% for tag in result.data.tags %}
+                                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ result.data.created_at.strftime('%Y-%m-%d') }}
+                                    <span class="ms-3">
+                                        <i class="fas fa-code-branch me-1"></i>v{{ result.data.version }}
+                                    </span>
+                                </small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item"
+                                            href="{{ url_for('topics.view_topic', topic_id=result.data.id) }}">
+                                            <i class="fas fa-eye me-2"></i>View
+                                        </a></li>
+                                    <li><a class="dropdown-item"
+                                            href="{{ url_for('topics.edit_topic', topic_id=result.data.id) }}">
+                                            <i class="fas fa-edit me-2"></i>Edit
+                                        </a></li>
+                                    <li><a class="dropdown-item"
+                                            href="{{ url_for('topics.topic_content', topic_id=result.data.id) }}">
+                                            <i class="fas fa-cog me-2"></i>Manage Content
+                                        </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% elif query or selected_tags %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Results Found</h5>
+                        <p class="text-muted">
+                            {% if query %}
+                            No content found for "{{ query }}"
+                            {% else %}
+                            No content found with the selected filters
+                            {% endif %}
+                        </p>
+                        <a href="{{ url_for('topics.search_content') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Try Different Search
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Search Your Content</h5>
+                        <p class="text-muted">Enter a search term or select tags to find your topics and content</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

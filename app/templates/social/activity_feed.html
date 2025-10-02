@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Feed{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-clock text-primary me-2"></i>Activity Feed
+                </h1>
+                <div>
+                    <a href="{{ url_for('social.social_dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Social
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Recent Activity ({{ recent_activity|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_activity %}
+                    <div class="timeline">
+                        {% for activity in recent_activity %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0">
+                                                {% if activity.activity_type == 'friend_request' %}
+                                                <i class="fas fa-user-plus text-primary fa-2x"></i>
+                                                {% elif activity.activity_type == 'friend_accepted' %}
+                                                <i class="fas fa-user-check text-success fa-2x"></i>
+                                                {% elif activity.activity_type == 'group_join' %}
+                                                <i class="fas fa-users text-success fa-2x"></i>
+                                                {% elif activity.activity_type == 'challenge_join' %}
+                                                <i class="fas fa-trophy text-warning fa-2x"></i>
+                                                {% elif activity.activity_type == 'challenge_completed' %}
+                                                <i class="fas fa-medal text-warning fa-2x"></i>
+                                                {% else %}
+                                                <i class="fas fa-circle text-primary fa-2x"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-2">
+                                                    {{ activity.activity_type.replace('_', ' ').title() }}
+                                                </h6>
+                                                <p class="text-muted mb-2">
+                                                    {% if activity.activity_type == 'friend_request' %}
+                                                    You sent a friend request
+                                                    {% elif activity.activity_type == 'friend_accepted' %}
+                                                    You accepted a friend request
+                                                    {% elif activity.activity_type == 'group_join' %}
+                                                    You joined a study group
+                                                    {% elif activity.activity_type == 'challenge_join' %}
+                                                    You joined a challenge
+                                                    {% elif activity.activity_type == 'challenge_completed' %}
+                                                    You completed a challenge
+                                                    {% else %}
+                                                    {{ activity.activity_type.replace('_', ' ').title() }}
+                                                    {% endif %}
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{
+                                                    activity.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Activity Yet</h5>
+                        <p class="text-muted">Your social activity will appear here as you interact with friends,
+                            groups, and challenges.</p>
+                        <a href="{{ url_for('social.social_dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-users me-2"></i>Explore Social Features
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        background: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-marker i {
+        font-size: 8px;
+        color: white;
+    }
+
+    .timeline-content {
+        margin-left: 20px;
+    }
+</style>
+{% endblock %}

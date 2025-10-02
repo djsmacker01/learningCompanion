@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Offline Data Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-download text-info me-2"></i>Offline Data Management
+                </h1>
+                <div>
+                    <a href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}"
+                        class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Offline Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Offline Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('mobile_accessibility.offline_action') }}" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label">Data Type</label>
+                            <select name="data_type" class="form-control" required>
+                                <option value="topics">Topics</option>
+                                <option value="sessions">Study Sessions</option>
+                                <option value="notes">Notes</option>
+                                <option value="attachments">Attachments</option>
+                                <option value="all">All Data</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Action</label>
+                            <select name="action" class="form-control" required>
+                                <option value="download">Download for Offline</option>
+                                <option value="clear">Clear Cache</option>
+                                <option value="sync">Sync with Server</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Execute Action
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Offline Status -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Offline Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5 class="mb-1">{{ cached_data|length }}</h5>
+                                <small class="text-muted">Cached Items</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">{{ data_by_type|length }}</h5>
+                            <small class="text-muted">Data Types</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cached Data -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-database me-2"></i>Cached Data ({{ cached_data|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if cached_data %}
+                    {% for data_type, items in data_by_type.items() %}
+                    <div class="mb-4">
+                        <h6 class="text-muted">{{ data_type.title() }} ({{ items|length }})</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Last Synced</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td>
+                                            <code>{{ item.data_id[:8] }}...</code>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ item.last_synced.strftime('%Y-%m-%d %H:%M') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if item.is_dirty %}
+                                            <span class="badge bg-warning">Dirty</span>
+                                            {% else %}
+                                            <span class="badge bg-success">Clean</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" title="Sync">
+                                                    <i class="fas fa-sync"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-download fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Cached Data</h5>
+                        <p class="text-muted">Download content to enable offline access</p>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Download Content
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Device Management{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-devices text-warning me-2"></i>Device Management
+                </h1>
+                <div>
+                    <a href="{{ url_for('mobile_accessibility.register_device') }}" class="btn btn-warning">
+                        <i class="fas fa-plus me-2"></i>Register Device
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Registered Devices -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Registered Devices ({{ devices|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if devices %}
+                    <div class="row">
+                        {% for device in devices %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">{{ device.device_name }}</h6>
+                                    <span class="badge bg-{{ 'success' if device.is_active else 'secondary' }}">
+                                        {{ 'Active' if device.is_active else 'Inactive' }}
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    <i
+                                        class="fas fa-{{ 'mobile-alt' if device.device_type == 'mobile' else 'tablet' if device.device_type == 'tablet' else 'desktop' }} me-1"></i>
+                                    {{ device.device_type.title() }}
+                                </p>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Last Sync: {{
+                                        device.last_sync.strftime('%Y-%m-%d %H:%M') }}
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-key me-1"></i>ID: <code>{{ device.device_id[:8] }}...</code>
+                                    </small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>{{ device.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                            data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#">
+                                                    <i class="fas fa-sync me-2"></i>Force Sync
+                                                </a></li>
+                                            <li><a class="dropdown-item" href="#">
+                                                    <i class="fas fa-edit me-2"></i>Edit Device
+                                                </a></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li><a class="dropdown-item text-danger" href="#">
+                                                    <i class="fas fa-trash me-2"></i>Remove Device
+                                                </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-devices fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Registered Devices</h5>
+                        <p class="text-muted">Register a device to enable cross-device synchronization</p>
+                        <a href="{{ url_for('mobile_accessibility.register_device') }}" class="btn btn-warning">
+                            <i class="fas fa-plus me-2"></i>Register Your First Device
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Version History - {{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-history text-info me-2"></i>Version History
+                    </h1>
+                    <p class="text-muted mb-0">{{ topic.title }} - Current Version: {{ topic.version }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('topics.topic_content', topic_id=topic.id) }}"
+                        class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Content
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-code-branch me-2"></i>Version Timeline
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if versions %}
+                    <div class="timeline">
+                        {% for version in versions %}
+                        <div
+                            class="timeline-item {% if version.version_number == topic.version %}current-version{% endif %}">
+                            <div class="timeline-marker">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                Version {{ version.version_number }}
+                                                {% if version.version_number == topic.version %}
+                                                <span class="badge bg-primary ms-2">Current</span>
+                                                {% endif %}
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{
+                                                version.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </small>
+                                        </div>
+                                        <div>
+                                            {% if version.version_number != topic.version %}
+                                            <form method="POST"
+                                                action="{{ url_for('topics.restore_topic_version', topic_id=topic.id, version_number=version.version_number) }}"
+                                                class="d-inline">
+                                                <button type="submit" class="btn btn-warning btn-sm"
+                                                    onclick="return confirm('Are you sure you want to restore this version? This will create a new version with the restored content.')">
+                                                    <i class="fas fa-undo me-1"></i>Restore
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="mb-2">{{ version.title }}</h6>
+
+                                        {% if version.description %}
+                                        <p class="text-muted mb-3">{{ version.description }}</p>
+                                        {% endif %}
+
+                                        {% if version.notes %}
+                                        <div class="mb-3">
+                                            <h6 class="text-muted small">Notes:</h6>
+                                            <p class="small">{{ version.notes }}</p>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if version.tags %}
+                                        <div class="mb-3">
+                                            <h6 class="text-muted small">Tags:</h6>
+                                            {% for tag in version.tags %}
+                                            <span class="badge bg-secondary me-1">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+
+                                        {% if version.change_summary %}
+                                        <div class="alert alert-info mb-0">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-info-circle me-2"></i>Change Summary
+                                            </h6>
+                                            <p class="mb-0">{{ version.change_summary }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Version History</h5>
+                        <p class="text-muted">This topic hasn't been modified yet.</p>
+                        <a href="{{ url_for('topics.topic_content', topic_id=topic.id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Content
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        background: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-marker i {
+        font-size: 8px;
+        color: white;
+    }
+
+    .current-version .timeline-marker {
+        background: #0d6efd;
+    }
+
+    .timeline-content {
+        margin-left: 20px;
+    }
+
+    .current-version .card {
+        border-color: #0d6efd !important;
+    }
+</style>
+{% endblock %}

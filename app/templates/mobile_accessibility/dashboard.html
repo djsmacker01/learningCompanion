@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Accessibility & Mobile Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-universal-access text-primary me-2"></i>Accessibility & Mobile
+                </h1>
+                <div>
+                    <a href="{{ url_for('mobile_accessibility.accessibility_test') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-vial me-2"></i>Test Accessibility
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('mobile_accessibility.accessibility_preferences') }}"
+                            class="btn btn-outline-primary">
+                            <i class="fas fa-cog me-2"></i>Accessibility Settings
+                        </a>
+                        <a href="{{ url_for('mobile_accessibility.mobile_preferences') }}"
+                            class="btn btn-outline-success">
+                            <i class="fas fa-mobile-alt me-2"></i>Mobile Settings
+                        </a>
+                        <a href="{{ url_for('mobile_accessibility.offline_management') }}" class="btn btn-outline-info">
+                            <i class="fas fa-download me-2"></i>Offline Data
+                        </a>
+                        <a href="{{ url_for('mobile_accessibility.device_management') }}"
+                            class="btn btn-outline-warning">
+                            <i class="fas fa-devices me-2"></i>Device Sync
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Settings Summary -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Current Settings
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Accessibility</h6>
+                        <ul class="list-unstyled small">
+                            <li><i class="fas fa-eye me-2"></i>Screen Reader: {{ 'Enabled' if
+                                accessibility_prefs.screen_reader_enabled else 'Disabled' }}</li>
+                            <li><i class="fas fa-adjust me-2"></i>High Contrast: {{ 'On' if
+                                accessibility_prefs.high_contrast_mode else 'Off' }}</li>
+                            <li><i class="fas fa-text-height me-2"></i>Text Size: {{
+                                accessibility_prefs.text_size.title() }}</li>
+                            <li><i class="fas fa-keyboard me-2"></i>Keyboard Nav: {{ 'Enabled' if
+                                accessibility_prefs.keyboard_navigation else 'Disabled' }}</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Mobile</h6>
+                        <ul class="list-unstyled small">
+                            <li><i class="fas fa-wifi me-2"></i>Offline Mode: {{ 'On' if mobile_prefs.offline_mode else
+                                'Off' }}</li>
+                            <li><i class="fas fa-sync me-2"></i>Auto Sync: {{ 'Enabled' if mobile_prefs.auto_sync else
+                                'Disabled' }}</li>
+                            <li><i class="fas fa-bell me-2"></i>Notifications: {{ 'On' if
+                                mobile_prefs.push_notifications else 'Off' }}</li>
+                            <li><i class="fas fa-vibrate me-2"></i>Haptic: {{ 'On' if mobile_prefs.haptic_feedback else
+                                'Off' }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-6">
+            <!-- Accessibility Features -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-universal-access me-2"></i>Accessibility Features
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-eye text-primary me-2"></i>Screen Reader Support
+                                </h6>
+                                <p class="text-muted small mb-2">ARIA labels, semantic HTML, and screen reader
+                                    optimizations</p>
+                                <span
+                                    class="badge bg-{{ 'success' if accessibility_prefs.screen_reader_enabled else 'secondary' }}">
+                                    {{ 'Enabled' if accessibility_prefs.screen_reader_enabled else 'Disabled' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-keyboard text-primary me-2"></i>Keyboard Navigation
+                                </h6>
+                                <p class="text-muted small mb-2">Full keyboard support with focus management</p>
+                                <span
+                                    class="badge bg-{{ 'success' if accessibility_prefs.keyboard_navigation else 'secondary' }}">
+                                    {{ 'Enabled' if accessibility_prefs.keyboard_navigation else 'Disabled' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-adjust text-primary me-2"></i>High Contrast Mode
+                                </h6>
+                                <p class="text-muted small mb-2">Enhanced contrast for better visibility</p>
+                                <span
+                                    class="badge bg-{{ 'success' if accessibility_prefs.high_contrast_mode else 'secondary' }}">
+                                    {{ 'On' if accessibility_prefs.high_contrast_mode else 'Off' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-text-height text-primary me-2"></i>Text Scaling
+                                </h6>
+                                <p class="text-muted small mb-2">Adjustable text size for better readability</p>
+                                <span class="badge bg-info">{{ accessibility_prefs.text_size.title() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Features -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-mobile-alt me-2"></i>Mobile Features
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-wifi text-success me-2"></i>Offline Access
+                                </h6>
+                                <p class="text-muted small mb-2">Download content for offline study</p>
+                                <span class="badge bg-{{ 'success' if mobile_prefs.offline_mode else 'secondary' }}">
+                                    {{ 'Enabled' if mobile_prefs.offline_mode else 'Disabled' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-sync text-success me-2"></i>Cross-Device Sync
+                                </h6>
+                                <p class="text-muted small mb-2">Sync progress across all devices</p>
+                                <span class="badge bg-{{ 'success' if mobile_prefs.auto_sync else 'secondary' }}">
+                                    {{ 'Auto' if mobile_prefs.auto_sync else 'Manual' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-bell text-success me-2"></i>Push Notifications
+                                </h6>
+                                <p class="text-muted small mb-2">Study reminders and updates</p>
+                                <span
+                                    class="badge bg-{{ 'success' if mobile_prefs.push_notifications else 'secondary' }}">
+                                    {{ 'On' if mobile_prefs.push_notifications else 'Off' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-vibrate text-success me-2"></i>Haptic Feedback
+                                </h6>
+                                <p class="text-muted small mb-2">Touch feedback for interactions</p>
+                                <span class="badge bg-{{ 'success' if mobile_prefs.haptic_feedback else 'secondary' }}">
+                                    {{ 'On' if mobile_prefs.haptic_feedback else 'Off' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-3">
+            <!-- Recent Activity -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Activity
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if audit_log %}
+                    {% for log in audit_log[:5] %}
+                    <div class="border-bottom pb-2 mb-2">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-circle text-primary" style="font-size: 8px;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2">
+                                <p class="mb-1 small">{{ log.action_type.replace('_', ' ').title() }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ log.timestamp.strftime('%m-%d %H:%M') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small">No recent activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5 class="mb-1">{{ audit_log|length }}</h5>
+                                <small class="text-muted">Actions</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">2</h5>
+                            <small class="text-muted">Devices</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

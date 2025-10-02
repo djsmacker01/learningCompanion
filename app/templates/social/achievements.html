@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Social Achievements{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-medal text-info me-2"></i>Social Achievements
+                </h1>
+                <div>
+                    <a href="{{ url_for('social.share_achievement') }}" class="btn btn-info">
+                        <i class="fas fa-share-alt me-2"></i>Share Achievement
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Shared Achievements -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-share-alt me-2"></i>Shared Achievements ({{ shared_achievements|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if shared_achievements %}
+                    <div class="row">
+                        {% for achievement in shared_achievements %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-medal text-warning fa-2x"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-2">{{ achievement.achievement_data.get('title', 'Achievement') }}
+                                        </h6>
+                                        <p class="text-muted small mb-2">{{
+                                            achievement.achievement_data.get('description', '')[:100] }}{% if
+                                            achievement.achievement_data.get('description', '')|length > 100 %}...{%
+                                            endif %}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{
+                                                achievement.shared_at.strftime('%Y-%m-%d') if achievement.shared_at else
+                                                achievement.created_at.strftime('%Y-%m-%d') }}
+                                            </small>
+                                            <span class="badge bg-info">{{ achievement.achievement_type.replace('_', '
+                                                ').title() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-share-alt fa-2x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Shared Achievements</h5>
+                        <p class="text-muted">You haven't shared any achievements yet.</p>
+                        <a href="{{ url_for('social.share_achievement') }}" class="btn btn-info">
+                            <i class="fas fa-plus me-2"></i>Share Your First Achievement
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- All Achievements -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>All Achievements ({{ user_achievements|length }})
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user_achievements %}
+                    <div class="row">
+                        {% for achievement in user_achievements %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="border rounded p-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        {% if achievement.is_shared %}
+                                        <i class="fas fa-medal text-warning fa-2x"></i>
+                                        {% else %}
+                                        <i class="fas fa-trophy text-muted fa-2x"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-2">{{ achievement.achievement_data.get('title', 'Achievement') }}
+                                        </h6>
+                                        <p class="text-muted small mb-2">{{
+                                            achievement.achievement_data.get('description', '')[:100] }}{% if
+                                            achievement.achievement_data.get('description', '')|length > 100 %}...{%
+                                            endif %}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{
+                                                achievement.created_at.strftime('%Y-%m-%d') }}
+                                            </small>
+                                            {% if achievement.is_shared %}
+                                            <span class="badge bg-success">Shared</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Private</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy fa-2x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Achievements</h5>
+                        <p class="text-muted">You haven't created any achievements yet.</p>
+                        <a href="{{ url_for('social.share_achievement') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Your First Achievement
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

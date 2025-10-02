@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Accessibility Preferences{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-universal-access me-2"></i>Accessibility Preferences
+                        </h5>
+                        <a href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}"
+                            class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <!-- Screen Reader Support -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.screen_reader_enabled(class="form-check-input") }}
+                                {{ form.screen_reader_enabled.label(class="form-check-label") }}
+                            </div>
+                            <div id="screenReaderHelp" class="form-text">
+                                Enables ARIA labels, semantic HTML, and screen reader optimizations
+                            </div>
+                        </div>
+
+                        <!-- High Contrast Mode -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.high_contrast_mode(class="form-check-input") }}
+                                {{ form.high_contrast_mode.label(class="form-check-label") }}
+                            </div>
+                            <div id="highContrastHelp" class="form-text">
+                                Increases contrast for better visibility
+                            </div>
+                        </div>
+
+                        <!-- Text Size -->
+                        <div class="mb-4">
+                            {{ form.text_size.label(class="form-label") }}
+                            {{ form.text_size(class="form-control" + (" is-invalid" if form.text_size.errors else ""))
+                            }}
+                            {% if form.text_size.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.text_size.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div id="textSizeHelp" class="form-text">
+                                Adjust text size for better readability
+                            </div>
+                        </div>
+
+                        <!-- Keyboard Navigation -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.keyboard_navigation(class="form-check-input") }}
+                                {{ form.keyboard_navigation.label(class="form-check-label") }}
+                            </div>
+                            <div id="keyboardNavHelp" class="form-text">
+                                Enable full keyboard navigation support
+                            </div>
+                        </div>
+
+                        <!-- Reduced Motion -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.reduced_motion(class="form-check-input") }}
+                                {{ form.reduced_motion.label(class="form-check-label") }}
+                            </div>
+                            <div id="reducedMotionHelp" class="form-text">
+                                Reduce animations and transitions
+                            </div>
+                        </div>
+
+                        <!-- Color Blind Friendly -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.color_blind_friendly(class="form-check-input") }}
+                                {{ form.color_blind_friendly.label(class="form-check-label") }}
+                            </div>
+                            <div id="colorBlindHelp" class="form-text">
+                                Use color-blind friendly color schemes
+                            </div>
+                        </div>
+
+                        <!-- Focus Indicators -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.focus_indicators(class="form-check-input") }}
+                                {{ form.focus_indicators.label(class="form-check-label") }}
+                            </div>
+                            <div id="focusIndicatorsHelp" class="form-text">
+                                Enhanced focus indicators for keyboard navigation
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}"
+                                class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Accessibility Features
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Screen Reader Support</h6>
+                            <ul class="small">
+                                <li>ARIA labels and descriptions</li>
+                                <li>Semantic HTML structure</li>
+                                <li>Screen reader announcements</li>
+                                <li>Alternative text for images</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Keyboard Navigation</h6>
+                            <ul class="small">
+                                <li>Tab navigation support</li>
+                                <li>Arrow key navigation</li>
+                                <li>Keyboard shortcuts</li>
+                                <li>Focus management</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

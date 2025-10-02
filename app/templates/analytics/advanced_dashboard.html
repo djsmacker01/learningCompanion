@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+
+{% block title %}Advanced Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-chart-line me-2"></i>Advanced Analytics Dashboard</h1>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-download me-1"></i>Export Data
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportAnalytics('pdf')">Export as PDF</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportAnalytics('csv')">Export as CSV</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportAnalytics('json')">Export as JSON</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Learning Velocity</h6>
+                            <h3 class="mb-0">
+                                {% if velocity_data %}
+                                {{ "%.1f"|format(velocity_data[0].velocity_score) }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tachometer-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Knowledge Retention</h6>
+                            <h3 class="mb-0">
+                                {% if retention_data %}
+                                {{ "%.1f"|format(retention_data[0].retention_score) }}%
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-brain fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Learning Efficiency</h6>
+                            <h3 class="mb-0">
+                                {% if efficiency_data %}
+                                {{ "%.1f"|format(efficiency_data[0].efficiency_score) }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bolt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Active Paths</h6>
+                            <h3 class="mb-0">{{ learning_paths|length }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-route fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Analytics Content -->
+    <div class="row">
+        <!-- Learning Velocity Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Learning Velocity</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="velocityChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Retention Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Knowledge Retention</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="retentionChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Efficiency and Gaps -->
+    <div class="row">
+        <!-- Learning Efficiency -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Learning Efficiency</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="efficiencyChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Gaps -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Knowledge Gaps</h5>
+                </div>
+                <div class="card-body">
+                    {% if knowledge_gaps %}
+                    <div class="list-group">
+                        {% for gap in knowledge_gaps[:5] %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ gap.gap_type|title }} Gap</h6>
+                                <small
+                                    class="badge bg-{{ 'danger' if gap.gap_severity == 'critical' else 'warning' if gap.gap_severity == 'high' else 'info' }}">
+                                    {{ gap.gap_severity|title }}
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ gap.gap_description }}</p>
+                            <small>Confidence: {{ "%.1f"|format(gap.confidence_score * 100) }}%</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <p>No knowledge gaps detected!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predictive Analytics -->
+    <div class="row">
+        <!-- Success Probability -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-crystal-ball me-2"></i>Success Predictions</h5>
+                </div>
+                <div class="card-body">
+                    {% if predictive_data %}
+                    {% for prediction in predictive_data[:3] %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>{{ prediction.prediction_type|replace('_', ' ')|title }}</span>
+                            <span
+                                class="badge bg-{{ 'success' if prediction.prediction_value > 70 else 'warning' if prediction.prediction_value > 40 else 'danger' }}">
+                                {{ "%.1f"|format(prediction.prediction_value) }}%
+                            </span>
+                        </div>
+                        <div class="progress mt-1">
+                            <div class="progress-bar" style="width: {{ prediction.prediction_value }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <p>No predictions available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Time Optimization -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Optimal Study Times</h5>
+                </div>
+                <div class="card-body">
+                    {% if study_optimization %}
+                    <div class="mb-3">
+                        <h6>Best Hour</h6>
+                        <span class="badge bg-primary">{{ study_optimization.optimal_hour }}:00</span>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Best Day</h6>
+                        <span class="badge bg-success">
+                            {% set days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                            %}
+                            {{ days[study_optimization.optimal_day_of_week] }}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Focus Duration</h6>
+                        <span class="badge bg-info">{{ study_optimization.focus_duration_minutes }} min</span>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Productivity Score</h6>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ study_optimization.productivity_score }}%"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <p>No optimization data available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Burnout Risk -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Burnout Risk</h5>
+                </div>
+                <div class="card-body">
+                    {% if burnout_data %}
+                    <div class="text-center mb-3">
+                        <div
+                            class="display-4 text-{{ 'danger' if burnout_data.risk_level == 'critical' else 'warning' if burnout_data.risk_level == 'high' else 'success' }}">
+                            {{ "%.0f"|format(burnout_data.risk_score) }}%
+                        </div>
+                        <h6
+                            class="text-{{ 'danger' if burnout_data.risk_level == 'critical' else 'warning' if burnout_data.risk_level == 'high' else 'success' }}">
+                            {{ burnout_data.risk_level|title }} Risk
+                        </h6>
+                    </div>
+                    {% if burnout_data.recommended_actions %}
+                    <div class="mt-3">
+                        <h6>Recommended Actions:</h6>
+                        <ul class="list-unstyled">
+                            {% for action in burnout_data.recommended_actions[:3] %}
+                            <li><i class="fas fa-check text-success me-2"></i>{{ action|replace('_', ' ')|title }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-heartbeat fa-2x mb-2"></i>
+                        <p>No burnout data available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Forecasting -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-target me-2"></i>Goal Achievement Forecasts</h5>
+                    <a href="{{ url_for('advanced_analytics.create_goal_forecast') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>New Forecast
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if goal_forecasts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Goal</th>
+                                    <th>Target Date</th>
+                                    <th>Predicted Date</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for goal in goal_forecasts %}
+                                <tr>
+                                    <td>{{ goal.goal_description }}</td>
+                                    <td>{{ goal.target_completion_date }}</td>
+                                    <td>{{ goal.predicted_completion_date }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar"
+                                                style="width: {{ goal.current_progress_percentage }}%">
+                                                {{ "%.1f"|format(goal.current_progress_percentage) }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if goal.is_on_track else 'warning' }}">
+                                            {{ 'On Track' if goal.is_on_track else 'At Risk' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ "%.1f"|format(goal.confidence_percentage) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-target fa-3x mb-3"></i>
+                        <p>No goal forecasts available</p>
+                        <a href="{{ url_for('advanced_analytics.create_goal_forecast') }}" class="btn btn-primary">
+                            Create Your First Forecast
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.learning_velocity') }}"
+                                class="btn btn-outline-primary w-100">
+                                <i class="fas fa-tachometer-alt me-2"></i>Learning Velocity
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.knowledge_retention') }}"
+                                class="btn btn-outline-success w-100">
+                                <i class="fas fa-brain me-2"></i>Knowledge Retention
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.learning_efficiency') }}"
+                                class="btn btn-outline-warning w-100">
+                                <i class="fas fa-bolt me-2"></i>Learning Efficiency
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.learning_paths') }}"
+                                class="btn btn-outline-info w-100">
+                                <i class="fas fa-route me-2"></i>Learning Paths
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.knowledge_gaps') }}"
+                                class="btn btn-outline-danger w-100">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Knowledge Gaps
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.predictive_analytics') }}"
+                                class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-crystal-ball me-2"></i>Predictive Analytics
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.study_optimization') }}"
+                                class="btn btn-outline-dark w-100">
+                                <i class="fas fa-clock me-2"></i>Study Optimization
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('advanced_analytics.burnout_analysis') }}"
+                                class="btn btn-outline-warning w-100">
+                                <i class="fas fa-heartbeat me-2"></i>Burnout Analysis
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Learning Velocity Chart
+    const velocityCtx = document.getElementById('velocityChart').getContext('2d');
+    const velocityChart = new Chart(velocityCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for velocity in velocity_data %}
+            '{{ velocity.measurement_period_start[:10] }}',
+            {% endfor %}
+        ],
+    datasets: [{
+        label: 'Learning Velocity',
+        data: [
+            {% for velocity in velocity_data %}
+                {{ velocity.velocity_score }},
+    {% endfor %}
+    ],
+        borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                scales: {
+            y: {
+                beginAtZero: true,
+                    max: 100
+            }
+        }
+    }
+});
+
+    // Knowledge Retention Chart
+    const retentionCtx = document.getElementById('retentionChart').getContext('2d');
+    const retentionChart = new Chart(retentionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Retained', 'Forgotten'],
+            datasets: [{
+                data: [
+                    {% if retention_data %}
+                {{ retention_data[0].retention_score }},
+                {{ 100 - retention_data[0].retention_score }}
+    {% else %}
+    50, 50
+    {% endif %}
+            ],
+    backgroundColor: [
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 99, 132, 0.8)'
+    ]
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false
+    }
+});
+
+    // Learning Efficiency Chart
+    const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+    const efficiencyChart = new Chart(efficiencyCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for efficiency in efficiency_data %}
+            '{{ efficiency.measurement_date[:10] }}',
+            {% endfor %}
+        ],
+    datasets: [{
+        label: 'Efficiency Score',
+        data: [
+            {% for efficiency in efficiency_data %}
+                {{ efficiency.efficiency_score }},
+    {% endfor %}
+    ],
+        backgroundColor: 'rgba(255, 206, 86, 0.8)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                scales: {
+            y: {
+                beginAtZero: true,
+                    max: 100
+            }
+        }
+    }
+});
+
+    // Export functionality
+    function exportAnalytics(format) {
+        // Implementation for exporting analytics data
+        alert(`Exporting analytics data as ${format.toUpperCase()}...`);
+    }
+</script>
+{% endblock %}

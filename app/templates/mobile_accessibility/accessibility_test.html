@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Accessibility Testing{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-vial me-2"></i>Accessibility Testing
+                        </h5>
+                        <a href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}"
+                            class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.test_type.label(class="form-label") }}
+                            {{ form.test_type(class="form-control" + (" is-invalid" if form.test_type.errors else ""))
+                            }}
+                            {% if form.test_type.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.test_type.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div id="testTypeHelp" class="form-text">
+                                Select the type of accessibility test to run
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.test_description.label(class="form-label") }}
+                            {{ form.test_description(class="form-control" + (" is-invalid" if
+                            form.test_description.errors else "")) }}
+                            {% if form.test_description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.test_description.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div id="testDescHelp" class="form-text">
+                                Optional description of what you want to test
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('mobile_accessibility.accessibility_dashboard') }}"
+                                class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-warning") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Testing Tools -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Accessibility Testing Tools
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-eye text-primary me-2"></i>Screen Reader Test
+                                </h6>
+                                <p class="text-muted small mb-2">Test screen reader compatibility</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="testScreenReader()">
+                                    <i class="fas fa-play me-1"></i>Run Test
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-keyboard text-primary me-2"></i>Keyboard Navigation
+                                </h6>
+                                <p class="text-muted small mb-2">Test keyboard navigation support</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="testKeyboardNav()">
+                                    <i class="fas fa-play me-1"></i>Run Test
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-adjust text-primary me-2"></i>Color Contrast
+                                </h6>
+                                <p class="text-muted small mb-2">Test color contrast ratios</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="testColorContrast()">
+                                    <i class="fas fa-play me-1"></i>Run Test
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-text-height text-primary me-2"></i>Text Scaling
+                                </h6>
+                                <p class="text-muted small mb-2">Test text scaling support</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="testTextScaling()">
+                                    <i class="fas fa-play me-1"></i>Run Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function testScreenReader() {
+        // Simulate screen reader test
+        alert('Screen Reader Test: Checking ARIA labels, semantic HTML, and screen reader compatibility...');
+    }
+
+    function testKeyboardNav() {
+        // Simulate keyboard navigation test
+        alert('Keyboard Navigation Test: Testing Tab navigation, arrow keys, and focus management...');
+    }
+
+    function testColorContrast() {
+        // Simulate color contrast test
+        alert('Color Contrast Test: Analyzing color contrast ratios for WCAG compliance...');
+    }
+
+    function testTextScaling() {
+        // Simulate text scaling test
+        alert('Text Scaling Test: Testing text scaling from 100% to 200%...');
+    }
+</script>
+{% endblock %}

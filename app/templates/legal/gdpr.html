@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}GDPR Compliance - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>GDPR Compliance</h4>
+                    <p class="text-muted mb-0">Last updated: January 1, 2024</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>GDPR Compliance:</strong> Learning Companion is committed to protecting your privacy and
+                        complying with the General Data Protection Regulation (GDPR).
+                    </div>
+
+                    <h5>1. What is GDPR?</h5>
+                    <p>The General Data Protection Regulation (GDPR) is a comprehensive data protection law that gives
+                        EU residents greater control over their personal data. It applies to all organizations that
+                        process personal data of EU residents, regardless of where the organization is located.</p>
+
+                    <h5>2. Our Commitment to GDPR</h5>
+                    <p>We are committed to:</p>
+                    <ul>
+                        <li><strong>Transparency:</strong> Clear communication about how we use your data</li>
+                        <li><strong>Accountability:</strong> Taking responsibility for data protection</li>
+                        <li><strong>Privacy by Design:</strong> Building privacy into our systems</li>
+                        <li><strong>Data Minimization:</strong> Collecting only necessary data</li>
+                        <li><strong>Purpose Limitation:</strong> Using data only for stated purposes</li>
+                        <li><strong>Storage Limitation:</strong> Keeping data only as long as needed</li>
+                    </ul>
+
+                    <h5>3. Your Rights Under GDPR</h5>
+
+                    <h6>3.1 Right to Information</h6>
+                    <p>You have the right to know:</p>
+                    <ul>
+                        <li>What personal data we collect</li>
+                        <li>How we use your data</li>
+                        <li>Who we share it with</li>
+                        <li>How long we keep it</li>
+                        <li>Your rights regarding your data</li>
+                    </ul>
+
+                    <h6>3.2 Right of Access</h6>
+                    <p>You can request a copy of all personal data we hold about you, including:</p>
+                    <ul>
+                        <li>Account information and profile data</li>
+                        <li>Study sessions and progress tracking</li>
+                        <li>Social interactions and communications</li>
+                        <li>Analytics and usage data</li>
+                        <li>Any other personal information we process</li>
+                    </ul>
+
+                    <h6>3.3 Right to Rectification</h6>
+                    <p>You can request correction of inaccurate or incomplete data:</p>
+                    <ul>
+                        <li>Update your profile information</li>
+                        <li>Correct study session data</li>
+                        <li>Modify your preferences</li>
+                        <li>Update contact information</li>
+                    </ul>
+
+                    <h6>3.4 Right to Erasure (Right to be Forgotten)</h6>
+                    <p>You can request deletion of your personal data when:</p>
+                    <ul>
+                        <li>Data is no longer necessary for its original purpose</li>
+                        <li>You withdraw consent</li>
+                        <li>Data was processed unlawfully</li>
+                        <li>You object to processing and there are no overriding legitimate grounds</li>
+                    </ul>
+
+                    <h6>3.5 Right to Restrict Processing</h6>
+                    <p>You can request that we limit how we process your data when:</p>
+                    <ul>
+                        <li>You contest the accuracy of data</li>
+                        <li>Processing is unlawful but you prefer restriction to deletion</li>
+                        <li>We no longer need the data but you need it for legal claims</li>
+                        <li>You object to processing pending verification of legitimate grounds</li>
+                    </ul>
+
+                    <h6>3.6 Right to Data Portability</h6>
+                    <p>You can request your data in a structured, machine-readable format:</p>
+                    <ul>
+                        <li>Export your study data</li>
+                        <li>Download your content and notes</li>
+                        <li>Transfer data to another service</li>
+                        <li>Receive data in a common format (JSON, CSV)</li>
+                    </ul>
+
+                    <h6>3.7 Right to Object</h6>
+                    <p>You can object to processing of your data for:</p>
+                    <ul>
+                        <li>Direct marketing purposes</li>
+                        <li>Profiling and automated decision-making</li>
+                        <li>Research and analytics</li>
+                        <li>Any other legitimate interests</li>
+                    </ul>
+
+                    <h6>3.8 Rights Related to Automated Decision-Making</h6>
+                    <p>You have rights regarding automated processing:</p>
+                    <ul>
+                        <li>Not to be subject to automated decision-making</li>
+                        <li>To human intervention in automated decisions</li>
+                        <li>To express your point of view</li>
+                        <li>To contest automated decisions</li>
+                    </ul>
+
+                    <h5>4. How to Exercise Your Rights</h5>
+                    <p>To exercise your GDPR rights, you can:</p>
+                    <ul>
+                        <li><strong>Use our self-service tools:</strong> Access your data through your account settings
+                        </li>
+                        <li><strong>Contact our Data Protection Officer:</strong> Email dpo@learningcompanion.com</li>
+                        <li><strong>Submit a request form:</strong> Use our online data request form</li>
+                        <li><strong>Contact support:</strong> Reach out to our support team</li>
+                    </ul>
+
+                    <h5>5. Data Processing Lawful Basis</h5>
+                    <p>We process your personal data based on the following lawful grounds:</p>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Purpose</th>
+                                    <th>Lawful Basis</th>
+                                    <th>Data Types</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Account Management</td>
+                                    <td>Contract Performance</td>
+                                    <td>Name, email, profile data</td>
+                                </tr>
+                                <tr>
+                                    <td>Study Tracking</td>
+                                    <td>Contract Performance</td>
+                                    <td>Sessions, progress, analytics</td>
+                                </tr>
+                                <tr>
+                                    <td>Social Features</td>
+                                    <td>Consent</td>
+                                    <td>Friends, groups, messages</td>
+                                </tr>
+                                <tr>
+                                    <td>AI Recommendations</td>
+                                    <td>Legitimate Interest</td>
+                                    <td>Usage patterns, preferences</td>
+                                </tr>
+                                <tr>
+                                    <td>Marketing</td>
+                                    <td>Consent</td>
+                                    <td>Email, preferences</td>
+                                </tr>
+                                <tr>
+                                    <td>Security</td>
+                                    <td>Legitimate Interest</td>
+                                    <td>IP address, device info</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5>6. Data Transfers</h5>
+                    <p>We may transfer your data outside the EU/EEA with appropriate safeguards:</p>
+                    <ul>
+                        <li><strong>Adequacy Decisions:</strong> Transfers to countries with adequate protection</li>
+                        <li><strong>Standard Contractual Clauses:</strong> EU-approved data transfer agreements</li>
+                        <li><strong>Binding Corporate Rules:</strong> Internal data protection policies</li>
+                        <li><strong>Certification Schemes:</strong> Privacy Shield or similar frameworks</li>
+                    </ul>
+
+                    <h5>7. Data Protection by Design</h5>
+                    <p>We implement privacy by design principles:</p>
+                    <ul>
+                        <li><strong>Data Minimization:</strong> Collect only necessary data</li>
+                        <li><strong>Purpose Limitation:</strong> Use data only for stated purposes</li>
+                        <li><strong>Storage Limitation:</strong> Keep data only as long as needed</li>
+                        <li><strong>Accuracy:</strong> Ensure data is accurate and up-to-date</li>
+                        <li><strong>Security:</strong> Protect data with appropriate measures</li>
+                        <li><strong>Transparency:</strong> Be clear about data practices</li>
+                    </ul>
+
+                    <h5>8. Data Breach Notification</h5>
+                    <p>In the event of a data breach, we will:</p>
+                    <ul>
+                        <li><strong>Notify Authorities:</strong> Report to supervisory authority within 72 hours</li>
+                        <li><strong>Inform Users:</strong> Notify affected users without undue delay</li>
+                        <li><strong>Document Incident:</strong> Keep records of the breach and response</li>
+                        <li><strong>Take Remedial Action:</strong> Implement measures to prevent recurrence</li>
+                    </ul>
+
+                    <h5>9. Children's Data</h5>
+                    <p>We have special protections for children's data:</p>
+                    <ul>
+                        <li><strong>Age Verification:</strong> Verify age before collecting data</li>
+                        <li><strong>Parental Consent:</strong> Require consent for children under 16</li>
+                        <li><strong>Limited Processing:</strong> Process only necessary data</li>
+                        <li><strong>Enhanced Security:</strong> Additional protection measures</li>
+                    </ul>
+
+                    <h5>10. Data Protection Officer</h5>
+                    <p>We have appointed a Data Protection Officer (DPO) who can be contacted at:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Email</h6>
+                            <p><a href="mailto:dpo@learningcompanion.com">dpo@learningcompanion.com</a></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Address</h6>
+                            <p>
+                                Data Protection Officer<br>
+                                Learning Companion Inc.<br>
+                                32 Chepstow Road<br>
+                                NP19 8EA<br>
+                                United Kingdom
+                            </p>
+                        </div>
+                    </div>
+
+                    <h5>11. Supervisory Authority</h5>
+                    <p>You have the right to lodge a complaint with your local supervisory authority if you believe we
+                        have violated GDPR. Find your local authority at:</p>
+                    <p><a href="https://edpb.europa.eu/about-edpb/board/members_en"
+                            target="_blank">https://edpb.europa.eu/about-edpb/board/members_en</a></p>
+
+                    <h5>12. Updates to This Policy</h5>
+                    <p>We may update this GDPR compliance information to reflect changes in our practices or legal
+                        requirements. We will notify you of any material changes.</p>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Your Rights Matter:</strong> We are committed to protecting your privacy and ensuring
+                        you have full control over your personal data.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

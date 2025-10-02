@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Social Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-users text-primary me-2"></i>Social Dashboard
+                </h1>
+                <div>
+                    <a href="{{ url_for('social.social_search') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('social.add_friend') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Add Friend
+                        </a>
+                        <a href="{{ url_for('social.create_study_group') }}" class="btn btn-outline-success">
+                            <i class="fas fa-users me-2"></i>Create Group
+                        </a>
+                        <a href="{{ url_for('social.create_challenge') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-trophy me-2"></i>Create Challenge
+                        </a>
+                        <a href="{{ url_for('social.share_achievement') }}" class="btn btn-outline-info">
+                            <i class="fas fa-share-alt me-2"></i>Share Achievement
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friends Summary -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user-friends me-2"></i>Friends
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5 class="mb-1">{{ friends|length }}</h5>
+                                <small class="text-muted">Friends</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">{{ pending_requests|length }}</h5>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <a href="{{ url_for('social.friends_list') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye me-2"></i>View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-6">
+            <!-- Recent Activity -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Recent Activity
+                    </h6>
+                    <a href="{{ url_for('social.activity_feed') }}" class="btn btn-sm btn-outline-primary">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_activity %}
+                    {% for activity in recent_activity %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-circle text-primary" style="font-size: 8px;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <p class="mb-1">
+                                    <strong>{{ activity.activity_type.replace('_', ' ').title() }}</strong>
+                                </p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ activity.created_at.strftime('%Y-%m-%d %H:%M')
+                                    }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clock fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No recent activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Active Challenges -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Active Challenges
+                    </h6>
+                    <a href="{{ url_for('social.social_challenges') }}" class="btn btn-sm btn-outline-warning">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if active_challenges %}
+                    {% for challenge in active_challenges[:3] %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6 class="mb-2">{{ challenge.title }}</h6>
+                        <p class="text-muted small mb-2">{{ challenge.description[:100] }}{% if
+                            challenge.description|length > 100 %}...{% endif %}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-target me-1"></i>{{ challenge.target_value }} {{ challenge.target_unit
+                                }}
+                            </small>
+                            <a href="{{ url_for('social.join_challenge', challenge_id=challenge.id) }}"
+                                class="btn btn-sm btn-warning">
+                                Join
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No active challenges</p>
+                        <a href="{{ url_for('social.create_challenge') }}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-plus me-2"></i>Create Challenge
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-3">
+            <!-- Study Groups -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-users me-2"></i>My Groups
+                    </h6>
+                    <a href="{{ url_for('social.study_groups') }}" class="btn btn-sm btn-outline-success">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user_groups %}
+                    {% for group in user_groups[:3] %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <h6 class="mb-2">{{ group.name }}</h6>
+                        <p class="text-muted small mb-2">{{ group.description[:80] }}{% if group.description|length > 80
+                            %}...{% endif %}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>{{ group.max_members }} members
+                            </small>
+                            <a href="{{ url_for('social.view_study_group', group_id=group.id) }}"
+                                class="btn btn-sm btn-success">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No study groups</p>
+                        <a href="{{ url_for('social.create_study_group') }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-2"></i>Create Group
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Shared Achievements -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-medal me-2"></i>Recent Achievements
+                    </h6>
+                    <a href="{{ url_for('social.social_achievements') }}" class="btn btn-sm btn-outline-info">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user_achievements %}
+                    {% for achievement in user_achievements[:3] %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-medal text-warning"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ achievement.achievement_data.get('title', 'Achievement') }}</h6>
+                                <p class="text-muted small mb-2">{{ achievement.achievement_data.get('description',
+                                    '')[:60] }}{% if achievement.achievement_data.get('description', '')|length > 60
+                                    %}...{% endif %}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ achievement.shared_at.strftime('%Y-%m-%d') if
+                                    achievement.shared_at else achievement.created_at.strftime('%Y-%m-%d') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-medal fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No shared achievements</p>
+                        <a href="{{ url_for('social.share_achievement') }}" class="btn btn-info btn-sm">
+                            <i class="fas fa-plus me-2"></i>Share Achievement
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

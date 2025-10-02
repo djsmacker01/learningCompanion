@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Create Challenge{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus me-2"></i>Create Challenge
+                        </h5>
+                        <a href="{{ url_for('social.social_challenges') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Challenges
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.title.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else
+                            "")) }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.challenge_type.label(class="form-label") }}
+                                {{ form.challenge_type(class="form-control" + (" is-invalid" if
+                                form.challenge_type.errors else "")) }}
+                                {% if form.challenge_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.challenge_type.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.target_value.label(class="form-label") }}
+                                {{ form.target_value(class="form-control" + (" is-invalid" if form.target_value.errors
+                                else "")) }}
+                                {% if form.target_value.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.target_value.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.target_unit.label(class="form-label") }}
+                            {{ form.target_unit(class="form-control" + (" is-invalid" if form.target_unit.errors else
+                            "")) }}
+                            {% if form.target_unit.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.target_unit.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.start_date.label(class="form-label") }}
+                                {{ form.start_date(class="form-control" + (" is-invalid" if form.start_date.errors else
+                                "")) }}
+                                {% if form.start_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.start_date.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.end_date.label(class="form-label") }}
+                                {{ form.end_date(class="form-control" + (" is-invalid" if form.end_date.errors else ""))
+                                }}
+                                {% if form.end_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.end_date.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('social.social_challenges') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-warning") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Challenge Types
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Study Time:</strong> Challenge participants to study for a certain number of minutes
+                        </li>
+                        <li><strong>Study Streak:</strong> Challenge participants to maintain a study streak for a
+                            certain number of days</li>
+                        <li><strong>Quiz Score:</strong> Challenge participants to achieve a certain average quiz score
+                        </li>
+                        <li><strong>Topic Completion:</strong> Challenge participants to complete a certain number of
+                            topics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
