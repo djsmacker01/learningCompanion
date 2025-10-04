@@ -155,7 +155,7 @@ class RegistrationForm(FlaskForm):
         if not re.search(r'\d', password):
             raise ValidationError('Password must contain at least one number.')
         
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        if not re.search(r'[!@
             raise ValidationError('Password must contain at least one special character.')
 
 
@@ -296,7 +296,7 @@ class ChangePasswordForm(FlaskForm):
         if not re.search(r'\d', password):
             raise ValidationError('Password must contain at least one number.')
         
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        if not re.search(r'[!@
             raise ValidationError('Password must contain at least one special character.')
 
 
@@ -355,5 +355,6 @@ class ResetPasswordForm(FlaskForm):
         if not re.search(r'\d', password):
             raise ValidationError('Password must contain at least one number.')
         
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        if not re.search(r'[!@
             raise ValidationError('Password must contain at least one special character.')
+
