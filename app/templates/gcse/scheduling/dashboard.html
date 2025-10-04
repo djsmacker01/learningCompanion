@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block title %}GCSE Scheduling Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Scheduling</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><i class="fas fa-calendar-alt me-2"></i>GCSE Scheduling Dashboard</h1>
+    <p class="lead">Manage your exam schedules, revision plans, and study reminders.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Exam Countdowns</h5>
+                    <a href="{{ url_for('gcse_scheduling.exam_schedules') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-cog me-1"></i>Manage
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if exam_countdowns %}
+                    {% for exam_data in exam_countdowns %}
+                    {% set exam = exam_data.exam %}
+                    {% set countdown = exam_data.countdown %}
+                    <div class="exam-countdown mb-3 p-3 rounded border-start border-4 
+                                {% if countdown.urgency == 'critical' %}border-danger bg-danger-light
+                                {% elif countdown.urgency == 'high' %}border-warning bg-warning-light
+                                {% elif countdown.urgency == 'medium' %}border-info bg-info-light
+                                {% else %}border-secondary bg-light{% endif %}">
+
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1 fw-bold">{{ exam.exam_name }}</h6>
+                                <small class="text-muted">
+                                    {% if exam.paper_number %}Paper {{ exam.paper_number }}{% endif %}
+                                    {% if exam.duration_minutes %} • {{ exam.duration_minutes }} minutes{% endif %}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                {% if countdown.status == 'today' %}
+                                <span class="badge bg-danger fs-6">TODAY!</span>
+                                {% elif countdown.status == 'urgent' %}
+                                <span class="badge bg-warning fs-6">{{ countdown.days }} days</span>
+                                {% elif countdown.status == 'soon' %}
+                                <span class="badge bg-info fs-6">{{ countdown.weeks }}w {{ countdown.days }}d</span>
+                                {% else %}
+                                <span class="badge bg-secondary fs-6">{{ countdown.months }}m {{ countdown.weeks
+                                    }}w</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                {{ exam.exam_date.strftime('%A, %B %d, %Y') if exam.exam_date else 'Date TBD' }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-plus fa-3x mb-3"></i>
+                        <p>No exams scheduled</p>
+                        <a href="{{ url_for('gcse_scheduling.create_exam_schedule') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add Exam
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Today's Revision</h5>
+                    <a href="{{ url_for('gcse_scheduling.daily_schedule', date_str=today_schedule.date.strftime('%Y-%m-%d')) }}"
+                        class="btn btn-light btn-sm">
+                        <i class="fas fa-eye me-1"></i>View
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if today_schedule.total_sessions > 0 %}
+                    <div class="revision-summary mb-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="h4 text-primary mb-0">{{ today_schedule.total_sessions }}</div>
+                                <small class="text-muted">Sessions</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-success mb-0">{{ today_schedule.total_study_time_hours }}h</div>
+                                <small class="text-muted">Study Time</small>
+                            </div>
+                            <div class="col-4">
+                                <span
+                                    class="badge bg-{% if today_schedule.study_intensity == 'high' %}danger{% elif today_schedule.study_intensity == 'medium' %}warning{% else %}info{% endif %} fs-6">
+                                    {{ today_schedule.study_intensity.title() }}
+                                </span>
+                                <br><small class="text-muted">Intensity</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for priority, sessions in today_schedule.sessions.items() %}
+                    {% if sessions %}
+                    <div class="priority-group mb-3">
+                        <h6
+                            class="text-{% if priority == 'high' %}danger{% elif priority == 'medium' %}warning{% else %}info{% endif %} mb-2">
+                            <i
+                                class="fas fa-{% if priority == 'high' %}exclamation-triangle{% elif priority == 'medium' %}clock{% else %}calendar{% endif %} me-1"></i>
+                            {{ priority.title() }} Priority
+                        </h6>
+                        {% for session in sessions[:3] %}
+                        <div class="session-item p-2 mb-2 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="fw-bold text-capitalize">{{ session.revision_type.replace('_', ' ')
+                                        }}</small>
+                                    {% if session.duration_minutes %}
+                                    <br><small class="text-muted">{{ session.duration_minutes }} minutes</small>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end">
+                                    {% if session.completed %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                    <i class="fas fa-circle text-muted"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if sessions|length > 3 %}
+                        <small class="text-muted">+{{ sessions|length - 3 }} more sessions</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-coffee fa-3x mb-3"></i>
+                        <p>No revision scheduled for today</p>
+                        <a href="{{ url_for('gcse_scheduling.revision_schedule') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Plan Revision
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Upcoming Revision (7 Days)</h5>
+                    <a href="{{ url_for('gcse_scheduling.revision_schedule') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-calendar me-1"></i>View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_revisions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for revision in upcoming_revisions[:10] %}
+                                <tr>
+                                    <td>
+                                        <small class="fw-bold">
+                                            {{ revision.revision_date.strftime('%a, %b %d') if revision.revision_date
+                                            else 'TBD' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary text-capitalize">
+                                            {{ revision.revision_type.replace('_', ' ') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ revision.duration_minutes }} min</small>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge bg-{% if revision.priority_level == 'high' %}danger{% elif revision.priority_level == 'medium' %}warning{% else %}info{% endif %}">
+                                            {{ revision.priority_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if revision.completed %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        {% else %}
+                                        <i class="fas fa-clock text-muted"></i>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                        <p>No upcoming revision sessions</p>
+                        <a href="{{ url_for('gcse_scheduling.revision_schedule') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Revision Plan
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Study Reminders</h5>
+                    <a href="{{ url_for('gcse_scheduling.study_reminders') }}" class="btn btn-dark btn-sm">
+                        <i class="fas fa-cog me-1"></i>Manage
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if study_reminders %}
+                    {% for reminder in study_reminders[:5] %}
+                    <div class="reminder-item p-2 mb-2 border-start border-3 border-warning bg-warning-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <small class="fw-bold">
+                                    {{ reminder.reminder_date.strftime('%a, %b %d') if reminder.reminder_date else 'TBD'
+                                    }}
+                                    {% if reminder.reminder_time %} at {{ reminder.reminder_time }}{% endif %}
+                                </small>
+                                <p class="small mb-1 mt-1">{{ reminder.message }}</p>
+                                <small class="text-muted text-capitalize">{{ reminder.reminder_type.replace('_', ' ')
+                                    }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if study_reminders|length > 5 %}
+                    <div class="text-center">
+                        <small class="text-muted">+{{ study_reminders|length - 5 }} more reminders</small>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-bell-slash fa-3x mb-3"></i>
+                        <p>No study reminders</p>
+                        <a href="{{ url_for('gcse_scheduling.study_reminders') }}" class="btn btn-warning">
+                            <i class="fas fa-plus me-2"></i>Add Reminder
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_scheduling.create_exam_schedule') }}"
+                                class="btn btn-outline-primary w-100">
+                                <i class="fas fa-calendar-plus fa-2x mb-2 d-block"></i>
+                                Add Exam
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_scheduling.revision_schedule') }}"
+                                class="btn btn-outline-info w-100">
+                                <i class="fas fa-calendar-week fa-2x mb-2 d-block"></i>
+                                Plan Revision
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_scheduling.study_reminders') }}"
+                                class="btn btn-outline-warning w-100">
+                                <i class="fas fa-bell fa-2x mb-2 d-block"></i>
+                                Add Reminder
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_grading.grade_calculator') }}"
+                                class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-calculator fa-2x mb-2 d-block"></i>
+                                Calculate Grade
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-danger-light {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .bg-warning-light {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .bg-info-light {
+        background-color: rgba(13, 202, 240, 0.1);
+    }
+
+    .revision-summary .h4 {
+        font-weight: 700;
+    }
+
+    .session-item {
+        transition: all 0.2s ease;
+    }
+
+    .session-item:hover {
+        background-color: #e9ecef !important;
+    }
+
+    .reminder-item {
+        transition: all 0.2s ease;
+    }
+
+    .reminder-item:hover {
+        background-color: rgba(255, 193, 7, 0.2) !important;
+    }
+
+    .exam-countdown {
+        transition: all 0.2s ease;
+    }
+
+    .exam-countdown:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

@@ -23,11 +23,11 @@ def mock_user():
     return user
 
 class TestTopicModel:
-    """Test Topic model functionality"""
+    
     
     @patch('app.models.supabase')
     def test_topic_creation(self, mock_supabase):
-        """Test creating a new topic"""
+        
         mock_response = MagicMock()
         mock_response.data = [{
             'id': 1,
@@ -49,7 +49,7 @@ class TestTopicModel:
     
     @patch('app.models.supabase')
     def test_get_topic_by_id(self, mock_supabase):
-        """Test getting a topic by ID"""
+        
         mock_response = MagicMock()
         mock_response.data = [{
             'id': 1,
@@ -70,7 +70,7 @@ class TestTopicModel:
     
     @patch('app.models.supabase')
     def test_get_all_topics_by_user(self, mock_supabase):
-        """Test getting all topics for a user"""
+        
         mock_response = MagicMock()
         mock_response.data = [
             {
@@ -101,12 +101,12 @@ class TestTopicModel:
         assert topics[1].title == 'Topic 2'
 
 class TestTopicRoutes:
-    """Test topic routes functionality"""
+    
     
     @patch('app.models.Topic')
     @patch('flask_login.current_user')
     def test_list_topics_route(self, mock_current_user, mock_topic_model, client):
-        """Test the list topics route"""
+        
         mock_current_user.id = 'test-user-id'
         mock_current_user.is_authenticated = True
         
@@ -124,7 +124,7 @@ class TestTopicRoutes:
     
     @patch('flask_login.current_user')
     def test_create_topic_route_get(self, mock_current_user, client):
-        """Test the create topic route (GET)"""
+        
         mock_current_user.is_authenticated = True
         
         response = client.get('/topics/new')
@@ -135,7 +135,7 @@ class TestTopicRoutes:
     @patch('app.models.Topic')
     @patch('flask_login.current_user')
     def test_create_topic_route_post(self, mock_current_user, mock_topic_model, client):
-        """Test the create topic route (POST)"""
+        
         mock_current_user.id = 'test-user-id'
         mock_current_user.is_authenticated = True
         
@@ -147,9 +147,10 @@ class TestTopicRoutes:
             'description': 'New Description'
         })
         
-        assert response.status_code == 302  # Redirect after successful creation
+        assert response.status_code == 302  
         mock_topic_model.create.assert_called_once_with('New Topic', 'New Description', 'test-user-id')
 
 if __name__ == '__main__':
     pytest.main([__file__])
+
 

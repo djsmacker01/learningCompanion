@@ -22,7 +22,7 @@
                     <form method="POST" novalidate>
                         {{ form.hidden_tag() }}
 
-                        <!-- Offline Mode -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.offline_mode(class="form-check-input") }}
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <!-- Auto Sync -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.auto_sync(class="form-check-input") }}
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <!-- Sync Frequency -->
+                        
                         <div class="mb-4">
                             {{ form.sync_frequency.label(class="form-label") }}
                             {{ form.sync_frequency(class="form-control" + (" is-invalid" if form.sync_frequency.errors
@@ -61,7 +61,7 @@
                             </div>
                         </div>
 
-                        <!-- Data Usage Limit -->
+                        
                         <div class="mb-4">
                             {{ form.data_usage_limit.label(class="form-label") }}
                             {{ form.data_usage_limit(class="form-control" + (" is-invalid" if
@@ -78,7 +78,7 @@
                             </div>
                         </div>
 
-                        <!-- Push Notifications -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.push_notifications(class="form-check-input") }}
@@ -89,7 +89,7 @@
                             </div>
                         </div>
 
-                        <!-- Vibration -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.vibration_enabled(class="form-check-input") }}
@@ -100,7 +100,7 @@
                             </div>
                         </div>
 
-                        <!-- Haptic Feedback -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.haptic_feedback(class="form-check-input") }}
@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Help Section -->
+            
             <div class="card shadow-sm border-0 mt-4">
                 <div class="card-header">
                     <h6 class="mb-0">

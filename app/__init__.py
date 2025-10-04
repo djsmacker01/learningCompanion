@@ -76,4 +76,26 @@ def create_app(config_name='default'):
     from app.routes.advanced_analytics import advanced_analytics_bp as advanced_analytics_blueprint
     app.register_blueprint(advanced_analytics_blueprint)
 
+    from app.routes.gcse import gcse as gcse_blueprint
+    app.register_blueprint(gcse_blueprint)
+
+    from app.routes.gcse_past_papers import gcse_past_papers as gcse_past_papers_blueprint
+    app.register_blueprint(gcse_past_papers_blueprint)
+
+    from app.routes.gcse_grading import gcse_grading as gcse_grading_blueprint
+    app.register_blueprint(gcse_grading_blueprint)
+
+    from app.routes.gcse_scheduling import gcse_scheduling as gcse_scheduling_blueprint
+    app.register_blueprint(gcse_scheduling_blueprint)
+
+    from app.routes.gcse_techniques import gcse_techniques as gcse_techniques_blueprint
+    app.register_blueprint(gcse_techniques_blueprint)
+
+    from app.routes.gcse_analytics import gcse_analytics as gcse_analytics_blueprint
+    app.register_blueprint(gcse_analytics_blueprint)
+
+    from app.routes.gcse_resources import gcse_resources as gcse_resources_blueprint
+    app.register_blueprint(gcse_resources_blueprint)
+
     return app
+

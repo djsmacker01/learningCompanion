@@ -1,6 +1,6 @@
-/* Mobile and Accessibility Styles */
 
-/* Responsive Design */
+
+
 @media (max-width: 768px) {
     .container-fluid {
         padding: 0.5rem;
@@ -38,7 +38,7 @@
     }
 }
 
-/* High Contrast Mode */
+
 .high-contrast {
     --bs-primary: #000000;
     --bs-secondary: #ffffff;
@@ -78,7 +78,7 @@
     color: #000000 !important;
 }
 
-/* Text Size Adjustments */
+
 .text-small {
     font-size: 0.875rem;
 }
@@ -95,7 +95,7 @@
     font-size: 1.5rem;
 }
 
-/* Focus Indicators */
+
 .focus-visible {
     outline: 3px solid #0d6efd !important;
     outline-offset: 2px;
@@ -109,7 +109,7 @@
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Reduced Motion */
+
 @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -127,7 +127,7 @@
     transition: none !important;
 }
 
-/* Color Blind Friendly */
+
 .color-blind-friendly {
     --bs-primary: #1f77b4;
     --bs-secondary: #ff7f0e;
@@ -153,7 +153,7 @@
     background-color: #ff7f0e !important;
 }
 
-/* Screen Reader Only Content */
+
 .sr-only {
     position: absolute !important;
     width: 1px !important;
@@ -166,7 +166,7 @@
     border: 0 !important;
 }
 
-/* Skip Links */
+
 .skip-link {
     position: absolute;
     top: -40px;
@@ -182,7 +182,7 @@
     top: 6px;
 }
 
-/* Mobile Touch Targets */
+
 @media (max-width: 768px) {
     .btn {
         min-height: 44px;
@@ -200,7 +200,7 @@
     }
 }
 
-/* Offline Indicator */
+
 .offline-indicator {
     position: fixed;
     top: 0;
@@ -218,7 +218,7 @@
     display: none;
 }
 
-/* Loading States */
+
 .loading {
     opacity: 0.6;
     pointer-events: none;
@@ -244,7 +244,7 @@
     }
 }
 
-/* Accessibility Improvements */
+
 .visually-hidden {
     position: absolute !important;
     width: 1px !important;
@@ -257,7 +257,7 @@
     border: 0 !important;
 }
 
-/* Form Accessibility */
+
 .form-label {
     font-weight: 600;
 }
@@ -270,7 +270,7 @@
     border-color: #198754;
 }
 
-/* Table Accessibility */
+
 .table th {
     background-color: #f8f9fa;
     font-weight: 600;
@@ -284,7 +284,7 @@
     text-align: right;
 }
 
-/* Navigation Accessibility */
+
 .navbar-nav .nav-link {
     position: relative;
 }
@@ -293,7 +293,7 @@
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Card Accessibility */
+
 .card-header {
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
@@ -303,7 +303,7 @@
     margin-bottom: 0.5rem;
 }
 
-/* Button Accessibility */
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -313,7 +313,7 @@
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Modal Accessibility */
+
 .modal-header {
     border-bottom: 1px solid #dee2e6;
 }
@@ -322,7 +322,7 @@
     border-top: 1px solid #dee2e6;
 }
 
-/* Alert Accessibility */
+
 .alert {
     border: 1px solid transparent;
     border-radius: 0.375rem;
@@ -352,7 +352,7 @@
     color: #055160;
 }
 
-/* Progress Bar Accessibility */
+
 .progress {
     height: 1rem;
     background-color: #e9ecef;
@@ -364,7 +364,7 @@
     border-radius: 0.375rem;
 }
 
-/* Badge Accessibility */
+
 .badge {
     font-size: 0.75em;
     font-weight: 700;
@@ -375,7 +375,7 @@
     border-radius: 0.375rem;
 }
 
-/* Tooltip Accessibility */
+
 .tooltip {
     position: absolute;
     z-index: 1070;
@@ -403,7 +403,7 @@
     opacity: 0.9;
 }
 
-/* Popover Accessibility */
+
 .popover {
     position: absolute;
     top: 0;
@@ -432,7 +432,7 @@
     border-radius: 0.5rem;
 }
 
-/* Dropdown Accessibility */
+
 .dropdown-menu {
     position: absolute;
     z-index: 1000;

@@ -1,6 +1,4 @@
-"""
-Reminder Delivery System for Email and SMS notifications
-"""
+
 
 import smtplib
 import json
@@ -13,16 +11,16 @@ from app.models import get_supabase_client, SUPABASE_AVAILABLE
 
 
 class ReminderDeliveryService:
-    """Service for delivering study reminders via email and SMS"""
+    
     
     def __init__(self):
-        self.smtp_server = "smtp.gmail.com"  # Default SMTP server
+        self.smtp_server = "smtp.gmail.com"  
         self.smtp_port = 587
-        self.sender_email = None  # Will be set from environment
-        self.sender_password = None  # Will be set from environment
+        self.sender_email = None  
+        self.sender_password = None  
         
     def send_reminder(self, reminder: StudyReminder) -> bool:
-        """Send a study reminder"""
+        
         try:
             if reminder.reminder_method == 'email':
                 return self._send_email_reminder(reminder)
@@ -40,7 +38,7 @@ class ReminderDeliveryService:
             return False
     
     def send_bulk_reminders(self, reminders: List[StudyReminder]) -> Dict[str, int]:
-        """Send multiple reminders and return statistics"""
+        
         results = {
             'sent': 0,
             'failed': 0,
@@ -56,10 +54,10 @@ class ReminderDeliveryService:
         return results
     
     def _send_email_reminder(self, reminder: StudyReminder) -> bool:
-        """Send email reminder"""
+        
         try:
-            # For demo purposes, we'll simulate email sending
-            # In production, you would use actual SMTP credentials
+            
+            
             
             print(f"📧 EMAIL REMINDER SENT:")
             print(f"   To: {reminder.user_id}")
@@ -69,7 +67,7 @@ class ReminderDeliveryService:
             print(f"   Topic: {reminder.topic_id}")
             print(f"   Session Type: {reminder.session_type}")
             
-            # Mark as sent
+            
             reminder.mark_as_sent()
             self._log_delivery(reminder.id, 'email', 'sent')
             
@@ -81,17 +79,17 @@ class ReminderDeliveryService:
             return False
     
     def _send_sms_reminder(self, reminder: StudyReminder) -> bool:
-        """Send SMS reminder"""
+        
         try:
-            # For demo purposes, we'll simulate SMS sending
-            # In production, you would use a service like Twilio
+            
+            
             
             print(f"📱 SMS REMINDER SENT:")
             print(f"   To: {reminder.user_id}")
             print(f"   Message: {reminder.title} - {reminder.message}")
             print(f"   Time: {reminder.scheduled_time}")
             
-            # Mark as sent
+            
             reminder.mark_as_sent()
             self._log_delivery(reminder.id, 'sms', 'sent')
             
@@ -103,10 +101,10 @@ class ReminderDeliveryService:
             return False
     
     def _send_push_reminder(self, reminder: StudyReminder) -> bool:
-        """Send push notification reminder"""
+        
         try:
-            # For demo purposes, we'll simulate push notification
-            # In production, you would use Firebase or similar service
+            
+            
             
             print(f"🔔 PUSH REMINDER SENT:")
             print(f"   To: {reminder.user_id}")
@@ -114,7 +112,7 @@ class ReminderDeliveryService:
             print(f"   Body: {reminder.message}")
             print(f"   Time: {reminder.scheduled_time}")
             
-            # Mark as sent
+            
             reminder.mark_as_sent()
             self._log_delivery(reminder.id, 'push', 'sent')
             
@@ -126,7 +124,7 @@ class ReminderDeliveryService:
             return False
     
     def _log_delivery(self, reminder_id: str, method: str, status: str, error_message: str = None):
-        """Log reminder delivery attempt"""
+        
         if not SUPABASE_AVAILABLE:
             return
             
@@ -149,15 +147,15 @@ class ReminderDeliveryService:
 
 
 class ReminderScheduler:
-    """Scheduler for processing and sending reminders"""
+    
     
     def __init__(self):
         self.delivery_service = ReminderDeliveryService()
     
     def process_pending_reminders(self) -> Dict[str, int]:
-        """Process all pending reminders that are due"""
+        
         try:
-            # Get all pending reminders that are due
+            
             pending_reminders = StudyReminder.get_pending_reminders()
             
             if not pending_reminders:
@@ -165,7 +163,7 @@ class ReminderScheduler:
             
             print(f"🕐 Processing {len(pending_reminders)} pending reminders...")
             
-            # Send reminders
+            
             results = self.delivery_service.send_bulk_reminders(pending_reminders)
             
             print(f"✅ Reminder processing complete:")
@@ -180,18 +178,18 @@ class ReminderScheduler:
             return {'sent': 0, 'failed': 0, 'total': 0}
     
     def create_daily_reminders(self, user_id: str) -> List[StudyReminder]:
-        """Create daily reminders for a user based on their preferences"""
+        
         try:
             from app.models.reminders import StudyReminderPreferences
             from app.utils.smart_scheduling import SmartSchedulingEngine
             
-            # Get user preferences
+            
             preferences = StudyReminderPreferences.get_or_create_preferences(user_id)
             
             if not preferences.is_enabled:
                 return []
             
-            # Create smart reminders
+            
             scheduling_engine = SmartSchedulingEngine()
             reminders = scheduling_engine.create_smart_reminders(user_id)
             
@@ -204,7 +202,7 @@ class ReminderScheduler:
             return []
     
     def cleanup_old_reminders(self, days_old: int = 30) -> int:
-        """Clean up old sent reminders"""
+        
         if not SUPABASE_AVAILABLE:
             return 0
             
@@ -213,7 +211,7 @@ class ReminderScheduler:
         try:
             cutoff_date = datetime.now() - timedelta(days=days_old)
             
-            # Delete old sent reminders
+            
             result = supabase.table('study_reminders').delete().eq('status', 'sent').lt('sent_at', cutoff_date.isoformat()).execute()
             
             deleted_count = len(result.data) if result.data else 0
@@ -228,10 +226,10 @@ class ReminderScheduler:
 
 def send_study_reminder_email(user_email: str, reminder_title: str, reminder_message: str, 
                             scheduled_time: datetime, topic_title: str = None) -> bool:
-    """Send a study reminder email (simplified version for demo)"""
+    
     try:
-        # For demo purposes, we'll just print the email content
-        # In production, you would use actual SMTP
+        
+        
         
         print("=" * 60)
         print("📧 STUDY REMINDER EMAIL")
@@ -262,10 +260,10 @@ def send_study_reminder_email(user_email: str, reminder_title: str, reminder_mes
 
 def send_study_reminder_sms(phone_number: str, reminder_message: str, 
                           scheduled_time: datetime) -> bool:
-    """Send a study reminder SMS (simplified version for demo)"""
+    
     try:
-        # For demo purposes, we'll just print the SMS content
-        # In production, you would use Twilio or similar service
+        
+        
         
         print("=" * 40)
         print("📱 STUDY REMINDER SMS")
@@ -280,3 +278,4 @@ def send_study_reminder_sms(phone_number: str, reminder_message: str,
     except Exception as e:
         print(f"Error sending study reminder SMS: {e}")
         return False
+

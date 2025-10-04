@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block title %}GCSE Subjects - Learning Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subject-card {
+        transition: transform 0.2s ease-in-out;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .exam-board-badge {
+        background: #2196F3;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+
+    .specification-code {
+        background: #f8f9fa;
+        color: #6c757d;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 0.7em;
+        font-family: monospace;
+    }
+
+    .topic-count {
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 0.7em;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .subject-category {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .category-icon {
+        font-size: 2em;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-book me-2"></i>GCSE Subjects</h1>
+                <div>
+                    <a href="{{ url_for('gcse.gcse_dashboard') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="examBoardFilter" class="form-label">Filter by Exam Board:</label>
+                <select class="form-select" id="examBoardFilter">
+                    <option value="">All Exam Boards</option>
+                    {% for board in exam_boards %}
+                    <option value="{{ board }}">{{ board }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="subjectSearch" class="form-label">Search Subjects:</label>
+                <input type="text" class="form-control" id="subjectSearch" placeholder="Search by subject name...">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="categoryFilter" class="form-label">Filter by Category:</label>
+                <select class="form-select" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="core">Core Subjects</option>
+                    <option value="sciences">Sciences</option>
+                    <option value="humanities">Humanities</option>
+                    <option value="languages">Languages</option>
+                    <option value="arts">Arts & Creative</option>
+                    <option value="practical">Practical Subjects</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-star category-icon"></i>
+                    <h3>Core Subjects</h3>
+                    <p class="mb-0">Essential subjects that most students take</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="coreSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['Mathematics', 'English Language', 'English Literature'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="core"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-flask category-icon"></i>
+                    <h3>Sciences</h3>
+                    <p class="mb-0">Biology, Chemistry, Physics and more</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="scienceSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['Biology', 'Chemistry', 'Physics', 'Computer Science'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="sciences"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-globe category-icon"></i>
+                    <h3>Humanities</h3>
+                    <p class="mb-0">History, Geography, and Social Sciences</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="humanitiesSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['History', 'Geography', 'Business Studies', 'Economics', 'Psychology',
+        'Sociology', 'Religious Studies'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="humanities"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-language category-icon"></i>
+                    <h3>Languages</h3>
+                    <p class="mb-0">Modern and Classical Languages</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="languageSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese',
+        'Arabic', 'Latin', 'Ancient Greek'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="languages"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-palette category-icon"></i>
+                    <h3>Arts & Creative</h3>
+                    <p class="mb-0">Creative and performing arts subjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="artsSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['Art & Design', 'Music', 'Drama', 'Dance', 'Media Studies', 'Film Studies',
+        'Photography'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="arts"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="subject-category">
+                <div class="text-center">
+                    <i class="fas fa-tools category-icon"></i>
+                    <h3>Practical Subjects</h3>
+                    <p class="mb-0">Hands-on and vocational subjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="practicalSubjects">
+        {% for subject in subjects %}
+        {% if subject.subject_name in ['Design & Technology', 'Food Preparation & Nutrition', 'Physical Education',
+        'Engineering', 'Health & Social Care', 'Child Development', 'Hospitality & Catering'] %}
+        <div class="col-md-6 col-lg-4 mb-4 subject-card-wrapper" data-category="practical"
+            data-exam-board="{{ subject.exam_board }}" data-subject="{{ subject.subject_name|lower }}">
+            <div class="card subject-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ subject.subject_name }}</h5>
+                        <span class="exam-board-badge">{{ subject.exam_board }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="specification-code">{{ subject.specification_code }}</span>
+                        <span class="topic-count ms-2">{{ subject.topics|length }} topics</span>
+                    </div>
+
+                    {% if subject.topics %}
+                    <div class="mb-3">
+                        <h6>Key Topics:</h6>
+                        <ul class="list-unstyled">
+                            {% for topic in subject.topics[:3] %}
+                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ topic.topic_name }}</li>
+                            {% endfor %}
+                            {% if subject.topics|length > 3 %}
+                            <li><small class="text-muted">+{{ subject.topics|length - 3 }} more topics</small></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if subject.exam_weight %}
+                            <small class="text-muted">Exam Weight: {{ subject.exam_weight }}%</small>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}" class="btn btn-primary">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const examBoardFilter = document.getElementById('examBoardFilter');
+        const subjectSearch = document.getElementById('subjectSearch');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const subjectCards = document.querySelectorAll('.subject-card-wrapper');
+
+        function filterSubjects() {
+            const selectedBoard = examBoardFilter.value.toLowerCase();
+            const searchTerm = subjectSearch.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+
+            subjectCards.forEach(function (card) {
+                const examBoard = card.getAttribute('data-exam-board').toLowerCase();
+                const subject = card.getAttribute('data-subject');
+                const category = card.getAttribute('data-category');
+
+                const boardMatch = !selectedBoard || examBoard === selectedBoard;
+                const searchMatch = !searchTerm || subject.includes(searchTerm);
+                const categoryMatch = !selectedCategory || category === selectedCategory;
+
+                if (boardMatch && searchMatch && categoryMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        examBoardFilter.addEventListener('change', filterSubjects);
+        subjectSearch.addEventListener('input', filterSubjects);
+        categoryFilter.addEventListener('change', filterSubjects);
+    });
+</script>
+{% endblock %}

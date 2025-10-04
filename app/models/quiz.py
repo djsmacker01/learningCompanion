@@ -1,7 +1,4 @@
-"""
-Quiz and Assessment Models
-Handles quizzes, questions, attempts, and flashcard progress
-"""
+
 
 from datetime import datetime, date, timedelta
 from typing import List, Dict, Optional, Tuple
@@ -11,7 +8,7 @@ import uuid
 
 
 class Quiz:
-    """Model for managing quizzes"""
+    
     
     def __init__(self, id=None, topic_id=None, user_id=None, title=None, 
                  description=None, quiz_type=None, difficulty_level='medium',
@@ -22,7 +19,7 @@ class Quiz:
         self.user_id = user_id
         self.title = title
         self.description = description
-        self.quiz_type = quiz_type  # multiple_choice, flashcards, practice_test, assessment
+        self.quiz_type = quiz_type  
         self.difficulty_level = difficulty_level
         self.time_limit_minutes = time_limit_minutes
         self.passing_score = passing_score
@@ -35,7 +32,7 @@ class Quiz:
                    description: str = None, quiz_type: str = 'multiple_choice',
                    difficulty_level: str = 'medium', time_limit_minutes: int = None,
                    passing_score: int = 70) -> 'Quiz':
-        """Create a new quiz"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -65,7 +62,7 @@ class Quiz:
 
     @classmethod
     def get_quizzes_by_topic(cls, topic_id: str, user_id: str) -> List['Quiz']:
-        """Get all quizzes for a specific topic"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -80,7 +77,7 @@ class Quiz:
 
     @classmethod
     def get_quiz_by_id(cls, quiz_id: str, user_id: str) -> Optional['Quiz']:
-        """Get a specific quiz by ID"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -96,7 +93,7 @@ class Quiz:
         return None
 
     def update_quiz(self, **kwargs) -> bool:
-        """Update quiz information"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -105,7 +102,7 @@ class Quiz:
         try:
             result = supabase.table('quizzes').update(kwargs).eq('id', self.id).execute()
             if result.data:
-                # Update local attributes
+                
                 for key, value in kwargs.items():
                     setattr(self, key, value)
                 return True
@@ -115,12 +112,12 @@ class Quiz:
         return False
 
     def delete_quiz(self) -> bool:
-        """Soft delete a quiz"""
+        
         return self.update_quiz(is_active=False)
 
 
 class QuizQuestion:
-    """Model for managing quiz questions"""
+    
     
     def __init__(self, id=None, quiz_id=None, question_text=None, question_type=None,
                  correct_answer=None, explanation=None, points=1, order_index=0,
@@ -136,13 +133,13 @@ class QuizQuestion:
         self.is_active = is_active
         self.created_at = created_at
         self.updated_at = updated_at
-        self.options = []  # Will be populated separately
+        self.options = []  
 
     @classmethod
     def create_question(cls, quiz_id: str, question_text: str, question_type: str,
                        correct_answer: str, explanation: str = None, points: int = 1,
                        order_index: int = 0) -> 'QuizQuestion':
-        """Create a new quiz question"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -171,7 +168,7 @@ class QuizQuestion:
 
     @classmethod
     def get_questions_by_quiz(cls, quiz_id: str) -> List['QuizQuestion']:
-        """Get all questions for a specific quiz"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -181,7 +178,7 @@ class QuizQuestion:
             result = supabase.table('quiz_questions').select('*').eq('quiz_id', quiz_id).eq('is_active', True).order('order_index').execute()
             questions = [cls(**question) for question in result.data]
             
-            # Load options for each question
+            
             for question in questions:
                 question.options = QuizQuestionOption.get_options_by_question(question.id)
                 
@@ -191,7 +188,7 @@ class QuizQuestion:
             return []
 
     def add_option(self, option_text: str, is_correct: bool = False, order_index: int = 0) -> bool:
-        """Add an option to a multiple choice question"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -207,7 +204,7 @@ class QuizQuestion:
         try:
             result = supabase.table('quiz_question_options').insert(option_data).execute()
             if result.data:
-                # Add to local options list
+                
                 option = QuizQuestionOption(**result.data[0])
                 self.options.append(option)
                 return True
@@ -218,7 +215,7 @@ class QuizQuestion:
 
 
 class QuizQuestionOption:
-    """Model for quiz question options (multiple choice)"""
+    
     
     def __init__(self, id=None, question_id=None, option_text=None, 
                  is_correct=False, order_index=0, created_at=None):
@@ -231,7 +228,7 @@ class QuizQuestionOption:
 
     @classmethod
     def get_options_by_question(cls, question_id: str) -> List['QuizQuestionOption']:
-        """Get all options for a specific question"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -246,7 +243,7 @@ class QuizQuestionOption:
 
 
 class QuizAttempt:
-    """Model for managing quiz attempts"""
+    
     
     def __init__(self, id=None, quiz_id=None, user_id=None, started_at=None,
                  completed_at=None, score=0, total_questions=0, correct_answers=0,
@@ -262,11 +259,11 @@ class QuizAttempt:
         self.time_taken_minutes = time_taken_minutes
         self.status = status
         self.created_at = created_at
-        self.answers = []  # Will be populated separately
+        self.answers = []  
 
     @classmethod
     def start_attempt(cls, quiz_id: str, user_id: str) -> 'QuizAttempt':
-        """Start a new quiz attempt"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -291,7 +288,7 @@ class QuizAttempt:
 
     @classmethod
     def get_attempt_by_id(cls, attempt_id: str, user_id: str) -> Optional['QuizAttempt']:
-        """Get a specific attempt by ID"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -302,7 +299,7 @@ class QuizAttempt:
             if result.data:
                 attempt_data = result.data[0]
                 attempt = cls(**attempt_data)
-                # Load answers
+                
                 attempt.answers = QuizAttemptAnswer.get_answers_by_attempt(attempt_id)
                 return attempt
         except Exception as e:
@@ -311,13 +308,13 @@ class QuizAttempt:
         return None
 
     def submit_answer(self, question_id: str, user_answer: str, time_spent_seconds: int = 0) -> bool:
-        """Submit an answer for a question"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
         supabase = get_supabase_client()
         
-        # Get the correct answer
+        
         try:
             question_result = supabase.table('quiz_questions').select('correct_answer').eq('id', question_id).execute()
             if not question_result.data:
@@ -337,7 +334,7 @@ class QuizAttempt:
             
             result = supabase.table('quiz_attempt_answers').insert(answer_data).execute()
             if result.data:
-                # Add to local answers list
+                
                 answer = QuizAttemptAnswer(**result.data[0])
                 self.answers.append(answer)
                 return True
@@ -347,19 +344,19 @@ class QuizAttempt:
         return False
 
     def complete_attempt(self) -> bool:
-        """Complete the quiz attempt and calculate score"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
         supabase = get_supabase_client()
         
         try:
-            # Calculate score
+            
             total_questions = len(self.answers)
             correct_answers = sum(1 for answer in self.answers if answer.is_correct)
             score = int((correct_answers / total_questions * 100)) if total_questions > 0 else 0
             
-            # Calculate time taken
+            
             if self.started_at:
                 started = datetime.fromisoformat(self.started_at.replace('Z', '+00:00'))
                 time_taken = datetime.now() - started
@@ -378,7 +375,7 @@ class QuizAttempt:
             
             result = supabase.table('quiz_attempts').update(update_data).eq('id', self.id).execute()
             if result.data:
-                # Update local attributes
+                
                 self.completed_at = update_data['completed_at']
                 self.score = score
                 self.total_questions = total_questions
@@ -393,7 +390,7 @@ class QuizAttempt:
 
 
 class QuizAttemptAnswer:
-    """Model for quiz attempt answers"""
+    
     
     def __init__(self, id=None, attempt_id=None, question_id=None, user_answer=None,
                  is_correct=False, time_spent_seconds=0, answered_at=None):
@@ -407,7 +404,7 @@ class QuizAttemptAnswer:
 
     @classmethod
     def get_answers_by_attempt(cls, attempt_id: str) -> List['QuizAttemptAnswer']:
-        """Get all answers for a specific attempt"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -422,7 +419,7 @@ class QuizAttemptAnswer:
 
 
 class FlashcardProgress:
-    """Model for managing flashcard progress with spaced repetition"""
+    
     
     def __init__(self, id=None, user_id=None, question_id=None, ease_factor=2.5,
                  interval_days=1, repetitions=0, next_review_date=None,
@@ -439,7 +436,7 @@ class FlashcardProgress:
 
     @classmethod
     def get_due_flashcards(cls, user_id: str, limit: int = 20) -> List['FlashcardProgress']:
-        """Get flashcards that are due for review"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -454,15 +451,15 @@ class FlashcardProgress:
             return []
 
     def update_progress(self, quality: int) -> bool:
-        """Update flashcard progress based on review quality (0-5)"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
         supabase = get_supabase_client()
         
         try:
-            # SuperMemo 2 algorithm
-            if quality >= 3:  # Correct response
+            
+            if quality >= 3:  
                 if self.repetitions == 0:
                     self.interval_days = 1
                 elif self.repetitions == 1:
@@ -471,14 +468,14 @@ class FlashcardProgress:
                     self.interval_days = int(self.interval_days * self.ease_factor)
                 
                 self.repetitions += 1
-            else:  # Incorrect response
+            else:  
                 self.repetitions = 0
                 self.interval_days = 1
             
-            # Update ease factor
+            
             self.ease_factor = max(1.3, self.ease_factor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
             
-            # Calculate next review date
+            
             self.next_review_date = (date.today() + timedelta(days=self.interval_days)).isoformat()
             self.last_reviewed_at = datetime.now().isoformat()
             
@@ -498,22 +495,22 @@ class FlashcardProgress:
 
     @classmethod
     def create_or_update_progress(cls, user_id: str, question_id: str, quality: int) -> bool:
-        """Create or update flashcard progress"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
         supabase = get_supabase_client()
         
         try:
-            # Check if progress exists
+            
             result = supabase.table('flashcard_progress').select('*').eq('user_id', user_id).eq('question_id', question_id).execute()
             
             if result.data:
-                # Update existing progress
+                
                 progress = cls(**result.data[0])
                 return progress.update_progress(quality)
             else:
-                # Create new progress
+                
                 progress = cls(
                     user_id=user_id,
                     question_id=question_id,
@@ -541,3 +538,4 @@ class FlashcardProgress:
             print(f"Error creating/updating flashcard progress: {e}")
             
         return False
+

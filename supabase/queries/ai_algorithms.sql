@@ -1,5 +1,5 @@
 
--- Query 1: Get topics that need review (spaced repetition algorithm)
+
 CREATE OR REPLACE FUNCTION public.get_topics_for_review(p_user_id UUID)
 RETURNS TABLE (
     topic_id UUID,
@@ -43,7 +43,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Query 2: Calculate learning velocity (sessions per week)
+
 CREATE OR REPLACE FUNCTION public.get_learning_velocity(p_user_id UUID, p_weeks INTEGER DEFAULT 4)
 RETURNS TABLE (
     topic_id UUID,
@@ -73,7 +73,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Query 3: Get confidence trend analysis
+
 CREATE OR REPLACE FUNCTION public.get_confidence_trend(p_user_id UUID, p_topic_id UUID, p_days INTEGER DEFAULT 30)
 RETURNS TABLE (
     session_date DATE,
@@ -99,7 +99,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Query 4: Recommend optimal study schedule
+
 CREATE OR REPLACE FUNCTION public.get_study_schedule(p_user_id UUID, p_days INTEGER DEFAULT 7)
 RETURNS TABLE (
     study_date DATE,
@@ -157,7 +157,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Query 5: Get mastery progression insights
+
 CREATE OR REPLACE FUNCTION public.get_mastery_insights(p_user_id UUID)
 RETURNS TABLE (
     topic_id UUID,
@@ -186,7 +186,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Grant permissions on functions
+
 GRANT EXECUTE ON FUNCTION public.get_topics_for_review(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_learning_velocity(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_confidence_trend(UUID, UUID, INTEGER) TO authenticated;

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <!-- Header -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <nav aria-label="breadcrumb">
@@ -17,7 +17,7 @@
     </div>
 
     <div class="row">
-        <!-- Main Session Info -->
+        
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light border-0">
@@ -134,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- Confidence Tracking -->
+            
             {% if session.confidence_before and session.confidence_after %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light border-0">
@@ -175,7 +175,7 @@
             </div>
             {% endif %}
 
-            <!-- Session Notes -->
+            
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
@@ -186,7 +186,7 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <!-- Display Mode -->
+                    
                     <div id="notes-display">
                         {% if session.notes %}
                         <div class="session-notes">
@@ -211,7 +211,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- Edit Mode -->
+                    
                     <div id="notes-edit" style="display: none;">
                         <form id="notes-form" method="POST"
                             action="{{ url_for('sessions.update_notes', session_id=session.id) }}">
@@ -237,9 +237,9 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
+        
         <div class="col-lg-4">
-            <!-- Topic Progress -->
+            
             {% if topic_progress %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light border-0">
@@ -278,7 +278,7 @@
             </div>
             {% endif %}
 
-            <!-- Related Sessions -->
+            
             {% if related_sessions %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light border-0">
@@ -314,7 +314,7 @@
             </div>
             {% endif %}
 
-            <!-- Quick Actions -->
+            
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-light border-0">
                     <h5 class="card-title mb-0">

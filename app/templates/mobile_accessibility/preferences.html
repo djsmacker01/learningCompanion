@@ -22,7 +22,7 @@
                     <form method="POST" novalidate>
                         {{ form.hidden_tag() }}
 
-                        <!-- Screen Reader Support -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.screen_reader_enabled(class="form-check-input") }}
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <!-- High Contrast Mode -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.high_contrast_mode(class="form-check-input") }}
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <!-- Text Size -->
+                        
                         <div class="mb-4">
                             {{ form.text_size.label(class="form-label") }}
                             {{ form.text_size(class="form-control" + (" is-invalid" if form.text_size.errors else ""))
@@ -61,7 +61,7 @@
                             </div>
                         </div>
 
-                        <!-- Keyboard Navigation -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.keyboard_navigation(class="form-check-input") }}
@@ -72,7 +72,7 @@
                             </div>
                         </div>
 
-                        <!-- Reduced Motion -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.reduced_motion(class="form-check-input") }}
@@ -83,7 +83,7 @@
                             </div>
                         </div>
 
-                        <!-- Color Blind Friendly -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.color_blind_friendly(class="form-check-input") }}
@@ -94,7 +94,7 @@
                             </div>
                         </div>
 
-                        <!-- Focus Indicators -->
+                        
                         <div class="mb-4">
                             <div class="form-check">
                                 {{ form.focus_indicators(class="form-check-input") }}
@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            <!-- Help Section -->
+            
             <div class="card shadow-sm border-0 mt-4">
                 <div class="card-header">
                     <h6 class="mb-0">

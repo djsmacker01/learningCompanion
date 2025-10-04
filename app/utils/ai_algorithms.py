@@ -1,13 +1,4 @@
-"""
-AI Algorithms and Analytics for Learning Companion
 
-This module contains algorithms for:
-- Study pattern analysis
-- Spaced repetition recommendations
-- Confidence trend analysis
-- Optimal session timing
-- Topic mastery calculation
-"""
 
 from datetime import datetime, timedelta, date
 from typing import List, Dict, Tuple, Optional
@@ -15,16 +6,16 @@ from app.models import Topic
 from app.models.study_session import StudySession
 
 class LearningAnalytics:
-    """Main class for learning analytics and AI algorithms"""
+    
     
     @staticmethod
     def calculate_study_streak(user_id: str) -> int:
-        """Calculate current consecutive study days"""
+        
         sessions = StudySession.get_user_sessions(user_id)
         if not sessions:
             return 0
         
-        # Sort by date descending
+        
         sessions.sort(key=lambda x: x.session_date, reverse=True)
         
         streak = 0
@@ -42,17 +33,17 @@ class LearningAnalytics:
     
     @staticmethod
     def get_optimal_session_length(user_id: str, topic_id: int) -> int:
-        """Suggest ideal session duration based on past performance"""
+        
         sessions = StudySession.get_topic_sessions(topic_id, user_id)
         if not sessions:
-            return 25  # Default Pomodoro time
+            return 25  
         
-        # Analyze past session durations and confidence gains
+        
         effective_sessions = []
         for session in sessions:
             if session.completed and session.confidence_after and session.confidence_before:
                 confidence_gain = session.confidence_after - session.confidence_before
-                if confidence_gain > 0:  # Only consider sessions with positive gains
+                if confidence_gain > 0:  
                     effective_sessions.append({
                         'duration': session.duration_minutes,
                         'confidence_gain': confidence_gain,
@@ -62,7 +53,7 @@ class LearningAnalytics:
         if not effective_sessions:
             return 25
         
-        # Find the duration with highest average efficiency
+        
         duration_efficiency = {}
         for session in effective_sessions:
             duration = session['duration']
@@ -92,7 +83,7 @@ class LearningAnalytics:
     
     @staticmethod
     def calculate_confidence_trends(user_id: str, topic_id: int) -> Dict:
-        """Track confidence improvement over time"""
+        
         sessions = StudySession.get_topic_sessions(topic_id, user_id)
         if not sessions:
             return {
@@ -122,15 +113,15 @@ class LearningAnalytics:
                 'prediction': 'insufficient_data'
             }
         
-        # Calculate trend
+        
         first_confidence = confidence_data[0]['confidence']
         last_confidence = confidence_data[-1]['confidence']
         total_improvement = last_confidence - first_confidence
         
-        # Calculate improvement rate (confidence points per session)
+        
         improvement_rate = total_improvement / len(confidence_data)
         
-        # Determine trend
+        
         if improvement_rate > 0.5:
             trend = 'improving'
         elif improvement_rate < -0.5:
@@ -138,7 +129,7 @@ class LearningAnalytics:
         else:
             trend = 'stable'
         
-        # Predict next confidence level
+        
         if trend == 'improving' and len(confidence_data) >= 3:
             recent_improvement = (confidence_data[-1]['confidence'] - confidence_data[-3]['confidence']) / 2
             predicted_confidence = min(10, confidence_data[-1]['confidence'] + recent_improvement)
@@ -157,7 +148,7 @@ class LearningAnalytics:
     
     @staticmethod
     def get_study_pattern_insights(user_id: str) -> Dict:
-        """Analyze when user studies most effectively"""
+        
         sessions = StudySession.get_user_sessions(user_id)
         if not sessions:
             return {
@@ -167,7 +158,7 @@ class LearningAnalytics:
                 'recommendations': []
             }
         
-        # Analyze by time of day
+        
         time_analysis = {}
         day_analysis = {}
         
@@ -182,24 +173,24 @@ class LearningAnalytics:
                 
                 confidence_gain = session.confidence_after - session.confidence_before
                 
-                # Time analysis
+                
                 if hour not in time_analysis:
                     time_analysis[hour] = {'total_gain': 0, 'count': 0}
                 time_analysis[hour]['total_gain'] += confidence_gain
                 time_analysis[hour]['count'] += 1
                 
-                # Day analysis
+                
                 if day_of_week not in day_analysis:
                     day_analysis[day_of_week] = {'total_gain': 0, 'count': 0}
                 day_analysis[day_of_week]['total_gain'] += confidence_gain
                 day_analysis[day_of_week]['count'] += 1
         
-        # Find best time
+        
         best_time = 'insufficient_data'
         best_time_score = -999
         
         for hour, data in time_analysis.items():
-            if data['count'] >= 2:  # Need at least 2 sessions for reliability
+            if data['count'] >= 2:  
                 avg_gain = data['total_gain'] / data['count']
                 if avg_gain > best_time_score:
                     best_time_score = avg_gain
@@ -208,7 +199,7 @@ class LearningAnalytics:
                     else:
                         best_time = f"{hour-12}:00 PM" if hour > 12 else "12:00 PM"
         
-        # Find best day
+        
         best_day = 'insufficient_data'
         best_day_score = -999
         
@@ -219,7 +210,7 @@ class LearningAnalytics:
                     best_day_score = avg_gain
                     best_day = day
         
-        # Generate recommendations
+        
         recommendations = []
         if best_time != 'insufficient_data':
             recommendations.append(f"Schedule study sessions around {best_time} for optimal learning")
@@ -240,43 +231,43 @@ class LearningAnalytics:
     
     @staticmethod
     def recommend_next_session_date(topic_id: int, user_id: str) -> datetime:
-        """Spaced repetition algorithm to recommend next study date"""
+        
         sessions = StudySession.get_topic_sessions(topic_id, user_id)
         if not sessions:
             return datetime.utcnow() + timedelta(days=1)
         
-        # Sort sessions by date
+        
         sessions.sort(key=lambda x: x.session_date, reverse=True)
         last_session = sessions[0]
         
-        # Calculate confidence level from last session
+        
         if last_session.confidence_after:
             confidence_level = last_session.confidence_after
         else:
-            confidence_level = 5  # Default
+            confidence_level = 5  
         
-        # Spaced repetition intervals based on confidence
+        
         if confidence_level >= 8:
-            # High confidence - review in 1 week
+            
             interval_days = 7
         elif confidence_level >= 6:
-            # Medium confidence - review in 3 days
+            
             interval_days = 3
         elif confidence_level >= 4:
-            # Low confidence - review tomorrow
+            
             interval_days = 1
         else:
-            # Very low confidence - review today or tomorrow
+            
             interval_days = 0
         
-        # Calculate next session date
+        
         last_session_date = last_session.session_date
         if isinstance(last_session_date, str):
             last_session_date = datetime.fromisoformat(last_session_date)
         
         next_session_date = last_session_date + timedelta(days=interval_days)
         
-        # Don't recommend past dates
+        
         if next_session_date.date() < datetime.utcnow().date():
             next_session_date = datetime.utcnow() + timedelta(days=1)
         
@@ -284,7 +275,7 @@ class LearningAnalytics:
     
     @staticmethod
     def get_topic_mastery_level(topic_id: int, user_id: str) -> Dict:
-        """Calculate current mastery level (1-5) for a topic"""
+        
         sessions = StudySession.get_topic_sessions(topic_id, user_id)
         if not sessions:
             return {
@@ -294,26 +285,26 @@ class LearningAnalytics:
                 'next_milestone': 'Complete your first study session'
             }
         
-        # Calculate mastery based on multiple factors
+        
         total_sessions = len(sessions)
         completed_sessions = len([s for s in sessions if s.completed])
         total_study_time = sum(s.duration_minutes for s in sessions if s.completed)
         
-        # Get latest confidence level
+        
         latest_confidence = 1
         if sessions:
             latest_session = max(sessions, key=lambda x: x.session_date)
             if latest_session.confidence_after:
                 latest_confidence = latest_session.confidence_after
         
-        # Calculate mastery score (0-100)
-        session_score = min(40, (completed_sessions * 4))  # Max 40 points for sessions
-        time_score = min(30, (total_study_time / 10))  # Max 30 points for time (300+ minutes = 30 points)
-        confidence_score = min(30, (latest_confidence * 3))  # Max 30 points for confidence
+        
+        session_score = min(40, (completed_sessions * 4))  
+        time_score = min(30, (total_study_time / 10))  
+        confidence_score = min(30, (latest_confidence * 3))  
         
         mastery_score = session_score + time_score + confidence_score
         
-        # Determine mastery level
+        
         if mastery_score >= 80:
             level = 5
             description = 'Expert'
@@ -350,10 +341,10 @@ class LearningAnalytics:
     
     @staticmethod
     def get_learning_recommendations(user_id: str) -> List[Dict]:
-        """Generate personalized learning recommendations"""
+        
         recommendations = []
         
-        # Get all user topics
+        
         topics = Topic.get_all_by_user(user_id)
         if not topics:
             recommendations.append({
@@ -365,13 +356,13 @@ class LearningAnalytics:
             })
             return recommendations
         
-        # Analyze each topic
+        
         for topic in topics:
             mastery = LearningAnalytics.get_topic_mastery_level(topic.id, user_id)
             next_session_date = LearningAnalytics.recommend_next_session_date(topic.id, user_id)
             confidence_trend = LearningAnalytics.calculate_confidence_trends(user_id, topic.id)
             
-            # Generate topic-specific recommendations
+            
             if mastery['level'] == 1:
                 recommendations.append({
                     'type': 'study',
@@ -400,7 +391,7 @@ class LearningAnalytics:
                     'topic_id': topic.id
                 })
         
-        # Add general recommendations
+        
         study_streak = LearningAnalytics.calculate_study_streak(user_id)
         if study_streak == 0:
             recommendations.append({
@@ -419,8 +410,9 @@ class LearningAnalytics:
                 'action': 'start_session'
             })
         
-        # Sort by priority
+        
         priority_order = {'high': 0, 'medium': 1, 'low': 2}
         recommendations.sort(key=lambda x: priority_order.get(x['priority'], 3))
         
         return recommendations[:5]      
+

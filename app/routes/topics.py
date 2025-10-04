@@ -17,7 +17,7 @@ import uuid
 from app.models import get_supabase_client
 
 def get_current_user():
-    """Get the current authenticated user"""
+    
     if current_user.is_authenticated:
         return current_user
     return None
@@ -214,7 +214,7 @@ def delete_topic(topic_id):
 @topics.route('/topics/<topic_id>/share', methods=['GET', 'POST'])
 @login_required
 def share_topic(topic_id):
-    """Share a topic and generate share code"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -255,7 +255,7 @@ def share_topic(topic_id):
 @topics.route('/topics/<topic_id>/revoke-sharing', methods=['POST'])
 @login_required
 def revoke_topic_sharing(topic_id):
-    """Revoke topic sharing"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -279,7 +279,7 @@ def revoke_topic_sharing(topic_id):
 @topics.route('/topics/join', methods=['GET', 'POST'])
 @login_required
 def join_topic():
-    """Join a topic using share code"""
+    
     form = JoinTopicForm()
     
     if form.validate_on_submit():
@@ -308,7 +308,7 @@ def join_topic():
 @topics.route('/topics/shared')
 @login_required
 def shared_topics():
-    """View topics shared with the user"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -326,7 +326,7 @@ def shared_topics():
 @topics.route('/topics/import/csv', methods=['GET', 'POST'])
 @login_required
 def import_topics_csv():
-    """Import topics from CSV file"""
+    
     form = CSVImportForm()
     
     if form.validate_on_submit():
@@ -336,14 +336,14 @@ def import_topics_csv():
                 flash('No file selected.', 'error')
                 return render_template('topics/import_csv.html', form=form)
             
-            # Read CSV content
+            
             csv_content = csv_file.read().decode('utf-8')
             csv_reader = csv.DictReader(io.StringIO(csv_content))
             
             imported_count = 0
             errors = []
             
-            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 for header
+            for row_num, row in enumerate(csv_reader, start=2):  
                 try:
                     title = row.get('title', '').strip()
                     description = row.get('description', '').strip()
@@ -352,7 +352,7 @@ def import_topics_csv():
                         errors.append(f"Row {row_num}: Title is required")
                         continue
                     
-                    # Create topic
+                    
                     topic = Topic.create(
                         title=title,
                         description=description,
@@ -371,7 +371,7 @@ def import_topics_csv():
                 flash(f'Successfully imported {imported_count} topics!', 'success')
             if errors:
                 flash(f'Some topics failed to import: {len(errors)} errors', 'warning')
-                for error in errors[:5]:  # Show first 5 errors
+                for error in errors[:5]:  
                     flash(error, 'error')
             
             return redirect(url_for('topics.list_topics'))
@@ -385,7 +385,7 @@ def import_topics_csv():
 @topics.route('/topics/import/bulk', methods=['GET', 'POST'])
 @login_required
 def import_topics_bulk():
-    """Import topics from text input"""
+    
     form = BulkTopicForm()
     
     if form.validate_on_submit():
@@ -410,7 +410,7 @@ def import_topics_bulk():
                         errors.append(f"Line {line_num}: Title is required")
                         continue
                     
-                    # Create topic
+                    
                     topic = Topic.create(
                         title=title,
                         description=description,
@@ -429,7 +429,7 @@ def import_topics_bulk():
                 flash(f'Successfully created {imported_count} topics!', 'success')
             if errors:
                 flash(f'Some topics failed to create: {len(errors)} errors', 'warning')
-                for error in errors[:5]:  # Show first 5 errors
+                for error in errors[:5]:  
                     flash(error, 'error')
             
             return redirect(url_for('topics.list_topics'))
@@ -443,7 +443,7 @@ def import_topics_bulk():
 @topics.route('/topics/import/materials', methods=['GET', 'POST'])
 @login_required
 def import_materials():
-    """Upload study materials"""
+    
     form = FileUploadForm()
     
     if form.validate_on_submit():
@@ -456,8 +456,8 @@ def import_materials():
                 flash('No file selected.', 'error')
                 return render_template('topics/import_materials.html', form=form)
             
-            # For now, just create a topic with the material info
-            # In a real implementation, you'd save the file and store the path
+            
+            
             topic = Topic.create(
                 title=title,
                 description=f"{description}\n\nUploaded file: {file.filename}",
@@ -479,7 +479,7 @@ def import_materials():
 @topics.route('/topics/<topic_id>/content', methods=['GET', 'POST'])
 @login_required
 def topic_content(topic_id):
-    """Manage topic content (notes, attachments, tags)"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -491,7 +491,7 @@ def topic_content(topic_id):
             flash('Topic not found.', 'error')
             return redirect(url_for('topics.list_topics'))
         
-        # Get content management data
+        
         from app.models.content_management import TopicAttachment, TopicNote, TopicVersion, TopicTag
         
         user = get_current_user()
@@ -504,13 +504,13 @@ def topic_content(topic_id):
         versions = TopicVersion.get_topic_versions(topic_id, user.id)
         available_tags = TopicTag.get_all_tags()
         
-        # Content update form
+        
         content_form = TopicContentForm()
         content_form.tags.choices = [(tag.name, tag.name) for tag in available_tags]
         content_form.tags.data = topic.tags
         
         if content_form.validate_on_submit():
-            # Update topic content
+            
             success = Topic.update_topic_content(
                 topic_id, user.id,
                 title=content_form.title.data,
@@ -525,7 +525,7 @@ def topic_content(topic_id):
             else:
                 flash('Error updating topic content.', 'error')
         
-        # Pre-populate form
+        
         content_form.title.data = topic.title
         content_form.description.data = topic.description
         content_form.notes.data = topic.notes
@@ -545,7 +545,7 @@ def topic_content(topic_id):
 @topics.route('/topics/<topic_id>/notes/add', methods=['GET', 'POST'])
 @login_required
 def add_topic_note(topic_id):
-    """Add a note to a topic"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -587,7 +587,7 @@ def add_topic_note(topic_id):
 @topics.route('/topics/<topic_id>/attachments/upload', methods=['GET', 'POST'])
 @login_required
 def upload_topic_attachment(topic_id):
-    """Upload an attachment to a topic"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -606,11 +606,11 @@ def upload_topic_attachment(topic_id):
             
             file = form.file.data
             if file:
-                # Generate secure filename
+                
                 filename = secure_filename(file.filename)
                 unique_filename = f"{uuid.uuid4()}_{filename}"
                 
-                # For now, just store the filename (in production, save to storage)
+                
                 file_path = f"uploads/{unique_filename}"
                 
                 attachment = TopicAttachment.create_attachment(
@@ -642,7 +642,7 @@ def upload_topic_attachment(topic_id):
 @topics.route('/topics/<topic_id>/versions')
 @login_required
 def topic_versions(topic_id):
-    """View topic version history"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -672,7 +672,7 @@ def topic_versions(topic_id):
 @topics.route('/topics/<topic_id>/versions/<int:version_number>/restore', methods=['POST'])
 @login_required
 def restore_topic_version(topic_id, version_number):
-    """Restore a topic to a specific version"""
+    
     try:
         from app.models.content_management import TopicVersion
         
@@ -693,11 +693,11 @@ def restore_topic_version(topic_id, version_number):
 @topics.route('/topics/search')
 @login_required
 def search_content():
-    """Search topics and content"""
+    
     try:
         form = ContentSearchForm()
         
-        # Get available tags for filter
+        
         from app.models.content_management import TopicTag
         available_tags = TopicTag.get_all_tags()
         form.tags.choices = [(tag.name, tag.name) for tag in available_tags]
@@ -709,7 +709,7 @@ def search_content():
         
         if query or selected_tags:
             if content_type in ['all', 'topics']:
-                # Search topics
+                
                 if selected_tags:
                     user = get_current_user()
                     if not user:
@@ -725,7 +725,7 @@ def search_content():
                     
                     topics = Topic.get_all_by_user(user.id)
                     
-                    # Filter by query if provided
+                    
                     if query:
                         topics = [t for t in topics if query.lower() in t.title.lower() or 
                                  query.lower() in (t.description or '').lower()]
@@ -742,3 +742,4 @@ def search_content():
     except Exception as e:
         flash('Error searching content.', 'error')
         return redirect(url_for('topics.list_topics'))
+

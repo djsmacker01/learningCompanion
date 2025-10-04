@@ -5,7 +5,7 @@ CREATE TABLE learning_velocity (
     topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
     velocity_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     learning_rate DECIMAL(5,2) NOT NULL DEFAULT 0.0,
-    time_to_mastery INTEGER, -- days to reach mastery
+    time_to_mastery INTEGER,
     difficulty_level VARCHAR(20) NOT NULL DEFAULT 'beginner',
     measurement_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
     measurement_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE learning_velocity (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Knowledge retention tracking
+
 CREATE TABLE knowledge_retention (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -28,7 +28,7 @@ CREATE TABLE knowledge_retention (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning efficiency metrics
+
 CREATE TABLE learning_efficiency (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -43,7 +43,7 @@ CREATE TABLE learning_efficiency (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Personalized learning paths
+
 CREATE TABLE learning_paths (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -60,32 +60,32 @@ CREATE TABLE learning_paths (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning path steps
+
 CREATE TABLE learning_path_steps (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     path_id UUID NOT NULL REFERENCES learning_paths(id) ON DELETE CASCADE,
     step_order INTEGER NOT NULL,
     step_title VARCHAR(200) NOT NULL,
     step_description TEXT,
-    step_type VARCHAR(50) NOT NULL, -- 'study', 'practice', 'quiz', 'review'
+    step_type VARCHAR(50) NOT NULL,
     topic_id UUID REFERENCES topics(id) ON DELETE SET NULL,
     estimated_time_minutes INTEGER NOT NULL DEFAULT 30,
     difficulty_level VARCHAR(20) NOT NULL DEFAULT 'beginner',
-    prerequisites TEXT[], -- Array of prerequisite step IDs
+    prerequisites TEXT[],
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
     completed_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Knowledge gaps and weaknesses
+
 CREATE TABLE knowledge_gaps (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
-    gap_type VARCHAR(50) NOT NULL, -- 'conceptual', 'practical', 'theoretical'
-    gap_severity VARCHAR(20) NOT NULL DEFAULT 'medium', -- 'low', 'medium', 'high', 'critical'
+    gap_type VARCHAR(50) NOT NULL,
+    gap_severity VARCHAR(20) NOT NULL DEFAULT 'medium',
     gap_description TEXT NOT NULL,
-    detected_through VARCHAR(50) NOT NULL, -- 'quiz', 'session', 'ai_analysis'
+    detected_through VARCHAR(50) NOT NULL,
     confidence_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     suggested_remediation TEXT,
     is_resolved BOOLEAN NOT NULL DEFAULT FALSE,
@@ -94,28 +94,28 @@ CREATE TABLE knowledge_gaps (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Predictive learning analytics
+
 CREATE TABLE predictive_analytics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
-    prediction_type VARCHAR(50) NOT NULL, -- 'success_probability', 'optimal_time', 'burnout_risk', 'goal_achievement'
+    prediction_type VARCHAR(50) NOT NULL,
     prediction_value DECIMAL(5,2) NOT NULL,
     confidence_level DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     prediction_horizon_days INTEGER NOT NULL DEFAULT 7,
-    factors_considered TEXT[], -- Array of factors used in prediction
+    factors_considered TEXT[],
     prediction_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    actual_outcome DECIMAL(5,2), -- For validation
-    accuracy_score DECIMAL(5,2), -- How accurate the prediction was
+    actual_outcome DECIMAL(5,2),
+    accuracy_score DECIMAL(5,2),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Study time optimization
+
 CREATE TABLE study_time_optimization (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    optimal_hour INTEGER NOT NULL, -- 0-23
-    optimal_day_of_week INTEGER NOT NULL, -- 0-6 (Sunday-Saturday)
+    optimal_hour INTEGER NOT NULL,
+    optimal_day_of_week INTEGER NOT NULL,
     productivity_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     focus_duration_minutes INTEGER NOT NULL DEFAULT 25,
     break_duration_minutes INTEGER NOT NULL DEFAULT 5,
@@ -125,28 +125,28 @@ CREATE TABLE study_time_optimization (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Burnout risk tracking
+
 CREATE TABLE burnout_risk (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    risk_level VARCHAR(20) NOT NULL DEFAULT 'low', -- 'low', 'medium', 'high', 'critical'
+    risk_level VARCHAR(20) NOT NULL DEFAULT 'low',
     risk_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
-    contributing_factors TEXT[], -- Array of factors
+    contributing_factors TEXT[],
     study_intensity_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     rest_adequacy_score DECIMAL(5,2) NOT NULL DEFAULT 0.0,
-    stress_indicators TEXT[], -- Array of stress indicators
-    recommended_actions TEXT[], -- Array of recommended actions
+    stress_indicators TEXT[],
+    recommended_actions TEXT[],
     is_monitored BOOLEAN NOT NULL DEFAULT TRUE,
     last_assessment TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Goal achievement forecasting
+
 CREATE TABLE goal_forecasting (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    goal_id UUID, -- Reference to user goals (if separate table exists)
+    goal_id UUID,
     goal_description TEXT NOT NULL,
     target_completion_date DATE NOT NULL,
     predicted_completion_date DATE NOT NULL,
@@ -155,13 +155,13 @@ CREATE TABLE goal_forecasting (
     required_velocity DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     current_velocity DECIMAL(5,2) NOT NULL DEFAULT 0.0,
     is_on_track BOOLEAN NOT NULL DEFAULT TRUE,
-    risk_factors TEXT[], -- Array of risk factors
-    mitigation_strategies TEXT[], -- Array of mitigation strategies
+    risk_factors TEXT[],
+    mitigation_strategies TEXT[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for performance
+
 CREATE INDEX idx_learning_velocity_user_topic ON learning_velocity(user_id, topic_id);
 CREATE INDEX idx_learning_velocity_created ON learning_velocity(created_at);
 CREATE INDEX idx_knowledge_retention_user_topic ON knowledge_retention(user_id, topic_id);
@@ -175,7 +175,7 @@ CREATE INDEX idx_study_time_optimization_user ON study_time_optimization(user_id
 CREATE INDEX idx_burnout_risk_user_level ON burnout_risk(user_id, risk_level);
 CREATE INDEX idx_goal_forecasting_user_track ON goal_forecasting(user_id, is_on_track);
 
--- Row Level Security (RLS) policies
+
 ALTER TABLE learning_velocity ENABLE ROW LEVEL SECURITY;
 ALTER TABLE knowledge_retention ENABLE ROW LEVEL SECURITY;
 ALTER TABLE learning_efficiency ENABLE ROW LEVEL SECURITY;
@@ -187,7 +187,7 @@ ALTER TABLE study_time_optimization ENABLE ROW LEVEL SECURITY;
 ALTER TABLE burnout_risk ENABLE ROW LEVEL SECURITY;
 ALTER TABLE goal_forecasting ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for learning_velocity
+
 CREATE POLICY "Users can view own learning velocity" ON learning_velocity
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own learning velocity" ON learning_velocity
@@ -195,7 +195,7 @@ CREATE POLICY "Users can insert own learning velocity" ON learning_velocity
 CREATE POLICY "Users can update own learning velocity" ON learning_velocity
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for knowledge_retention
+
 CREATE POLICY "Users can view own knowledge retention" ON knowledge_retention
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own knowledge retention" ON knowledge_retention
@@ -203,13 +203,13 @@ CREATE POLICY "Users can insert own knowledge retention" ON knowledge_retention
 CREATE POLICY "Users can update own knowledge retention" ON knowledge_retention
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for learning_efficiency
+
 CREATE POLICY "Users can view own learning efficiency" ON learning_efficiency
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own learning efficiency" ON learning_efficiency
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- RLS Policies for learning_paths
+
 CREATE POLICY "Users can view own learning paths" ON learning_paths
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own learning paths" ON learning_paths
@@ -217,7 +217,7 @@ CREATE POLICY "Users can insert own learning paths" ON learning_paths
 CREATE POLICY "Users can update own learning paths" ON learning_paths
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for learning_path_steps
+
 CREATE POLICY "Users can view own learning path steps" ON learning_path_steps
     FOR SELECT USING (auth.uid() = (SELECT user_id FROM learning_paths WHERE id = path_id));
 CREATE POLICY "Users can insert own learning path steps" ON learning_path_steps
@@ -225,7 +225,7 @@ CREATE POLICY "Users can insert own learning path steps" ON learning_path_steps
 CREATE POLICY "Users can update own learning path steps" ON learning_path_steps
     FOR UPDATE USING (auth.uid() = (SELECT user_id FROM learning_paths WHERE id = path_id));
 
--- RLS Policies for knowledge_gaps
+
 CREATE POLICY "Users can view own knowledge gaps" ON knowledge_gaps
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own knowledge gaps" ON knowledge_gaps
@@ -233,13 +233,13 @@ CREATE POLICY "Users can insert own knowledge gaps" ON knowledge_gaps
 CREATE POLICY "Users can update own knowledge gaps" ON knowledge_gaps
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for predictive_analytics
+
 CREATE POLICY "Users can view own predictive analytics" ON predictive_analytics
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own predictive analytics" ON predictive_analytics
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- RLS Policies for study_time_optimization
+
 CREATE POLICY "Users can view own study time optimization" ON study_time_optimization
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own study time optimization" ON study_time_optimization
@@ -247,7 +247,7 @@ CREATE POLICY "Users can insert own study time optimization" ON study_time_optim
 CREATE POLICY "Users can update own study time optimization" ON study_time_optimization
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for burnout_risk
+
 CREATE POLICY "Users can view own burnout risk" ON burnout_risk
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own burnout risk" ON burnout_risk
@@ -255,7 +255,7 @@ CREATE POLICY "Users can insert own burnout risk" ON burnout_risk
 CREATE POLICY "Users can update own burnout risk" ON burnout_risk
     FOR UPDATE USING (auth.uid() = user_id);
 
--- RLS Policies for goal_forecasting
+
 CREATE POLICY "Users can view own goal forecasting" ON goal_forecasting
     FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own goal forecasting" ON goal_forecasting
@@ -263,7 +263,7 @@ CREATE POLICY "Users can insert own goal forecasting" ON goal_forecasting
 CREATE POLICY "Users can update own goal forecasting" ON goal_forecasting
     FOR UPDATE USING (auth.uid() = user_id);
 
--- Functions for advanced analytics calculations
+
 CREATE OR REPLACE FUNCTION calculate_learning_velocity(
     p_user_id UUID,
     p_topic_id UUID,
@@ -276,7 +276,7 @@ DECLARE
     total_time_minutes INTEGER;
     knowledge_gained DECIMAL(5,2);
 BEGIN
-    -- Calculate learning velocity based on sessions and knowledge gained
+
     SELECT 
         COUNT(*),
         COALESCE(SUM(duration_minutes), 0),
@@ -291,10 +291,10 @@ BEGIN
         RETURN 0.0;
     END IF;
     
-    -- Velocity = knowledge gained per hour of study
+
     velocity_score := (knowledge_gained * 60.0) / GREATEST(total_time_minutes, 1);
     
-    RETURN LEAST(velocity_score, 100.0); -- Cap at 100
+    RETURN LEAST(velocity_score, 100.0);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -309,7 +309,7 @@ DECLARE
     days_since_review INTEGER;
     forgetting_factor DECIMAL(5,2);
 BEGIN
-    -- Get last review date
+
     SELECT MAX(created_at) INTO last_review
     FROM study_sessions 
     WHERE user_id = p_user_id AND topic_id = p_topic_id;
@@ -320,9 +320,9 @@ BEGIN
     
     days_since_review := EXTRACT(EPOCH FROM (NOW() - last_review)) / 86400;
     
-    -- Ebbinghaus forgetting curve: R = e^(-t/S)
-    -- Where R is retention, t is time, S is strength of memory
-    forgetting_factor := EXP(-days_since_review / 7.0); -- 7 days half-life
+
+
+    forgetting_factor := EXP(-days_since_review / 7.0);
     
     retention_score := forgetting_factor * 100.0;
     
@@ -342,7 +342,7 @@ DECLARE
     session_progress DECIMAL(5,2);
     focus_score DECIMAL(5,2);
 BEGIN
-    -- Get session data
+
     SELECT duration_minutes, progress_percentage, focus_score
     INTO session_duration, session_progress, focus_score
     FROM study_sessions 
@@ -352,7 +352,7 @@ BEGIN
         RETURN 0.0;
     END IF;
     
-    -- Efficiency = (progress * focus) / time
+
     efficiency_score := (session_progress * COALESCE(focus_score, 50.0)) / session_duration;
     
     RETURN LEAST(efficiency_score, 100.0);
@@ -370,7 +370,7 @@ RETURNS TABLE(
     confidence_score DECIMAL(5,2)
 ) AS $$
 BEGIN
-    -- Analyze quiz results, session performance, and retention
+
     RETURN QUERY
     WITH performance_analysis AS (
         SELECT 
@@ -431,26 +431,26 @@ DECLARE
     days_remaining INTEGER;
     required_velocity DECIMAL(5,2);
 BEGIN
-    -- Get current progress
+
     SELECT AVG(progress_percentage) INTO current_progress
     FROM study_sessions 
     WHERE user_id = p_user_id AND topic_id = p_topic_id
     AND created_at >= NOW() - INTERVAL '7 days';
     
-    -- Calculate study velocity
+
     SELECT calculate_learning_velocity(p_user_id, p_topic_id, 14) INTO study_velocity;
     
-    -- Calculate days remaining
+
     days_remaining := p_exam_date - CURRENT_DATE;
     
     IF days_remaining <= 0 THEN
         RETURN CASE WHEN current_progress >= 80 THEN 90.0 ELSE 20.0 END;
     END IF;
     
-    -- Calculate required velocity to reach 80% by exam date
+
     required_velocity := (80.0 - COALESCE(current_progress, 0)) / days_remaining;
     
-    -- Success probability based on velocity comparison
+
     IF study_velocity >= required_velocity THEN
         success_probability := 85.0 + (study_velocity - required_velocity) * 2;
     ELSE
@@ -461,11 +461,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers for automatic analytics updates
+
 CREATE OR REPLACE FUNCTION update_learning_analytics()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Update learning velocity when study session is completed
+
     IF NEW.status = 'completed' THEN
         INSERT INTO learning_velocity (
             user_id, topic_id, velocity_score, learning_rate,
@@ -484,7 +484,7 @@ BEGIN
             learning_rate = EXCLUDED.learning_rate,
             updated_at = NOW();
         
-        -- Update knowledge retention
+
         INSERT INTO knowledge_retention (
             user_id, topic_id, retention_score, forgetting_curve_slope,
             retention_period_days, last_reviewed, next_review_due
@@ -492,8 +492,8 @@ BEGIN
         VALUES (
             NEW.user_id, NEW.topic_id,
             calculate_retention_curve(NEW.user_id, NEW.topic_id),
-            -0.1, -- Default forgetting curve slope
-            7, -- 7 days retention period
+            -0.1,
+            7,
             NEW.created_at,
             NEW.created_at + INTERVAL '7 days'
         )
@@ -504,7 +504,7 @@ BEGIN
             next_review_due = EXCLUDED.next_review_due,
             updated_at = NOW();
         
-        -- Update learning efficiency
+
         INSERT INTO learning_efficiency (
             user_id, topic_id, efficiency_score, time_invested_minutes,
             knowledge_gained_score, focus_score, session_quality,
@@ -530,7 +530,7 @@ CREATE TRIGGER trigger_update_learning_analytics
     FOR EACH ROW
     EXECUTE FUNCTION update_learning_analytics();
 
--- Insert sample data for testing
+
 INSERT INTO learning_velocity (user_id, topic_id, velocity_score, learning_rate, difficulty_level, measurement_period_start, measurement_period_end)
 SELECT 
     u.id,
@@ -572,12 +572,12 @@ AND t.id IN (SELECT id FROM topics LIMIT 5);
 INSERT INTO study_time_optimization (user_id, optimal_hour, optimal_day_of_week, productivity_score, focus_duration_minutes, break_duration_minutes, session_frequency_per_week, measurement_period_days)
 SELECT 
     u.id,
-    FLOOR(RANDOM() * 12 + 8), -- 8 AM to 8 PM
-    FLOOR(RANDOM() * 7), -- 0-6 (Sunday-Saturday)
+    FLOOR(RANDOM() * 12 + 8),
+    FLOOR(RANDOM() * 7),
     ROUND((RANDOM() * 30 + 60)::numeric, 2),
-    FLOOR(RANDOM() * 30 + 25), -- 25-55 minutes
-    FLOOR(RANDOM() * 10 + 5), -- 5-15 minutes
-    FLOOR(RANDOM() * 4 + 3), -- 3-7 sessions per week
+    FLOOR(RANDOM() * 30 + 25),
+    FLOOR(RANDOM() * 10 + 5),
+    FLOOR(RANDOM() * 4 + 3),
     30
 FROM users u
 WHERE u.id IN (SELECT id FROM users LIMIT 3);

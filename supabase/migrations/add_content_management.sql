@@ -1,13 +1,13 @@
--- Add content management functionality
--- This migration adds notes, file attachments, tags, and versioning to topics
 
--- Add content management fields to topics table
+
+
+
 ALTER TABLE topics ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE topics ADD COLUMN IF NOT EXISTS tags TEXT[];
 ALTER TABLE topics ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
 ALTER TABLE topics ADD COLUMN IF NOT EXISTS last_modified TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
--- Create topic_attachments table for file attachments
+
 CREATE TABLE IF NOT EXISTS topic_attachments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -24,20 +24,20 @@ CREATE TABLE IF NOT EXISTS topic_attachments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create topic_notes table for detailed notes
+
 CREATE TABLE IF NOT EXISTS topic_notes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    note_type VARCHAR(50) DEFAULT 'general', -- general, summary, key_points, questions, resources
+    note_type VARCHAR(50) DEFAULT 'general',
     is_public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create topic_versions table for content versioning
+
 CREATE TABLE IF NOT EXISTS topic_versions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS topic_versions (
     UNIQUE(topic_id, version_number)
 );
 
--- Create topic_tags table for tag management
+
 CREATE TABLE IF NOT EXISTS topic_tags (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS topic_tags (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_topics_tags ON topics USING GIN(tags);
 CREATE INDEX IF NOT EXISTS idx_topics_version ON topics(version);
 CREATE INDEX IF NOT EXISTS idx_topics_last_modified ON topics(last_modified);
@@ -77,13 +77,13 @@ CREATE INDEX IF NOT EXISTS idx_topic_versions_version ON topic_versions(topic_id
 CREATE INDEX IF NOT EXISTS idx_topic_tags_name ON topic_tags(name);
 CREATE INDEX IF NOT EXISTS idx_topic_tags_usage ON topic_tags(usage_count);
 
--- Enable RLS on new tables
+
 ALTER TABLE topic_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE topic_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE topic_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE topic_tags ENABLE ROW LEVEL SECURITY;
 
--- RLS policies for topic_attachments
+
 CREATE POLICY "Users can view their own topic attachments" ON topic_attachments
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -96,7 +96,7 @@ CREATE POLICY "Users can update their own topic attachments" ON topic_attachment
 CREATE POLICY "Users can delete their own topic attachments" ON topic_attachments
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for topic_notes
+
 CREATE POLICY "Users can view their own topic notes" ON topic_notes
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -109,14 +109,14 @@ CREATE POLICY "Users can update their own topic notes" ON topic_notes
 CREATE POLICY "Users can delete their own topic notes" ON topic_notes
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for topic_versions
+
 CREATE POLICY "Users can view their own topic versions" ON topic_versions
     FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can create versions for their topics" ON topic_versions
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- RLS policies for topic_tags (public read, authenticated write)
+
 CREATE POLICY "Anyone can view topic tags" ON topic_tags
     FOR SELECT USING (true);
 
@@ -126,7 +126,7 @@ CREATE POLICY "Authenticated users can create topic tags" ON topic_tags
 CREATE POLICY "Authenticated users can update topic tags" ON topic_tags
     FOR UPDATE USING (auth.uid() IS NOT NULL);
 
--- Function to create a new topic version
+
 CREATE OR REPLACE FUNCTION create_topic_version(
     p_topic_id UUID,
     p_change_summary TEXT DEFAULT NULL
@@ -136,7 +136,7 @@ DECLARE
     new_version INTEGER;
     topic_data RECORD;
 BEGIN
-    -- Get current topic data
+
     SELECT title, description, notes, tags, version
     INTO topic_data
     FROM topics 
@@ -146,10 +146,10 @@ BEGIN
         RAISE EXCEPTION 'Topic not found or access denied';
     END IF;
     
-    -- Get next version number
+
     new_version := topic_data.version + 1;
     
-    -- Create version record
+
     INSERT INTO topic_versions (
         topic_id, user_id, version_number, title, description, 
         notes, tags, change_summary
@@ -158,7 +158,7 @@ BEGIN
         topic_data.description, topic_data.notes, topic_data.tags, p_change_summary
     );
     
-    -- Update topic version
+
     UPDATE topics 
     SET version = new_version, last_modified = NOW()
     WHERE id = p_topic_id;
@@ -167,7 +167,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to restore a topic version
+
 CREATE OR REPLACE FUNCTION restore_topic_version(
     p_topic_id UUID,
     p_version_number INTEGER
@@ -176,7 +176,7 @@ RETURNS BOOLEAN AS $$
 DECLARE
     version_data RECORD;
 BEGIN
-    -- Get version data
+
     SELECT title, description, notes, tags
     INTO version_data
     FROM topic_versions 
@@ -186,10 +186,10 @@ BEGIN
         RAISE EXCEPTION 'Version not found or access denied';
     END IF;
     
-    -- Create new version with restored data
+
     PERFORM create_topic_version(p_topic_id, 'Restored from version ' || p_version_number);
     
-    -- Update topic with restored data
+
     UPDATE topics 
     SET 
         title = version_data.title,
@@ -203,23 +203,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to update tag usage count
+
 CREATE OR REPLACE FUNCTION update_tag_usage()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Update usage count for tags
+
     IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
-        -- Increment usage for new tags
+
         UPDATE topic_tags 
         SET usage_count = usage_count + 1 
         WHERE name = ANY(NEW.tags) AND name != ALL(COALESCE(OLD.tags, ARRAY[]::TEXT[]));
         
-        -- Decrement usage for removed tags
+
         UPDATE topic_tags 
         SET usage_count = GREATEST(usage_count - 1, 0) 
         WHERE name = ANY(COALESCE(OLD.tags, ARRAY[]::TEXT[])) AND name != ALL(NEW.tags);
     ELSIF TG_OP = 'DELETE' THEN
-        -- Decrement usage for deleted topic tags
+
         UPDATE topic_tags 
         SET usage_count = GREATEST(usage_count - 1, 0) 
         WHERE name = ANY(COALESCE(OLD.tags, ARRAY[]::TEXT[]));
@@ -229,12 +229,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for tag usage tracking
+
 CREATE TRIGGER update_tag_usage_trigger
     AFTER INSERT OR UPDATE OR DELETE ON topics
     FOR EACH ROW EXECUTE FUNCTION update_tag_usage();
 
--- Create trigger for updated_at
+
 CREATE TRIGGER update_topic_attachments_updated_at 
     BEFORE UPDATE ON topic_attachments 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -243,11 +243,11 @@ CREATE TRIGGER update_topic_notes_updated_at
     BEFORE UPDATE ON topic_notes 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Grant permissions
+
 GRANT EXECUTE ON FUNCTION create_topic_version(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION restore_topic_version(UUID, INTEGER) TO authenticated;
 
--- Insert some default tags
+
 INSERT INTO topic_tags (name, color, description) VALUES
 ('programming', '#3B82F6', 'Programming and coding topics'),
 ('mathematics', '#10B981', 'Math and quantitative subjects'),
@@ -259,7 +259,7 @@ INSERT INTO topic_tags (name, color, description) VALUES
 ('health', '#84CC16', 'Health and medical subjects')
 ON CONFLICT (name) DO NOTHING;
 
--- Comments
+
 COMMENT ON TABLE topic_attachments IS 'File attachments for topics';
 COMMENT ON TABLE topic_notes IS 'Detailed notes for topics';
 COMMENT ON TABLE topic_versions IS 'Version history for topics';

@@ -1,6 +1,4 @@
-"""
-Models for Study Reminders and Scheduling System
-"""
+
 
 import json
 from datetime import datetime, time, timedelta
@@ -9,7 +7,7 @@ from app.models import get_supabase_client, SUPABASE_AVAILABLE
 
 
 class StudyReminderPreferences:
-    """Model for user's study reminder preferences"""
+    
     
     def __init__(self, id=None, user_id=None, is_enabled=True, reminder_methods=None, 
                  preferred_times=None, timezone='UTC', frequency='daily', 
@@ -22,7 +20,7 @@ class StudyReminderPreferences:
         self.preferred_times = preferred_times or ['09:00', '18:00']
         self.timezone = timezone
         self.frequency = frequency
-        self.days_of_week = days_of_week or [1, 2, 3, 4, 5]  # Monday to Friday
+        self.days_of_week = days_of_week or [1, 2, 3, 4, 5]  
         self.study_goal_minutes = study_goal_minutes
         self.advance_notice_minutes = advance_notice_minutes
         self.created_at = created_at
@@ -30,7 +28,7 @@ class StudyReminderPreferences:
 
     @classmethod
     def get_or_create_preferences(cls, user_id: str):
-        """Get or create reminder preferences for a user"""
+        
         if not SUPABASE_AVAILABLE:
             return cls(user_id=user_id)
             
@@ -42,16 +40,16 @@ class StudyReminderPreferences:
                 data = result.data[0]
                 return cls(**data)
             else:
-                # Create default preferences
+                
                 preferences = cls(user_id=user_id)
                 return preferences.save()
         except Exception as e:
             print(f"Error getting reminder preferences: {e}")
-            # Return default preferences if table doesn't exist
+            
             return cls(user_id=user_id)
 
     def save(self):
-        """Save reminder preferences"""
+        
         if not SUPABASE_AVAILABLE:
             return self
             
@@ -72,10 +70,10 @@ class StudyReminderPreferences:
             }
             
             if self.id:
-                # Update existing
+                
                 result = supabase.table('study_reminder_preferences').update(data).eq('id', self.id).execute()
             else:
-                # Create new
+                
                 data['created_at'] = datetime.now().isoformat()
                 result = supabase.table('study_reminder_preferences').insert(data).execute()
                 
@@ -92,7 +90,7 @@ class StudyReminderPreferences:
 
 
 class StudyReminder:
-    """Model for individual study reminders"""
+    
     
     def __init__(self, id=None, user_id=None, title=None, message=None, 
                  scheduled_time=None, reminder_type='study', reminder_method='email',
@@ -121,7 +119,7 @@ class StudyReminder:
                        message: str = None, reminder_type: str = 'study',
                        reminder_method: str = 'email', topic_id: str = None,
                        session_type: str = None, priority: str = 'medium'):
-        """Create a new study reminder"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -155,7 +153,7 @@ class StudyReminder:
 
     @classmethod
     def get_user_reminders(cls, user_id: str, status: str = None, limit: int = 50):
-        """Get reminders for a user"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -171,12 +169,12 @@ class StudyReminder:
             return [cls(**reminder) for reminder in result.data]
         except Exception as e:
             print(f"Error getting user reminders: {e}")
-            # Return empty list if table doesn't exist
+            
             return []
 
     @classmethod
     def get_pending_reminders(cls, before_time: datetime = None):
-        """Get all pending reminders that should be sent"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -196,7 +194,7 @@ class StudyReminder:
             return []
 
     def mark_as_sent(self):
-        """Mark reminder as sent"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -216,7 +214,7 @@ class StudyReminder:
             return False
 
     def cancel(self):
-        """Cancel a reminder"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -236,7 +234,7 @@ class StudyReminder:
 
 
 class StudySchedule:
-    """Model for study schedules"""
+    
     
     def __init__(self, id=None, user_id=None, title=None, description=None,
                  scheduled_start=None, scheduled_end=None, topic_id=None,
@@ -266,7 +264,7 @@ class StudySchedule:
                        scheduled_end: datetime, topic_id: str = None,
                        session_type: str = 'review', description: str = None,
                        priority: str = 'medium'):
-        """Create a new study schedule"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -300,7 +298,7 @@ class StudySchedule:
     @classmethod
     def get_user_schedules(cls, user_id: str, start_date: datetime = None,
                           end_date: datetime = None, status: str = None):
-        """Get schedules for a user within a date range"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -320,11 +318,11 @@ class StudySchedule:
             return [cls(**schedule) for schedule in result.data]
         except Exception as e:
             print(f"Error getting user schedules: {e}")
-            # Return empty list if table doesn't exist
+            
             return []
 
     def start_session(self):
-        """Mark schedule as in progress"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -344,7 +342,7 @@ class StudySchedule:
             return False
 
     def complete_session(self):
-        """Mark schedule as completed"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -365,7 +363,7 @@ class StudySchedule:
 
 
 class OptimalStudyTime:
-    """Model for AI-generated optimal study time suggestions"""
+    
     
     def __init__(self, id=None, user_id=None, suggested_time=None, confidence_score=0.5,
                  reasoning=None, factors=None, topic_id=None, session_type='review',
@@ -387,7 +385,7 @@ class OptimalStudyTime:
                          confidence_score: float, reasoning: str,
                          factors: Dict[str, Any] = None, topic_id: str = None,
                          session_type: str = 'review'):
-        """Create a new optimal study time suggestion"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
@@ -416,7 +414,7 @@ class OptimalStudyTime:
 
     @classmethod
     def get_user_suggestions(cls, user_id: str, limit: int = 10):
-        """Get optimal study time suggestions for a user"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -427,11 +425,11 @@ class OptimalStudyTime:
             return [cls(**suggestion) for suggestion in result.data]
         except Exception as e:
             print(f"Error getting optimal study time suggestions: {e}")
-            # Return empty list if table doesn't exist
+            
             return []
 
     def accept(self):
-        """Accept the optimal study time suggestion"""
+        
         if not SUPABASE_AVAILABLE:
             return False
             
@@ -451,7 +449,7 @@ class OptimalStudyTime:
 
 
 class StudyPattern:
-    """Model for study patterns analysis"""
+    
     
     def __init__(self, id=None, user_id=None, pattern_type=None, pattern_data=None,
                  confidence_score=0.5, sample_size=1, last_updated=None, created_at=None):
@@ -466,7 +464,7 @@ class StudyPattern:
 
     @classmethod
     def get_user_patterns(cls, user_id: str, pattern_type: str = None):
-        """Get study patterns for a user"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -486,14 +484,14 @@ class StudyPattern:
     @classmethod
     def update_pattern(cls, user_id: str, pattern_type: str, pattern_data: Dict[str, Any],
                       confidence_score: float, sample_size: int):
-        """Update or create a study pattern"""
+        
         if not SUPABASE_AVAILABLE:
             return None
             
         supabase = get_supabase_client()
         
         try:
-            # Check if pattern exists
+            
             existing = supabase.table('study_patterns').select('id').eq('user_id', user_id).eq('pattern_type', pattern_type).execute()
             
             data = {
@@ -506,10 +504,10 @@ class StudyPattern:
             }
             
             if existing.data:
-                # Update existing
+                
                 result = supabase.table('study_patterns').update(data).eq('id', existing.data[0]['id']).execute()
             else:
-                # Create new
+                
                 data['created_at'] = datetime.now().isoformat()
                 result = supabase.table('study_patterns').insert(data).execute()
                 
@@ -519,3 +517,4 @@ class StudyPattern:
             print(f"Error updating study pattern: {e}")
             
         return None
+

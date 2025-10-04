@@ -1,5 +1,5 @@
 
--- AI Conversations table
+
 CREATE TABLE IF NOT EXISTS ai_conversations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS ai_chat_settings (
     UNIQUE(user_id)
 );
 
--- AI Chat Templates table
+
 CREATE TABLE IF NOT EXISTS ai_chat_templates (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS ai_chat_templates (
     )
 );
 
--- AI Chat Analytics table
+
 CREATE TABLE IF NOT EXISTS ai_chat_analytics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS ai_chat_analytics (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_ai_conversations_user_id ON ai_conversations(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_conversations_topic_id ON ai_conversations(topic_id);
 CREATE INDEX IF NOT EXISTS idx_ai_conversations_created_at ON ai_conversations(created_at DESC);
@@ -69,14 +69,14 @@ CREATE INDEX IF NOT EXISTS idx_ai_chat_analytics_conversation_id ON ai_chat_anal
 CREATE INDEX IF NOT EXISTS idx_ai_chat_analytics_topic_id ON ai_chat_analytics(topic_id);
 CREATE INDEX IF NOT EXISTS idx_ai_chat_analytics_type ON ai_chat_analytics(interaction_type);
 
--- Enable Row Level Security (RLS)
+
 ALTER TABLE ai_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_chat_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_chat_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_chat_analytics ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
--- AI Conversations policies
+
+
 CREATE POLICY "Users can view their own conversations" ON ai_conversations
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -89,7 +89,7 @@ CREATE POLICY "Users can update their own conversations" ON ai_conversations
 CREATE POLICY "Users can delete their own conversations" ON ai_conversations
     FOR DELETE USING (auth.uid() = user_id);
 
--- AI Chat Settings policies
+
 CREATE POLICY "Users can view their own settings" ON ai_chat_settings
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -102,7 +102,7 @@ CREATE POLICY "Users can update their own settings" ON ai_chat_settings
 CREATE POLICY "Users can delete their own settings" ON ai_chat_settings
     FOR DELETE USING (auth.uid() = user_id);
 
--- AI Chat Templates policies
+
 CREATE POLICY "Users can view their own templates and public templates" ON ai_chat_templates
     FOR SELECT USING (auth.uid() = user_id OR is_public = TRUE);
 
@@ -178,7 +178,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create triggers for updated_at
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -202,7 +202,7 @@ CREATE TRIGGER update_ai_chat_templates_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert default AI chat settings for existing users
+
 INSERT INTO ai_chat_settings (user_id, response_style, context_length, include_examples, auto_save_conversations)
 SELECT 
     u.id,
@@ -215,7 +215,7 @@ WHERE NOT EXISTS (
     SELECT 1 FROM ai_chat_settings acs WHERE acs.user_id = u.id
 );
 
--- Insert some default public templates
+
 INSERT INTO ai_chat_templates (user_id, name, template_type, content, is_public)
 VALUES 
     (NULL, 'Summarize Key Points', 'summarize', 'Please summarize the key points of this topic in a clear and concise way.', TRUE),
@@ -223,7 +223,7 @@ VALUES
     (NULL, 'Generate Study Questions', 'questions', 'Generate 5 practice questions for this topic with varying difficulty levels.', TRUE),
     (NULL, 'Create Study Guide', 'study_guide', 'Create a comprehensive study guide for this topic with main concepts, examples, and practice exercises.', TRUE);
 
--- Add comments for documentation
+
 COMMENT ON TABLE ai_conversations IS 'Stores AI chat conversations between users and the AI assistant';
 COMMENT ON TABLE ai_chat_settings IS 'Stores user preferences for AI chat functionality';
 COMMENT ON TABLE ai_chat_templates IS 'Stores reusable chat templates for common AI interactions';

@@ -1,4 +1,4 @@
--- Create user_profiles table for gamification data
+
 CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     UNIQUE(user_id)
 );
 
--- Create badges table
+
 CREATE TABLE IF NOT EXISTS badges (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS badges (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create user_badges table
+
 CREATE TABLE IF NOT EXISTS user_badges (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS user_badges (
     UNIQUE(user_id, badge_id)
 );
 
--- Create achievements table
+
 CREATE TABLE IF NOT EXISTS achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS achievements (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create user_achievements table
+
 CREATE TABLE IF NOT EXISTS user_achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
     UNIQUE(user_id, achievement_id)
 );
 
--- Create xp_transactions table for tracking XP history
+
 CREATE TABLE IF NOT EXISTS xp_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS xp_transactions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create leaderboards table for caching leaderboard data
+
 CREATE TABLE IF NOT EXISTS leaderboards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS leaderboards (
     UNIQUE(user_id, category, period)
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_total_xp ON user_profiles(total_xp DESC);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_study_streak ON user_profiles(study_streak DESC);
@@ -99,7 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_xp_transactions_created_at ON xp_transactions(cre
 CREATE INDEX IF NOT EXISTS idx_leaderboards_category_period ON leaderboards(category, period);
 CREATE INDEX IF NOT EXISTS idx_leaderboards_rank ON leaderboards(category, period, rank);
 
--- Enable RLS
+
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
@@ -108,7 +108,7 @@ ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE xp_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leaderboards ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+
 CREATE POLICY "Users can view their own profile" ON user_profiles FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update their own profile" ON user_profiles FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
@@ -129,59 +129,59 @@ CREATE POLICY "Anyone can view leaderboards" ON leaderboards FOR SELECT USING (t
 CREATE POLICY "Users can update their own leaderboard entries" ON leaderboards FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own leaderboard entries" ON leaderboards FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Create triggers for updated_at
+
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_leaderboards_updated_at BEFORE UPDATE ON leaderboards FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Insert default badges
+
 INSERT INTO badges (name, description, icon, category, rarity, xp_reward, requirements) VALUES
--- Study badges
+
 ('First Steps', 'Complete your first study session', 'fas fa-baby', 'study', 'common', 10, '{"study_sessions": 1}'),
 ('Dedicated Learner', 'Complete 10 study sessions', 'fas fa-graduation-cap', 'study', 'common', 25, '{"study_sessions": 10}'),
 ('Study Master', 'Complete 50 study sessions', 'fas fa-crown', 'study', 'rare', 50, '{"study_sessions": 50}'),
 ('Study Legend', 'Complete 100 study sessions', 'fas fa-trophy', 'study', 'epic', 100, '{"study_sessions": 100}'),
 
--- Streak badges
+
 ('Getting Started', 'Maintain a 3-day study streak', 'fas fa-fire', 'streak', 'common', 15, '{"study_streak": 3}'),
 ('On Fire', 'Maintain a 7-day study streak', 'fas fa-fire', 'streak', 'common', 30, '{"study_streak": 7}'),
 ('Streak Master', 'Maintain a 30-day study streak', 'fas fa-fire', 'streak', 'rare', 75, '{"study_streak": 30}'),
 ('Unstoppable', 'Maintain a 100-day study streak', 'fas fa-fire', 'streak', 'legendary', 200, '{"study_streak": 100}'),
 
--- Quiz badges
+
 ('Quiz Novice', 'Complete your first quiz', 'fas fa-question-circle', 'quiz', 'common', 15, '{"quizzes_completed": 1}'),
 ('Quiz Enthusiast', 'Complete 10 quizzes', 'fas fa-brain', 'quiz', 'common', 35, '{"quizzes_completed": 10}'),
 ('Quiz Master', 'Complete 25 quizzes', 'fas fa-medal', 'quiz', 'rare', 60, '{"quizzes_completed": 25}'),
 ('Quiz Legend', 'Complete 50 quizzes', 'fas fa-trophy', 'quiz', 'epic', 125, '{"quizzes_completed": 50}'),
 
--- Achievement badges
+
 ('Speed Learner', 'Complete a quiz in under 5 minutes', 'fas fa-bolt', 'achievement', 'rare', 40, '{"quiz_time_under": 300}'),
 ('Perfectionist', 'Score 100% on a quiz', 'fas fa-star', 'achievement', 'rare', 50, '{"quiz_score": 100}'),
 ('Marathon Studier', 'Study for 2 hours in one session', 'fas fa-clock', 'achievement', 'epic', 75, '{"session_duration": 120}'),
 ('Topic Master', 'Master 5 different topics', 'fas fa-book', 'achievement', 'rare', 60, '{"topics_mastered": 5}'),
 
--- Special badges
+
 ('Early Bird', 'Study before 6 AM', 'fas fa-sun', 'special', 'rare', 30, '{"study_time_before": "06:00"}'),
 ('Night Owl', 'Study after 10 PM', 'fas fa-moon', 'special', 'rare', 30, '{"study_time_after": "22:00"}'),
 ('Weekend Warrior', 'Study on both weekend days', 'fas fa-calendar-weekend', 'special', 'common', 25, '{"weekend_study": true}');
 
--- Insert default achievements
+
 INSERT INTO achievements (name, description, icon, category, xp_reward, requirements) VALUES
--- Study achievements
+
 ('Study Habit', 'Study for 7 consecutive days', 'fas fa-calendar-check', 'study', 50, '{"consecutive_days": 7}'),
 ('Study Marathon', 'Study for 30 consecutive days', 'fas fa-calendar-alt', 'study', 150, '{"consecutive_days": 30}'),
 ('Time Master', 'Accumulate 100 hours of study time', 'fas fa-hourglass-half', 'time', 100, '{"total_hours": 100}'),
 ('Speed Reader', 'Complete 10 study sessions in one day', 'fas fa-tachometer-alt', 'study', 75, '{"sessions_per_day": 10}'),
 
--- Quiz achievements
+
 ('Quiz Champion', 'Score 90% or higher on 10 quizzes', 'fas fa-medal', 'quiz', 80, '{"high_scores": 10}'),
 ('Perfect Score', 'Score 100% on 5 different quizzes', 'fas fa-star', 'quiz', 100, '{"perfect_scores": 5}'),
 ('Quiz Marathon', 'Complete 20 quizzes in one week', 'fas fa-running', 'quiz', 120, '{"quizzes_per_week": 20}'),
 
--- Mastery achievements
+
 ('Subject Expert', 'Master 10 different topics', 'fas fa-graduation-cap', 'mastery', 150, '{"topics_mastered": 10}'),
 ('Knowledge Seeker', 'Create 25 quizzes', 'fas fa-plus-circle', 'mastery', 100, '{"quizzes_created": 25}'),
 ('Flashcard Master', 'Review 1000 flashcards', 'fas fa-lightbulb', 'mastery', 80, '{"flashcards_reviewed": 1000}'),
 
--- Streak achievements
+
 ('Consistency King', 'Maintain a 14-day study streak', 'fas fa-fire', 'streak', 100, '{"study_streak": 14}'),
 ('Iron Will', 'Maintain a 60-day study streak', 'fas fa-dumbbell', 'streak', 250, '{"study_streak": 60}');

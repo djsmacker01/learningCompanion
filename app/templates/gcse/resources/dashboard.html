@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block title %}GCSE Learning Resources{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Resources</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><i class="fas fa-book me-2"></i>GCSE Learning Resources</h1>
+    <p class="lead">Discover curated educational content, revision materials, and learning resources tailored to your
+        GCSE studies.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    
+    {% if featured_resources %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Featured Resources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for resource in featured_resources %}
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card resource-card h-100">
+                                {% if resource.thumbnail_url %}
+                                <img src="{{ resource.thumbnail_url }}" class="card-img-top" alt="{{ resource.title }}"
+                                    style="height: 150px; object-fit: cover;">
+                                {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                    style="height: 150px;">
+                                    <i
+                                        class="fas fa-{{ 'video' if resource.resource_type == 'video' else 'file-alt' if resource.resource_type == 'document' else 'gamepad' if resource.resource_type == 'interactive' else 'book' }} fa-3x text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">{{ resource.title }}</h6>
+                                    <div class="mb-2">
+                                        <span class="badge bg-secondary text-capitalize">{{ resource.resource_type
+                                            }}</span>
+                                        <span class="badge bg-{{ 'success' if resource.is_free else 'warning' }}">
+                                            {{ 'Free' if resource.is_free else '£' + resource.price|string }}
+                                        </span>
+                                    </div>
+                                    <p class="card-text small flex-grow-1">{{ resource.description[:100] }}{% if
+                                        resource.description|length > 100 %}...{% endif %}</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-star text-warning"></i> {{ resource.rating }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> {{ resource.duration_minutes }}m
+                                            </small>
+                                        </div>
+                                        <a href="{{ url_for('gcse_resources.resource_detail', resource_id=resource.id) }}"
+                                            class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-eye me-1"></i>View Resource
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    
+    {% if recommendations and "error" not in recommendations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Personalized Recommendations</h5>
+                    <a href="{{ url_for('gcse_resources.personalized_recommendations') }}"
+                        class="btn btn-light btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recommendations.recommendations_by_subject %}
+                    {% for subject_name, subject_recommendations in recommendations.recommendations_by_subject.items()
+                    %}
+                    <div class="recommendation-section mb-4">
+                        <h6 class="text-success mb-3">{{ subject_name }}</h6>
+                        <div class="row">
+                            {% for type, resources in subject_recommendations.recommendations.items() %}
+                            {% if resources %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="recommendation-card p-3 border rounded">
+                                    <h6 class="text-capitalize">{{ type.replace('_', ' ') }}</h6>
+                                    {% for resource in resources[:2] %}
+                                    <div class="resource-item mb-2">
+                                        <a href="{{ url_for('gcse_resources.resource_detail', resource_id=resource.id) }}"
+                                            class="text-decoration-none">
+                                            <small class="fw-bold">{{ resource.title }}</small>
+                                        </a>
+                                        <div class="small text-muted">
+                                            <i class="fas fa-star text-warning"></i> {{ resource.rating }}
+                                            {% if resource.duration_minutes %}
+                                            • {{ resource.duration_minutes }}m
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if recommendations.overall_recommendations %}
+                    <div class="mt-4">
+                        <h6 class="text-primary mb-3">General Recommendations</h6>
+                        <div class="row">
+                            {% for recommendation in recommendations.overall_recommendations %}
+                            <div class="col-md-4 mb-3">
+                                <div class="recommendation-card p-3 border rounded">
+                                    <h6>{{ recommendation.title }}</h6>
+                                    <p class="small mb-2">{{ recommendation.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-secondary text-capitalize">{{ recommendation.type
+                                            }}</span>
+                                        <small class="text-muted">
+                                            <i class="fas fa-star text-warning"></i> {{ recommendation.rating }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    
+    {% if recent_resources %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recently Accessed</h5>
+                    <a href="{{ url_for('gcse_resources.my_resources') }}" class="btn btn-light btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Resource</th>
+                                    <th>Type</th>
+                                    <th>Action</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resource in recent_resources[:5] %}
+                                <tr>
+                                    <td>
+                                        <small class="fw-bold">{{ resource.resource_id }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary text-capitalize">{{ resource.resource_type
+                                            }}</span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge bg-{{ 'success' if resource.action == 'view' else 'primary' if resource.action == 'download' else 'warning' }}">
+                                            {{ resource.action.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ resource.accessed_at[:10] }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-th-large me-2"></i>Browse by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="category-card text-center p-4 border rounded h-100">
+                                <i class="fas fa-play-circle fa-3x text-primary mb-3"></i>
+                                <h6>Videos</h6>
+                                <p class="small text-muted">Educational videos and tutorials</p>
+                                <a href="{{ url_for('gcse_resources.browse_resources', resource_type='video') }}"
+                                    class="btn btn-outline-primary btn-sm">Browse Videos</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="category-card text-center p-4 border rounded h-100">
+                                <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                                <h6>Documents</h6>
+                                <p class="small text-muted">Study guides and reference materials</p>
+                                <a href="{{ url_for('gcse_resources.browse_resources', resource_type='document') }}"
+                                    class="btn btn-outline-success btn-sm">Browse Documents</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="category-card text-center p-4 border rounded h-100">
+                                <i class="fas fa-gamepad fa-3x text-warning mb-3"></i>
+                                <h6>Interactive</h6>
+                                <p class="small text-muted">Interactive tutorials and simulations</p>
+                                <a href="{{ url_for('gcse_resources.browse_resources', resource_type='interactive') }}"
+                                    class="btn btn-outline-warning btn-sm">Browse Interactive</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="category-card text-center p-4 border rounded h-100">
+                                <i class="fas fa-clipboard-list fa-3x text-info mb-3"></i>
+                                <h6>Revision Materials</h6>
+                                <p class="small text-muted">Study guides and practice materials</p>
+                                <a href="{{ url_for('gcse_resources.revision_materials') }}"
+                                    class="btn btn-outline-info btn-sm">Browse Materials</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_resources.browse_resources') }}"
+                                class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search fa-2x mb-2 d-block"></i>
+                                Search Resources
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_resources.personalized_recommendations') }}"
+                                class="btn btn-outline-success w-100">
+                                <i class="fas fa-lightbulb fa-2x mb-2 d-block"></i>
+                                Get Recommendations
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_resources.my_resources') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-bookmark fa-2x mb-2 d-block"></i>
+                                My Resources
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('gcse_resources.educational_content') }}"
+                                class="btn btn-outline-warning w-100">
+                                <i class="fas fa-graduation-cap fa-2x mb-2 d-block"></i>
+                                Learning Content
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .resource-card {
+        transition: all 0.2s ease;
+    }
+
+    .resource-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .recommendation-card {
+        transition: all 0.2s ease;
+        background-color: #f8f9fa;
+    }
+
+    .recommendation-card:hover {
+        background-color: #e9ecef;
+        transform: translateY(-1px);
+    }
+
+    .category-card {
+        transition: all 0.2s ease;
+    }
+
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-color: #007bff !important;
+    }
+
+    .resource-item {
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .resource-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .recommendation-section {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1rem;
+    }
+
+    .recommendation-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+</style>
+{% endblock %}

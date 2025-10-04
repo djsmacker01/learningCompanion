@@ -1,4 +1,4 @@
--- Create quizzes table
+
 CREATE TABLE IF NOT EXISTS quizzes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create quiz_questions table
+
 CREATE TABLE IF NOT EXISTS quiz_questions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create quiz_question_options table for multiple choice questions
+
 CREATE TABLE IF NOT EXISTS quiz_question_options (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     question_id UUID NOT NULL REFERENCES quiz_questions(id) ON DELETE CASCADE,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS quiz_question_options (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create quiz_attempts table
+
 CREATE TABLE IF NOT EXISTS quiz_attempts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     quiz_id UUID NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create quiz_attempt_answers table
+
 CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     attempt_id UUID NOT NULL REFERENCES quiz_attempts(id) ON DELETE CASCADE,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS quiz_attempt_answers (
     answered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create flashcard_progress table for spaced repetition
+
 CREATE TABLE IF NOT EXISTS flashcard_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS flashcard_progress (
     UNIQUE(user_id, question_id)
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_quizzes_topic_id ON quizzes(topic_id);
 CREATE INDEX IF NOT EXISTS idx_quizzes_user_id ON quizzes(user_id);
 CREATE INDEX IF NOT EXISTS idx_quizzes_type ON quizzes(quiz_type);
@@ -91,7 +91,7 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempt_answers_attempt_id ON quiz_attempt_a
 CREATE INDEX IF NOT EXISTS idx_flashcard_progress_user_id ON flashcard_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_flashcard_progress_next_review ON flashcard_progress(next_review_date);
 
--- Enable RLS
+
 ALTER TABLE quizzes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quiz_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quiz_question_options ENABLE ROW LEVEL SECURITY;
@@ -99,7 +99,7 @@ ALTER TABLE quiz_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quiz_attempt_answers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE flashcard_progress ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+
 CREATE POLICY "Users can view their own quizzes" ON quizzes FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create their own quizzes" ON quizzes FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own quizzes" ON quizzes FOR UPDATE USING (auth.uid() = user_id);
@@ -149,7 +149,7 @@ CREATE POLICY "Users can view their own flashcard progress" ON flashcard_progres
 CREATE POLICY "Users can create their own flashcard progress" ON flashcard_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own flashcard progress" ON flashcard_progress FOR UPDATE USING (auth.uid() = user_id);
 
--- Create triggers for updated_at
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

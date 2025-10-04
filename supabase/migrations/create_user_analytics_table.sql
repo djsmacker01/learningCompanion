@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS user_analytics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
-    total_study_time INTEGER DEFAULT 0, -- in minutes
+    total_study_time INTEGER DEFAULT 0,
     total_sessions INTEGER DEFAULT 0,
     current_streak INTEGER DEFAULT 0,
     longest_streak INTEGER DEFAULT 0,

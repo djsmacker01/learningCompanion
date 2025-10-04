@@ -78,7 +78,7 @@ def topic_progress():
 
 @analytics.route('/analytics/api/learning-trends')
 def learning_trends():
-    """API endpoint for learning trends data"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -432,3 +432,4 @@ def get_learning_trends_data(user_id, client):
     except Exception as e:
         print(f"Error getting learning trends: {e}")
         return {'trends': []}
+

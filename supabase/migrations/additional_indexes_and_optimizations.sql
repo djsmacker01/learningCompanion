@@ -98,7 +98,7 @@ FROM users u
 LEFT JOIN topics t ON u.id = t.user_id
 LEFT JOIN study_sessions s ON u.id = s.user_id AND s.completed = TRUE
 GROUP BY u.id, u.email, u.first_name, u.last_name;
--- Grant permissions on the view
+
 GRANT SELECT ON user_dashboard_analytics TO authenticated;
 
 

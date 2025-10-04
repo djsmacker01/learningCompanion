@@ -6,7 +6,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Header -->
+            
             <div class="text-center mb-5">
                 <h1 class="h2 mb-3">
                     <i class="fas fa-play-circle text-primary me-2"></i>Start Study Session
@@ -14,7 +14,7 @@
                 <p class="text-muted">Begin a focused learning session and track your progress</p>
             </div>
 
-            <!-- AI Recommendations -->
+            
             {% if ai_recommendations %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
@@ -53,14 +53,14 @@
             </div>
             {% endif %}
 
-            <!-- Session Start Form -->
+            
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <form method="POST">
                         {{ form.hidden_tag() }}
 
                         <div class="row">
-                            <!-- Topic Selection -->
+                            
                             <div class="col-md-6 mb-4">
                                 <label class="form-label fw-medium">
                                     <i class="fas fa-book text-primary me-2"></i>Choose Topic
@@ -75,7 +75,7 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Session Type -->
+                            
                             <div class="col-md-6 mb-4">
                                 <label class="form-label fw-medium">
                                     <i class="fas fa-tag text-primary me-2"></i>Session Type
@@ -91,7 +91,7 @@
                             </div>
                         </div>
 
-                        <!-- Confidence Rating -->
+                        
                         <div class="mb-4">
                             <label class="form-label fw-medium">
                                 <i class="fas fa-chart-line text-primary me-2"></i>Current Confidence Level
@@ -121,7 +121,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Estimated Duration -->
+                        
                         <div class="mb-4">
                             <label class="form-label fw-medium">
                                 <i class="fas fa-clock text-primary me-2"></i>Estimated Duration
@@ -152,7 +152,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Initial Notes -->
+                        
                         <div class="mb-4">
                             <label class="form-label fw-medium">
                                 <i class="fas fa-sticky-note text-primary me-2"></i>Initial Notes (Optional)
@@ -172,7 +172,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Action Buttons -->
+                        
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('sessions.session_history') }}"
                                 class="btn btn-outline-secondary me-md-2">
@@ -184,7 +184,7 @@
                 </div>
             </div>
 
-            <!-- Study Tips -->
+            
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-light border-0">
                     <h5 class="card-title mb-0">
@@ -229,7 +229,7 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            
             <div class="text-center mt-4">
                 <p class="text-muted mb-3">Or use our study timer for guided sessions</p>
                 <a href="{{ url_for('sessions.study_timer') }}" class="btn btn-outline-success">

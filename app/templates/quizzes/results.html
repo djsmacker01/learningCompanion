@@ -6,7 +6,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Results Header -->
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-{{ 'success' if passed else 'danger' }} text-white">
                     <div class="text-center">
@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <!-- Gamification Rewards -->
+            
             {% if rewards and (rewards.xp_earned > 0 or rewards.badges_earned or rewards.achievements_unlocked) %}
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-warning text-dark">
@@ -75,7 +75,7 @@
             </div>
             {% endif %}
 
-            <!-- Score Breakdown -->
+            
             <div class="row mb-4">
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm text-center">
@@ -106,7 +106,7 @@
                 </div>
             </div>
 
-            <!-- Performance Analysis -->
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
@@ -165,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- Question Review -->
+            
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
@@ -240,7 +240,7 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
+            
             <div class="text-center mb-4">
                 <div class="btn-group" role="group">
                     <a href="{{ url_for('quizzes.quiz_detail', quiz_id=quiz.id) }}" class="btn btn-outline-secondary">
@@ -257,7 +257,7 @@
                 </div>
             </div>
 
-            <!-- Study Recommendations -->
+            
             {% if not passed %}
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-warning text-dark">

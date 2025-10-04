@@ -1,4 +1,4 @@
-// Mobile and Accessibility JavaScript
+
 
 class MobileAccessibility {
     constructor() {
@@ -24,35 +24,35 @@ class MobileAccessibility {
     }
 
     setupAccessibilityFeatures() {
-        // Add skip link
+
         this.addSkipLink();
         
-        // Add ARIA landmarks
+
         this.addARIALandmarks();
         
-        // Add live regions
+
         this.addLiveRegions();
         
-        // Setup focus management
+
         this.setupFocusManagement();
     }
 
     setupMobileFeatures() {
-        // Detect mobile device
+
         this.detectMobileDevice();
         
-        // Setup touch events
+
         this.setupTouchEvents();
         
-        // Setup viewport handling
+
         this.setupViewportHandling();
         
-        // Setup device orientation
+
         this.setupDeviceOrientation();
     }
 
     setupOfflineDetection() {
-        // Listen for online/offline events
+
         window.addEventListener('online', () => {
             this.handleOnlineStatus(true);
         });
@@ -61,44 +61,44 @@ class MobileAccessibility {
             this.handleOnlineStatus(false);
         });
 
-        // Check initial status
+
         this.handleOnlineStatus(navigator.onLine);
     }
 
     setupKeyboardNavigation() {
-        // Add keyboard event listeners
+
         document.addEventListener('keydown', (e) => {
             this.handleKeyboardNavigation(e);
         });
 
-        // Setup tab navigation
+
         this.setupTabNavigation();
         
-        // Setup arrow key navigation
+
         this.setupArrowKeyNavigation();
         
-        // Setup escape key handling
+
         this.setupEscapeKeyHandling();
     }
 
     setupScreenReaderSupport() {
-        // Add screen reader announcements
+
         this.addScreenReaderAnnouncements();
         
-        // Setup ARIA live regions
+
         this.setupARIALiveRegions();
         
-        // Add semantic HTML
+
         this.addSemanticHTML();
     }
 
     setupHighContrastMode() {
-        // Check for high contrast preference
+
         if (window.matchMedia('(prefers-contrast: high)').matches) {
             this.enableHighContrast();
         }
 
-        // Listen for contrast changes
+
         window.matchMedia('(prefers-contrast: high)').addEventListener('change', (e) => {
             if (e.matches) {
                 this.enableHighContrast();
@@ -109,21 +109,21 @@ class MobileAccessibility {
     }
 
     setupTextScaling() {
-        // Check for text scaling preference
+
         const textSize = this.getTextSizePreference();
         this.applyTextScaling(textSize);
 
-        // Listen for text size changes
+
         this.setupTextSizeListener();
     }
 
     setupReducedMotion() {
-        // Check for reduced motion preference
+
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             this.enableReducedMotion();
         }
 
-        // Listen for motion changes
+
         window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
             if (e.matches) {
                 this.enableReducedMotion();
@@ -134,7 +134,7 @@ class MobileAccessibility {
     }
 
     setupColorBlindFriendly() {
-        // Check for color blind friendly preference
+
         const isColorBlindFriendly = this.getColorBlindFriendlyPreference();
         if (isColorBlindFriendly) {
             this.enableColorBlindFriendly();
@@ -142,63 +142,63 @@ class MobileAccessibility {
     }
 
     setupFocusManagement() {
-        // Add focus indicators
+
         this.addFocusIndicators();
         
-        // Setup focus trapping
+
         this.setupFocusTrapping();
         
-        // Setup focus restoration
+
         this.setupFocusRestoration();
     }
 
     setupTouchTargets() {
-        // Ensure minimum touch target size
+
         this.ensureMinimumTouchTargets();
         
-        // Add touch feedback
+
         this.addTouchFeedback();
     }
 
     setupSkipLinks() {
-        // Add skip to main content link
+
         this.addSkipToMainLink();
         
-        // Add skip to navigation link
+
         this.addSkipToNavigationLink();
     }
 
     setupARIALabels() {
-        // Add ARIA labels to interactive elements
+
         this.addARIALabels();
         
-        // Add ARIA descriptions
+
         this.addARIADescriptions();
         
-        // Add ARIA live regions
+
         this.addARIALiveRegions();
     }
 
     setupLiveRegions() {
-        // Add status live region
+
         this.addStatusLiveRegion();
         
-        // Add alert live region
+
         this.addAlertLiveRegion();
         
-        // Add log live region
+
         this.addLogLiveRegion();
     }
 
     setupErrorHandling() {
-        // Setup error handling for accessibility features
+
         this.setupAccessibilityErrorHandling();
         
-        // Setup error recovery
+
         this.setupErrorRecovery();
     }
 
-    // Accessibility Methods
+
     addSkipLink() {
         const skipLink = document.createElement('a');
         skipLink.href = '#main-content';
@@ -209,27 +209,27 @@ class MobileAccessibility {
     }
 
     addARIALandmarks() {
-        // Add main landmark
+
         const main = document.querySelector('main');
         if (main) {
             main.setAttribute('role', 'main');
             main.id = 'main-content';
         }
 
-        // Add navigation landmarks
+
         const navs = document.querySelectorAll('nav');
         navs.forEach((nav, index) => {
             nav.setAttribute('role', 'navigation');
             nav.setAttribute('aria-label', `Navigation ${index + 1}`);
         });
 
-        // Add header landmark
+
         const header = document.querySelector('header');
         if (header) {
             header.setAttribute('role', 'banner');
         }
 
-        // Add footer landmark
+
         const footer = document.querySelector('footer');
         if (footer) {
             footer.setAttribute('role', 'contentinfo');
@@ -237,7 +237,7 @@ class MobileAccessibility {
     }
 
     addLiveRegions() {
-        // Add status live region
+
         const statusRegion = document.createElement('div');
         statusRegion.id = 'status-live-region';
         statusRegion.setAttribute('aria-live', 'polite');
@@ -245,7 +245,7 @@ class MobileAccessibility {
         statusRegion.className = 'sr-only';
         document.body.appendChild(statusRegion);
 
-        // Add alert live region
+
         const alertRegion = document.createElement('div');
         alertRegion.id = 'alert-live-region';
         alertRegion.setAttribute('aria-live', 'assertive');
@@ -255,7 +255,7 @@ class MobileAccessibility {
     }
 
     setupFocusManagement() {
-        // Add focus indicators
+
         document.addEventListener('focusin', (e) => {
             e.target.classList.add('focus-visible');
         });
@@ -265,7 +265,7 @@ class MobileAccessibility {
         });
     }
 
-    // Mobile Methods
+
     detectMobileDevice() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
@@ -274,7 +274,7 @@ class MobileAccessibility {
     }
 
     setupTouchEvents() {
-        // Add touch event listeners
+
         document.addEventListener('touchstart', (e) => {
             e.target.classList.add('touch-active');
         });
@@ -287,12 +287,12 @@ class MobileAccessibility {
     }
 
     setupViewportHandling() {
-        // Handle viewport changes
+
         window.addEventListener('resize', () => {
             this.handleViewportChange();
         });
 
-        // Handle orientation changes
+
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
                 this.handleViewportChange();
@@ -301,7 +301,7 @@ class MobileAccessibility {
     }
 
     setupDeviceOrientation() {
-        // Handle device orientation
+
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', (e) => {
                 this.handleDeviceOrientation(e);
@@ -309,7 +309,7 @@ class MobileAccessibility {
         }
     }
 
-    // Offline Methods
+
     handleOnlineStatus(isOnline) {
         const indicator = document.getElementById('offline-indicator');
         if (indicator) {
@@ -323,9 +323,9 @@ class MobileAccessibility {
         }
     }
 
-    // Keyboard Navigation Methods
+
     handleKeyboardNavigation(e) {
-        // Handle specific keyboard shortcuts
+
         if (e.altKey && e.key === 'm') {
             e.preventDefault();
             this.focusMainContent();
@@ -342,7 +342,7 @@ class MobileAccessibility {
     }
 
     setupTabNavigation() {
-        // Ensure proper tab order
+
         const focusableElements = document.querySelectorAll(
             'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
@@ -353,7 +353,7 @@ class MobileAccessibility {
     }
 
     setupArrowKeyNavigation() {
-        // Setup arrow key navigation for custom components
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 this.handleArrowKeyNavigation(e);
@@ -362,7 +362,7 @@ class MobileAccessibility {
     }
 
     setupEscapeKeyHandling() {
-        // Handle escape key for modals, dropdowns, etc.
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.handleEscapeKey();
@@ -370,14 +370,14 @@ class MobileAccessibility {
         });
     }
 
-    // Screen Reader Methods
+
     addScreenReaderAnnouncements() {
-        // Add announcements for dynamic content
+
         this.setupDynamicAnnouncements();
     }
 
     setupARIALiveRegions() {
-        // Setup live regions for dynamic content
+
         const liveRegions = document.querySelectorAll('[aria-live]');
         liveRegions.forEach(region => {
             this.setupLiveRegion(region);
@@ -385,11 +385,11 @@ class MobileAccessibility {
     }
 
     addSemanticHTML() {
-        // Add semantic HTML elements
+
         this.addSemanticElements();
     }
 
-    // High Contrast Methods
+
     enableHighContrast() {
         document.body.classList.add('high-contrast');
     }
@@ -398,7 +398,7 @@ class MobileAccessibility {
         document.body.classList.remove('high-contrast');
     }
 
-    // Text Scaling Methods
+
     getTextSizePreference() {
         return localStorage.getItem('text-size') || 'medium';
     }
@@ -409,7 +409,7 @@ class MobileAccessibility {
     }
 
     setupTextSizeListener() {
-        // Listen for text size changes
+
         window.addEventListener('storage', (e) => {
             if (e.key === 'text-size') {
                 this.applyTextScaling(e.newValue);
@@ -417,7 +417,7 @@ class MobileAccessibility {
         });
     }
 
-    // Reduced Motion Methods
+
     enableReducedMotion() {
         document.body.classList.add('reduced-motion');
     }
@@ -426,7 +426,7 @@ class MobileAccessibility {
         document.body.classList.remove('reduced-motion');
     }
 
-    // Color Blind Friendly Methods
+
     getColorBlindFriendlyPreference() {
         return localStorage.getItem('color-blind-friendly') === 'true';
     }
@@ -439,9 +439,9 @@ class MobileAccessibility {
         document.body.classList.remove('color-blind-friendly');
     }
 
-    // Focus Management Methods
+
     addFocusIndicators() {
-        // Add focus indicators to interactive elements
+
         const focusableElements = document.querySelectorAll(
             'a, button, input, select, textarea, [tabindex]'
         );
@@ -458,19 +458,19 @@ class MobileAccessibility {
     }
 
     setupFocusTrapping() {
-        // Setup focus trapping for modals
+
         this.setupModalFocusTrapping();
     }
 
     setupFocusRestoration() {
-        // Store and restore focus
+
         let lastFocusedElement = null;
 
         document.addEventListener('focusin', (e) => {
             lastFocusedElement = e.target;
         });
 
-        // Restore focus when needed
+
         this.restoreFocus = () => {
             if (lastFocusedElement) {
                 lastFocusedElement.focus();
@@ -478,9 +478,9 @@ class MobileAccessibility {
         };
     }
 
-    // Touch Target Methods
+
     ensureMinimumTouchTargets() {
-        // Ensure minimum 44px touch targets
+
         const touchTargets = document.querySelectorAll('a, button, input, select, textarea');
         touchTargets.forEach(target => {
             const rect = target.getBoundingClientRect();
@@ -492,7 +492,7 @@ class MobileAccessibility {
     }
 
     addTouchFeedback() {
-        // Add touch feedback
+
         document.addEventListener('touchstart', (e) => {
             e.target.classList.add('touch-active');
         });
@@ -504,7 +504,7 @@ class MobileAccessibility {
         });
     }
 
-    // Skip Link Methods
+
     addSkipToMainLink() {
         const skipLink = document.createElement('a');
         skipLink.href = '#main-content';
@@ -521,9 +521,9 @@ class MobileAccessibility {
         document.body.insertBefore(skipLink, document.body.firstChild);
     }
 
-    // ARIA Methods
+
     addARIALabels() {
-        // Add ARIA labels to interactive elements
+
         const buttons = document.querySelectorAll('button:not([aria-label])');
         buttons.forEach(button => {
             if (!button.textContent.trim()) {
@@ -533,7 +533,7 @@ class MobileAccessibility {
     }
 
     addARIADescriptions() {
-        // Add ARIA descriptions
+
         const formControls = document.querySelectorAll('input, select, textarea');
         formControls.forEach(control => {
             if (control.hasAttribute('aria-describedby')) {
@@ -550,7 +550,7 @@ class MobileAccessibility {
     }
 
     addARIALiveRegions() {
-        // Add live regions for dynamic content
+
         const liveRegion = document.createElement('div');
         liveRegion.id = 'live-region';
         liveRegion.setAttribute('aria-live', 'polite');
@@ -559,7 +559,7 @@ class MobileAccessibility {
         document.body.appendChild(liveRegion);
     }
 
-    // Live Region Methods
+
     addStatusLiveRegion() {
         const statusRegion = document.createElement('div');
         statusRegion.id = 'status-live-region';
@@ -587,20 +587,20 @@ class MobileAccessibility {
         document.body.appendChild(logRegion);
     }
 
-    // Error Handling Methods
+
     setupAccessibilityErrorHandling() {
-        // Setup error handling for accessibility features
+
         window.addEventListener('error', (e) => {
             this.handleAccessibilityError(e);
         });
     }
 
     setupErrorRecovery() {
-        // Setup error recovery mechanisms
+
         this.setupErrorRecoveryMechanisms();
     }
 
-    // Utility Methods
+
     announceToScreenReader(message) {
         const liveRegion = document.getElementById('status-live-region');
         if (liveRegion) {
@@ -629,7 +629,7 @@ class MobileAccessibility {
     }
 
     handleEscapeKey() {
-        // Close modals, dropdowns, etc.
+
         const modals = document.querySelectorAll('.modal.show');
         modals.forEach(modal => {
             const closeButton = modal.querySelector('[data-bs-dismiss="modal"]');
@@ -640,13 +640,13 @@ class MobileAccessibility {
     }
 
     handleViewportChange() {
-        // Handle viewport changes
+
         const viewport = {
             width: window.innerWidth,
             height: window.innerHeight
         };
 
-        // Update mobile class
+
         if (viewport.width < 768) {
             document.body.classList.add('mobile-viewport');
         } else {
@@ -655,13 +655,13 @@ class MobileAccessibility {
     }
 
     handleDeviceOrientation(e) {
-        // Handle device orientation changes
-        const orientation = e.alpha; // 0-360 degrees
-        // Handle orientation changes
+
+        const orientation = e.alpha;
+
     }
 
     handleArrowKeyNavigation(e) {
-        // Handle arrow key navigation
+
         const currentElement = document.activeElement;
         const parent = currentElement.closest('[role="menu"], [role="listbox"], [role="grid"]');
         
@@ -684,7 +684,7 @@ class MobileAccessibility {
     }
 
     setupDynamicAnnouncements() {
-        // Setup announcements for dynamic content
+
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList') {
@@ -704,14 +704,14 @@ class MobileAccessibility {
     }
 
     setupLiveRegion(region) {
-        // Setup live region behavior
+
         region.addEventListener('DOMSubtreeModified', () => {
-            // Handle live region updates
+
         });
     }
 
     addSemanticElements() {
-        // Add semantic HTML elements
+
         const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
         headings.forEach((heading, index) => {
             if (!heading.id) {
@@ -721,7 +721,7 @@ class MobileAccessibility {
     }
 
     setupModalFocusTrapping() {
-        // Setup focus trapping for modals
+
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
             modal.addEventListener('shown.bs.modal', () => {
@@ -758,26 +758,26 @@ class MobileAccessibility {
     }
 
     setupErrorRecoveryMechanisms() {
-        // Setup error recovery mechanisms
+
         window.addEventListener('unhandledrejection', (e) => {
             this.handleUnhandledRejection(e);
         });
     }
 
     handleAccessibilityError(e) {
-        // Handle accessibility errors
+
         console.error('Accessibility error:', e);
         this.announceToScreenReader('An error occurred. Please try again.');
     }
 
     handleUnhandledRejection(e) {
-        // Handle unhandled promise rejections
+
         console.error('Unhandled rejection:', e);
         this.announceToScreenReader('An error occurred. Please refresh the page.');
     }
 
     announceNewContent(node) {
-        // Announce new content to screen readers
+
         if (node.matches('.alert, .notification, .message')) {
             const text = node.textContent.trim();
             if (text) {
@@ -787,10 +787,10 @@ class MobileAccessibility {
     }
 }
 
-// Initialize when DOM is loaded
+
 document.addEventListener('DOMContentLoaded', () => {
     new MobileAccessibility();
 });
 
-// Export for use in other modules
+
 window.MobileAccessibility = MobileAccessibility;

@@ -1,6 +1,4 @@
-"""
-Google Calendar Integration Utilities
-"""
+
 
 import os
 from datetime import datetime, timedelta
@@ -9,7 +7,7 @@ import json
 
 
 class GoogleCalendarIntegration:
-    """Google Calendar integration for study schedules"""
+    
     
     def __init__(self):
         self.client_id = os.getenv('GOOGLE_CLIENT_ID')
@@ -18,7 +16,7 @@ class GoogleCalendarIntegration:
         self.scope = 'https://www.googleapis.com/auth/calendar'
     
     def get_auth_url(self, state: str = None) -> str:
-        """Generate Google OAuth authorization URL"""
+        
         from urllib.parse import urlencode
         
         params = {
@@ -36,7 +34,7 @@ class GoogleCalendarIntegration:
         return f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
     
     def exchange_code_for_token(self, code: str) -> Dict[str, Any]:
-        """Exchange authorization code for access token"""
+        
         import requests
         
         data = {
@@ -51,7 +49,7 @@ class GoogleCalendarIntegration:
         return response.json()
     
     def refresh_access_token(self, refresh_token: str) -> Dict[str, Any]:
-        """Refresh access token using refresh token"""
+        
         import requests
         
         data = {
@@ -65,7 +63,7 @@ class GoogleCalendarIntegration:
         return response.json()
     
     def create_calendar_event(self, access_token: str, event_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create an event in Google Calendar"""
+        
         import requests
         
         headers = {
@@ -79,7 +77,7 @@ class GoogleCalendarIntegration:
     
     def create_study_event(self, access_token: str, title: str, start_time: datetime, 
                           end_time: datetime, description: str = None, topic: str = None) -> Dict[str, Any]:
-        """Create a study session event in Google Calendar"""
+        
         
         event_data = {
             'summary': title,
@@ -95,18 +93,18 @@ class GoogleCalendarIntegration:
             'reminders': {
                 'useDefault': False,
                 'overrides': [
-                    {'method': 'email', 'minutes': 24 * 60},  # 1 day before
-                    {'method': 'popup', 'minutes': 15}  # 15 minutes before
+                    {'method': 'email', 'minutes': 24 * 60},  
+                    {'method': 'popup', 'minutes': 15}  
                 ]
             },
-            'colorId': '2',  # Green color for study events
+            'colorId': '2',  
             'visibility': 'private'
         }
         
         return self.create_calendar_event(access_token, event_data)
     
     def sync_study_schedule(self, access_token: str, schedules: List[Any]) -> List[Dict[str, Any]]:
-        """Sync multiple study schedules to Google Calendar"""
+        
         created_events = []
         
         for schedule in schedules:
@@ -127,11 +125,11 @@ class GoogleCalendarIntegration:
 
 
 class CalendarWidget:
-    """Calendar widget for dashboard"""
+    
     
     @staticmethod
     def generate_calendar_html(events: List[Dict[str, Any]], month: int = None, year: int = None) -> str:
-        """Generate HTML for calendar widget"""
+        
         from datetime import datetime, timedelta
         import calendar
         
@@ -140,11 +138,11 @@ class CalendarWidget:
         if not year:
             year = datetime.now().year
         
-        # Get calendar data
+        
         cal = calendar.monthcalendar(year, month)
         month_name = calendar.month_name[month]
         
-        # Create events lookup by date
+        
         events_by_date = {}
         for event in events:
             event_date = datetime.fromisoformat(event['start']['dateTime']).date()
@@ -152,24 +150,8 @@ class CalendarWidget:
                 events_by_date[event_date] = []
             events_by_date[event_date].append(event)
         
-        # Generate HTML
-        html = f"""
-        <div class="calendar-widget">
-            <div class="calendar-header">
-                <h5>{month_name} {year}</h5>
-            </div>
-            <div class="calendar-grid">
-                <div class="calendar-weekdays">
-                    <div class="weekday">Mon</div>
-                    <div class="weekday">Tue</div>
-                    <div class="weekday">Wed</div>
-                    <div class="weekday">Thu</div>
-                    <div class="weekday">Fri</div>
-                    <div class="weekday">Sat</div>
-                    <div class="weekday">Sun</div>
-                </div>
-                <div class="calendar-days">
-        """
+        
+        html = f
         
         for week in cal:
             for day in week:
@@ -180,17 +162,9 @@ class CalendarWidget:
                     has_events = date in events_by_date
                     event_count = len(events_by_date.get(date, []))
                     
-                    html += f'''
-                    <div class="calendar-day {"has-events" if has_events else ""}">
-                        <span class="day-number">{day}</span>
-                        {f'<span class="event-indicator">{event_count}</span>' if has_events else ''}
-                    </div>
-                    '''
+                    html += f
         
-        html += """
-                </div>
-            </div>
-        </div>
-        """
+        html += 
         
         return html
+

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS user_accessibility_preferences (
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     screen_reader_enabled BOOLEAN DEFAULT FALSE,
     high_contrast_mode BOOLEAN DEFAULT FALSE,
-    text_size VARCHAR(20) DEFAULT 'medium', -- small, medium, large, extra-large
+    text_size VARCHAR(20) DEFAULT 'medium',
     keyboard_navigation BOOLEAN DEFAULT TRUE,
     reduced_motion BOOLEAN DEFAULT FALSE,
     color_blind_friendly BOOLEAN DEFAULT FALSE,
@@ -14,14 +14,14 @@ CREATE TABLE IF NOT EXISTS user_accessibility_preferences (
     UNIQUE(user_id)
 );
 
--- Create user_mobile_preferences table
+
 CREATE TABLE IF NOT EXISTS user_mobile_preferences (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     offline_mode BOOLEAN DEFAULT FALSE,
     auto_sync BOOLEAN DEFAULT TRUE,
-    sync_frequency INTEGER DEFAULT 15, -- minutes
-    data_usage_limit INTEGER DEFAULT 100, -- MB per day
+    sync_frequency INTEGER DEFAULT 15,
+    data_usage_limit INTEGER DEFAULT 100,
     push_notifications BOOLEAN DEFAULT TRUE,
     vibration_enabled BOOLEAN DEFAULT TRUE,
     haptic_feedback BOOLEAN DEFAULT TRUE,
@@ -30,26 +30,26 @@ CREATE TABLE IF NOT EXISTS user_mobile_preferences (
     UNIQUE(user_id)
 );
 
--- Create offline_data table for caching
+
 CREATE TABLE IF NOT EXISTS offline_data (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    data_type VARCHAR(50) NOT NULL, -- topics, sessions, notes, attachments
+    data_type VARCHAR(50) NOT NULL,
     data_id UUID NOT NULL,
     data_content JSONB NOT NULL,
     last_synced TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    is_dirty BOOLEAN DEFAULT FALSE, -- has local changes not synced
+    is_dirty BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create device_sync table for cross-device synchronization
+
 CREATE TABLE IF NOT EXISTS device_sync (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     device_id VARCHAR(255) NOT NULL,
     device_name VARCHAR(255),
-    device_type VARCHAR(50), -- mobile, tablet, desktop
+    device_type VARCHAR(50),
     last_sync TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     sync_token VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
@@ -58,16 +58,16 @@ CREATE TABLE IF NOT EXISTS device_sync (
     UNIQUE(user_id, device_id)
 );
 
--- Create accessibility_audit_log table
+
 CREATE TABLE IF NOT EXISTS accessibility_audit_log (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    action_type VARCHAR(50) NOT NULL, -- screen_reader_used, keyboard_navigation, high_contrast_toggle
+    action_type VARCHAR(50) NOT NULL,
     action_data JSONB,
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_user_accessibility_preferences_user ON user_accessibility_preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_mobile_preferences_user ON user_mobile_preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_offline_data_user ON offline_data(user_id);
@@ -78,14 +78,14 @@ CREATE INDEX IF NOT EXISTS idx_device_sync_device ON device_sync(device_id);
 CREATE INDEX IF NOT EXISTS idx_accessibility_audit_user ON accessibility_audit_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_accessibility_audit_timestamp ON accessibility_audit_log(timestamp);
 
--- Enable RLS on all tables
+
 ALTER TABLE user_accessibility_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_mobile_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE offline_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE device_sync ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accessibility_audit_log ENABLE ROW LEVEL SECURITY;
 
--- RLS policies for user_accessibility_preferences
+
 CREATE POLICY "Users can view their own accessibility preferences" ON user_accessibility_preferences
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -98,7 +98,7 @@ CREATE POLICY "Users can update their own accessibility preferences" ON user_acc
 CREATE POLICY "Users can delete their own accessibility preferences" ON user_accessibility_preferences
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for user_mobile_preferences
+
 CREATE POLICY "Users can view their own mobile preferences" ON user_mobile_preferences
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -111,7 +111,7 @@ CREATE POLICY "Users can update their own mobile preferences" ON user_mobile_pre
 CREATE POLICY "Users can delete their own mobile preferences" ON user_mobile_preferences
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for offline_data
+
 CREATE POLICY "Users can view their own offline data" ON offline_data
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -124,7 +124,7 @@ CREATE POLICY "Users can update their own offline data" ON offline_data
 CREATE POLICY "Users can delete their own offline data" ON offline_data
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for device_sync
+
 CREATE POLICY "Users can view their own device sync data" ON device_sync
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -137,14 +137,14 @@ CREATE POLICY "Users can update their own device sync data" ON device_sync
 CREATE POLICY "Users can delete their own device sync data" ON device_sync
     FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for accessibility_audit_log
+
 CREATE POLICY "Users can view their own accessibility audit log" ON accessibility_audit_log
     FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can create their own accessibility audit log" ON accessibility_audit_log
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Functions for mobile and accessibility features
+
 CREATE OR REPLACE FUNCTION get_user_accessibility_preferences(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
@@ -153,7 +153,7 @@ BEGIN
     SELECT * INTO preferences FROM user_accessibility_preferences WHERE user_id = p_user_id;
     
     IF NOT FOUND THEN
-        -- Create default preferences
+
         INSERT INTO user_accessibility_preferences (user_id) VALUES (p_user_id);
         SELECT * INTO preferences FROM user_accessibility_preferences WHERE user_id = p_user_id;
     END IF;
@@ -182,7 +182,7 @@ CREATE OR REPLACE FUNCTION update_user_accessibility_preferences(
 )
 RETURNS BOOLEAN AS $$
 BEGIN
-    -- Insert or update preferences
+
     INSERT INTO user_accessibility_preferences (
         user_id, screen_reader_enabled, high_contrast_mode, text_size,
         keyboard_navigation, reduced_motion, color_blind_friendly, focus_indicators
@@ -218,7 +218,7 @@ BEGIN
     SELECT * INTO preferences FROM user_mobile_preferences WHERE user_id = p_user_id;
     
     IF NOT FOUND THEN
-        -- Create default preferences
+
         INSERT INTO user_mobile_preferences (user_id) VALUES (p_user_id);
         SELECT * INTO preferences FROM user_mobile_preferences WHERE user_id = p_user_id;
     END IF;
@@ -247,7 +247,7 @@ CREATE OR REPLACE FUNCTION update_user_mobile_preferences(
 )
 RETURNS BOOLEAN AS $$
 BEGIN
-    -- Insert or update preferences
+
     INSERT INTO user_mobile_preferences (
         user_id, offline_mode, auto_sync, sync_frequency, data_usage_limit,
         push_notifications, vibration_enabled, haptic_feedback
@@ -285,10 +285,10 @@ RETURNS VARCHAR(255) AS $$
 DECLARE
     sync_token VARCHAR(255);
 BEGIN
-    -- Generate sync token
+
     sync_token := encode(gen_random_bytes(32), 'hex');
     
-    -- Insert or update device
+
     INSERT INTO device_sync (user_id, device_id, device_name, device_type, sync_token)
     VALUES (p_user_id, p_device_id, p_device_name, p_device_type, sync_token)
     ON CONFLICT (user_id, device_id) DO UPDATE SET
@@ -317,7 +317,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create triggers for updated_at
+
 CREATE TRIGGER update_user_accessibility_preferences_updated_at 
     BEFORE UPDATE ON user_accessibility_preferences 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -334,7 +334,7 @@ CREATE TRIGGER update_device_sync_updated_at
     BEFORE UPDATE ON device_sync 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Grant permissions
+
 GRANT EXECUTE ON FUNCTION get_user_accessibility_preferences(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION update_user_accessibility_preferences(UUID, BOOLEAN, BOOLEAN, VARCHAR, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_user_mobile_preferences(UUID) TO authenticated;
@@ -342,7 +342,7 @@ GRANT EXECUTE ON FUNCTION update_user_mobile_preferences(UUID, BOOLEAN, BOOLEAN,
 GRANT EXECUTE ON FUNCTION register_device(UUID, VARCHAR, VARCHAR, VARCHAR) TO authenticated;
 GRANT EXECUTE ON FUNCTION log_accessibility_action(UUID, VARCHAR, JSONB) TO authenticated;
 
--- Comments
+
 COMMENT ON TABLE user_accessibility_preferences IS 'User accessibility preferences for screen readers, high contrast, etc.';
 COMMENT ON TABLE user_mobile_preferences IS 'User mobile preferences for offline mode, sync settings, etc.';
 COMMENT ON TABLE offline_data IS 'Cached data for offline access';

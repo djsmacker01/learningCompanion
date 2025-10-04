@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+{% block title %}GCSE Grade Calculator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse_grading.grade_calculator') }}">Grading</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Calculator</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4"><i class="fas fa-calculator me-2"></i>GCSE Grade Calculator</h1>
+    <p class="lead">Calculate your GCSE grade based on your marks and official grade boundaries.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Grade Calculator</h5>
+                </div>
+                <div class="card-body">
+                    <form id="gradeCalculatorForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="examBoard" class="form-label">Exam Board</label>
+                                <select class="form-select" id="examBoard" name="exam_board" required>
+                                    <option value="">Select Exam Board</option>
+                                    {% for board in exam_boards %}
+                                    <option value="{{ board }}">{{ board }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="subject" class="form-label">Subject</label>
+                                <select class="form-select" id="subject" name="subject_code" required>
+                                    <option value="">Select Subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.specification_code }}"
+                                        data-exam-board="{{ subject.exam_board }}">
+                                        {{ subject.name }} ({{ subject.exam_board }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tier" class="form-label">Tier</label>
+                                <select class="form-select" id="tier" name="tier">
+                                    <option value="">Auto-detect</option>
+                                    <option value="Foundation">Foundation</option>
+                                    <option value="Higher">Higher</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="examYear" class="form-label">Exam Year</label>
+                                <select class="form-select" id="examYear" name="exam_year">
+                                    <option value="">Latest</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="achievedMarks" class="form-label">Marks Achieved</label>
+                                <input type="number" class="form-control" id="achievedMarks" name="achieved_marks"
+                                    placeholder="Enter marks achieved" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="totalMarks" class="form-label">Total Marks</label>
+                                <input type="number" class="form-control" id="totalMarks" name="total_marks"
+                                    placeholder="Enter total marks" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-calculator me-2"></i>Calculate Grade
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm" id="resultCard" style="display: none;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Grade Result</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div id="gradeDisplay">
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>How it Works</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small mb-2">The calculator uses official grade boundaries from exam boards to determine
+                        your grade.</p>
+                    <ul class="small mb-0">
+                        <li>Select your exam board and subject</li>
+                        <li>Enter your achieved marks and total marks</li>
+                        <li>Choose tier if known, or let it auto-detect</li>
+                        <li>Get your calculated grade instantly</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Grade Scale (9-1)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="grade-scale">
+                        <div class="grade-item grade-9">9 - Exceptional</div>
+                        <div class="grade-item grade-8">8 - Excellent</div>
+                        <div class="grade-item grade-7">7 - Very Good</div>
+                        <div class="grade-item grade-6">6 - Good</div>
+                        <div class="grade-item grade-5">5 - Strong Pass</div>
+                        <div class="grade-item grade-4">4 - Standard Pass</div>
+                        <div class="grade-item grade-3">3 - Below Standard</div>
+                        <div class="grade-item grade-2">2 - Poor</div>
+                        <div class="grade-item grade-1">1 - Very Poor</div>
+                        <div class="grade-item grade-u">U - Ungraded</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .grade-scale .grade-item {
+        padding: 8px 12px;
+        margin: 2px 0;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+
+    .grade-9 {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .grade-8 {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .grade-7 {
+        background-color: #b3d9ff;
+        color: #004085;
+    }
+
+    .grade-6 {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .grade-5 {
+        background-color: #ffeaa7;
+        color: #856404;
+    }
+
+    .grade-4 {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .grade-3 {
+        background-color: #f1b0b7;
+        color: #721c24;
+    }
+
+    .grade-2 {
+        background-color: #e2b3b9;
+        color: #721c24;
+    }
+
+    .grade-1 {
+        background-color: #d6b8ba;
+        color: #721c24;
+    }
+
+    .grade-u {
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+</style>
+
+<script>
+    document.getElementById('gradeCalculatorForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const response = await fetch('{{ url_for("gcse_grading.api_calculate_grade") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                displayGradeResult(result.grade_result);
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while calculating the grade.');
+        }
+    });
+
+    function displayGradeResult(gradeResult) {
+        const resultCard = document.getElementById('resultCard');
+        const gradeDisplay = document.getElementById('gradeDisplay');
+
+        const gradeClass = `grade-${gradeResult.grade}`;
+
+        gradeDisplay.innerHTML = `
+        <div class="grade-result">
+            <div class="grade-number ${gradeClass}">
+                <h2 class="mb-0">Grade ${gradeResult.grade}</h2>
+            </div>
+            <p class="grade-description mt-2">${gradeResult.description}</p>
+            <div class="grade-details mt-3">
+                <div class="row text-start">
+                    <div class="col-6"><strong>Percentage:</strong></div>
+                    <div class="col-6">${gradeResult.percentage.toFixed(1)}%</div>
+                </div>
+                <div class="row text-start">
+                    <div class="col-6"><strong>Marks:</strong></div>
+                    <div class="col-6">${gradeResult.raw_mark}/${gradeResult.total_mark}</div>
+                </div>
+                <div class="row text-start">
+                    <div class="col-6"><strong>Tier:</strong></div>
+                    <div class="col-6">${gradeResult.tier}</div>
+                </div>
+                ${gradeResult.boundary_mark ? `
+                <div class="row text-start">
+                    <div class="col-6"><strong>Boundary:</strong></div>
+                    <div class="col-6">${gradeResult.boundary_mark} marks</div>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+        resultCard.style.display = 'block';
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Filter subjects based on selected exam board
+    document.getElementById('examBoard').addEventListener('change', function () {
+        const selectedBoard = this.value;
+        const subjectSelect = document.getElementById('subject');
+        const options = subjectSelect.querySelectorAll('option[data-exam-board]');
+
+        // Reset subject selection
+        subjectSelect.value = '';
+
+        options.forEach(option => {
+            if (selectedBoard === '' || option.dataset.examBoard === selectedBoard) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
