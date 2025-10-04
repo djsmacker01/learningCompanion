@@ -15,7 +15,7 @@ ai_recommendations = Blueprint('ai_recommendations', __name__)
 @ai_recommendations.route('/ai/recommendations')
 @login_required
 def recommendations_dashboard():
-    """AI Recommendations Dashboard"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -53,7 +53,7 @@ def recommendations_dashboard():
 
 @ai_recommendations.route('/ai/api/recommendations')
 def api_recommendations():
-    """API endpoint for AI recommendations"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -71,7 +71,7 @@ def api_recommendations():
 
 @ai_recommendations.route('/ai/api/study-patterns')
 def api_study_patterns():
-    """API endpoint for study pattern analysis"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -86,7 +86,7 @@ def api_study_patterns():
 
 @ai_recommendations.route('/ai/api/topics-for-review')
 def api_topics_for_review():
-    """API endpoint for spaced repetition recommendations"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -105,7 +105,7 @@ def api_topics_for_review():
 
 @ai_recommendations.route('/ai/api/study-schedule')
 def api_study_schedule():
-    """API endpoint for optimal study schedule"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -125,7 +125,7 @@ def api_study_schedule():
 
 @ai_recommendations.route('/ai/api/topic-mastery/<topic_id>')
 def api_topic_mastery(topic_id):
-    """API endpoint for topic mastery analysis"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -148,7 +148,7 @@ def api_topic_mastery(topic_id):
         return jsonify({'error': str(e)}), 500
 
 def get_topics_for_review(user_id, client):
-    """Get topics that need review based on spaced repetition"""
+    
     try:
        
         response = client.rpc('get_topics_for_review', {'p_user_id': user_id}).execute()
@@ -164,7 +164,7 @@ def get_topics_for_review(user_id, client):
         return calculate_topics_for_review_fallback(user_id, client)
 
 def calculate_topics_for_review_fallback(user_id, client):
-    """Fallback method to calculate topics for review"""
+    
     try:
         
         topics_response = client.table('topics').select('*').eq('user_id', user_id).eq('is_active', True).execute()
@@ -184,7 +184,7 @@ def calculate_topics_for_review_fallback(user_id, client):
             
                 confidence_level = last_session.get('confidence_after', 5)
                 
-                # Calculate recommended interval based on confidence
+                
                 if confidence_level >= 8:
                     recommended_interval = 7
                 elif confidence_level >= 6:
@@ -194,7 +194,7 @@ def calculate_topics_for_review_fallback(user_id, client):
                 else:
                     recommended_interval = 0
                 
-                # Check if review is needed
+                
                 if days_since >= recommended_interval:
                     topics_for_review.append({
                         'topic_id': topic['id'],
@@ -205,7 +205,7 @@ def calculate_topics_for_review_fallback(user_id, client):
                         'confidence_level': confidence_level
                     })
             else:
-                # No sessions yet - high priority
+                
                 topics_for_review.append({
                     'topic_id': topic['id'],
                     'title': topic['title'],
@@ -215,7 +215,7 @@ def calculate_topics_for_review_fallback(user_id, client):
                     'confidence_level': 1
                 })
         
-        # Sort by priority (days overdue, then mastery level)
+        
         topics_for_review.sort(key=lambda x: (x['days_since_last_session'] - x['recommended_interval'], -x['mastery_level']))
         
         return topics_for_review
@@ -225,7 +225,7 @@ def calculate_topics_for_review_fallback(user_id, client):
         return []
 
 def get_study_schedule(user_id, client, days=7):
-    """Get optimal study schedule for the next N days"""
+    
     try:
        
         response = client.rpc('get_study_schedule', {'p_user_id': user_id, 'p_days': days}).execute()
@@ -241,7 +241,7 @@ def get_study_schedule(user_id, client, days=7):
         return calculate_study_schedule_fallback(user_id, client, days)
 
 def calculate_study_schedule_fallback(user_id, client, days=7):
-    """Fallback method to calculate study schedule"""
+    
     try:
         
         topics_for_review = get_topics_for_review(user_id, client)
@@ -259,13 +259,13 @@ def calculate_study_schedule_fallback(user_id, client, days=7):
             
            
             if topic['mastery_level'] <= 2:
-                recommended_duration = 45  # Longer for beginners
+                recommended_duration = 45  
             elif topic['mastery_level'] <= 4:
-                recommended_duration = 30  # Medium for intermediate
+                recommended_duration = 30  
             else:
-                recommended_duration = 20  # Shorter for advanced
+                recommended_duration = 20  
             
-            # Determine reason
+            
             if topic['days_since_last_session'] > topic['recommended_interval'] * 2:
                 reason = 'Overdue for review'
             elif topic['days_since_last_session'] >= topic['recommended_interval']:
@@ -290,7 +290,7 @@ def calculate_study_schedule_fallback(user_id, client, days=7):
 
 @ai_recommendations.route('/ai/api/learning-insights')
 def api_learning_insights():
-    """API endpoint for comprehensive learning insights"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -301,7 +301,7 @@ def api_learning_insights():
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Database not available'}), 500
         
-        # Get comprehensive insights
+        
         insights = {
             'study_streak': LearningAnalytics.calculate_study_streak(user.id),
             'study_patterns': LearningAnalytics.get_study_pattern_insights(user.id),
@@ -314,3 +314,4 @@ def api_learning_insights():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
