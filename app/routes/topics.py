@@ -139,7 +139,7 @@ def view_topic(topic_id):
                              topic_progress=topic_progress,
                              recent_sessions=recent_sessions)
     except Exception as e:
-        print(f"❌ Exception in view_topic: {e}")
+        print(f"ERROR: Exception in view_topic: {e}")
         import traceback
         traceback.print_exc()
         flash('Error loading topic. Please try again.', 'error')
