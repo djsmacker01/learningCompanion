@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, Optional, NumberRange, Length
 
 
 class AccessibilityPreferencesForm(FlaskForm):
-    """Form for accessibility preferences"""
+    
     
     screen_reader_enabled = BooleanField('Enable Screen Reader Support', 
         default=False,
@@ -75,7 +75,7 @@ class AccessibilityPreferencesForm(FlaskForm):
 
 
 class MobilePreferencesForm(FlaskForm):
-    """Form for mobile preferences"""
+    
     
     offline_mode = BooleanField('Enable Offline Mode', 
         default=False,
@@ -147,7 +147,7 @@ class MobilePreferencesForm(FlaskForm):
 
 
 class DeviceRegistrationForm(FlaskForm):
-    """Form for device registration"""
+    
     
     device_name = StringField('Device Name', 
         validators=[
@@ -181,7 +181,7 @@ class DeviceRegistrationForm(FlaskForm):
 
 
 class OfflineDataForm(FlaskForm):
-    """Form for offline data management"""
+    
     
     data_type = SelectField('Data Type', 
         choices=[
@@ -217,7 +217,7 @@ class OfflineDataForm(FlaskForm):
 
 
 class AccessibilityTestForm(FlaskForm):
-    """Form for accessibility testing"""
+    
     
     test_type = SelectField('Test Type', 
         choices=[
@@ -253,7 +253,7 @@ class AccessibilityTestForm(FlaskForm):
 
 
 class SyncStatusForm(FlaskForm):
-    """Form for sync status management"""
+    
     
     device_id = StringField('Device ID', 
         validators=[
@@ -286,3 +286,4 @@ class SyncStatusForm(FlaskForm):
     submit = SubmitField('Update Sync Status', render_kw={
         'class': 'btn btn-primary'
     })
+
