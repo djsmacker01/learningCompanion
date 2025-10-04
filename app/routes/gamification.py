@@ -1,7 +1,4 @@
-"""
-Gamification Routes
-Handles badges, achievements, XP system, and leaderboards
-"""
+
 
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required
@@ -21,7 +18,7 @@ gamification = Blueprint('gamification', __name__, url_prefix='/gamification')
 @gamification.route('/')
 @login_required
 def gamification_dashboard():
-    """Main gamification dashboard"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -29,16 +26,16 @@ def gamification_dashboard():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Get user profile
+    
     profile = UserProfile.get_or_create_profile(user.id)
     if not profile:
         return jsonify({'error': 'Failed to load profile'}), 500
     
-    # Get user badges and achievements
+    
     user_badges = UserBadge.get_user_badges(user.id)
     user_achievements = UserAchievement.get_user_achievements(user.id)
     
-    # Get recent XP transactions
+    
     recent_xp = GamificationEngine._get_recent_xp_transactions(user.id, limit=10)
     
     return render_template('gamification/dashboard.html', 
@@ -50,7 +47,7 @@ def gamification_dashboard():
 
 @gamification.route('/badges')
 def badges_page():
-    """Badges page showing all available badges"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -58,12 +55,12 @@ def badges_page():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Get all badges
+    
     all_badges = Badge.get_all_badges()
     user_badges = UserBadge.get_user_badges(user.id)
     user_badge_ids = {badge.badge_id for badge in user_badges}
     
-    # Get user profile for progress tracking
+    
     profile = UserProfile.get_or_create_profile(user.id)
     
     return render_template('gamification/badges.html',
@@ -74,7 +71,7 @@ def badges_page():
 
 @gamification.route('/achievements')
 def achievements_page():
-    """Achievements page showing all available achievements"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -82,12 +79,12 @@ def achievements_page():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Get all achievements
+    
     all_achievements = Achievement.get_all_achievements()
     user_achievements = UserAchievement.get_user_achievements(user.id)
     user_achievement_ids = {achievement.achievement_id for achievement in user_achievements}
     
-    # Get user profile for progress tracking
+    
     profile = UserProfile.get_or_create_profile(user.id)
     
     return render_template('gamification/achievements.html',
@@ -98,7 +95,7 @@ def achievements_page():
 
 @gamification.route('/leaderboard')
 def leaderboard_page():
-    """Leaderboard page showing rankings"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -106,14 +103,14 @@ def leaderboard_page():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Get leaderboard data for different categories
+    
     categories = ['total_xp', 'study_streak', 'quizzes_completed', 'study_time', 'topics_mastered']
     leaderboards = {}
     
     for category in categories:
         leaderboards[category] = Leaderboard.get_leaderboard(category, limit=10)
     
-    # Get user's rank in each category
+    
     user_ranks = {}
     profile = UserProfile.get_or_create_profile(user.id)
     
@@ -129,7 +126,7 @@ def leaderboard_page():
 
 @gamification.route('/api/profile')
 def api_user_profile():
-    """API endpoint to get user profile data"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -159,7 +156,7 @@ def api_user_profile():
 
 @gamification.route('/api/badges')
 def api_user_badges():
-    """API endpoint to get user badges"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -189,7 +186,7 @@ def api_user_badges():
 
 @gamification.route('/api/achievements')
 def api_user_achievements():
-    """API endpoint to get user achievements"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -219,7 +216,7 @@ def api_user_achievements():
 
 @gamification.route('/api/leaderboard/<category>')
 def api_leaderboard(category):
-    """API endpoint to get leaderboard data"""
+    
     period = request.args.get('period', 'all_time')
     limit = int(request.args.get('limit', 10))
     
@@ -234,7 +231,7 @@ def api_leaderboard(category):
 
 @gamification.route('/api/xp-history')
 def api_xp_history():
-    """API endpoint to get XP transaction history"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -250,7 +247,7 @@ def api_xp_history():
 
 @gamification.route('/api/process-study-session', methods=['POST'])
 def api_process_study_session():
-    """API endpoint to process study session and award rewards"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -265,7 +262,7 @@ def api_process_study_session():
         if duration_minutes <= 0:
             return jsonify({'error': 'Invalid duration'}), 400
         
-        # Process study session
+        
         rewards = GamificationEngine.process_study_session(user.id, duration_minutes)
         
         return jsonify({
@@ -280,7 +277,7 @@ def api_process_study_session():
 
 @gamification.route('/api/process-quiz-completion', methods=['POST'])
 def api_process_quiz_completion():
-    """API endpoint to process quiz completion and award rewards"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -296,7 +293,7 @@ def api_process_quiz_completion():
         if quiz_score < 0 or quiz_score > 100:
             return jsonify({'error': 'Invalid quiz score'}), 400
         
-        # Process quiz completion
+        
         rewards = GamificationEngine.process_quiz_completion(user.id, quiz_score, time_taken_minutes)
         
         return jsonify({
@@ -311,7 +308,7 @@ def api_process_quiz_completion():
 
 @gamification.route('/api/check-rewards')
 def api_check_rewards():
-    """API endpoint to check for new badges and achievements"""
+    
     user = get_current_user()
     if not user:
         flash('User not authenticated.', 'error')
@@ -320,7 +317,7 @@ def api_check_rewards():
         return jsonify({'error': 'User not found'}), 404
     
     try:
-        # Check for new badges and achievements
+        
         new_badges = GamificationEngine._check_badges(user.id)
         new_achievements = GamificationEngine._check_achievements(user.id)
         
@@ -335,13 +332,13 @@ def api_check_rewards():
         return jsonify({'error': 'Failed to check rewards'}), 500
 
 
-# Add missing methods to GamificationEngine
+
 class GamificationEngine:
-    """Extended gamification engine with additional methods"""
+    
     
     @staticmethod
     def _get_recent_xp_transactions(user_id: str, limit: int = 10) -> List[Dict]:
-        """Get recent XP transactions for user"""
+        
         if not SUPABASE_AVAILABLE:
             return []
             
@@ -356,7 +353,7 @@ class GamificationEngine:
     
     @staticmethod
     def _get_user_rank(user_id: str, category: str, period: str = 'all_time') -> int:
-        """Get user's rank in a specific category"""
+        
         if not SUPABASE_AVAILABLE:
             return 0
             
@@ -373,7 +370,7 @@ class GamificationEngine:
     
     @staticmethod
     def _calculate_level_progress(profile: UserProfile) -> Dict:
-        """Calculate level progress for user"""
+        
         current_level_xp = UserProfile.get_xp_for_level(profile.current_level)
         next_level_xp = UserProfile.get_xp_for_level(profile.current_level + 1)
         
@@ -387,3 +384,4 @@ class GamificationEngine:
             'total_xp_needed': total_xp_needed,
             'progress_percentage': min(100, max(0, progress_percentage))
         }
+

@@ -1,6 +1,4 @@
-"""
-Mobile and Accessibility Models
-"""
+
 
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -10,7 +8,7 @@ import json
 
 
 class UserAccessibilityPreferences:
-    """Model for user accessibility preferences"""
+    
     
     def __init__(self, id=None, user_id=None, screen_reader_enabled=False,
                  high_contrast_mode=False, text_size='medium', keyboard_navigation=True,
@@ -30,7 +28,7 @@ class UserAccessibilityPreferences:
     
     @classmethod
     def get_user_preferences(cls, user_id: str):
-        """Get user accessibility preferences"""
+        
         if not SUPABASE_AVAILABLE:
             return cls(user_id=user_id)
         
@@ -62,7 +60,7 @@ class UserAccessibilityPreferences:
     
     @classmethod
     def update_preferences(cls, user_id: str, **kwargs):
-        """Update user accessibility preferences"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -90,7 +88,7 @@ class UserAccessibilityPreferences:
     
     @classmethod
     def log_accessibility_action(cls, user_id: str, action_type: str, action_data: dict = None):
-        """Log accessibility action for audit"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -113,7 +111,7 @@ class UserAccessibilityPreferences:
 
 
 class UserMobilePreferences:
-    """Model for user mobile preferences"""
+    
     
     def __init__(self, id=None, user_id=None, offline_mode=False, auto_sync=True,
                  sync_frequency=15, data_usage_limit=100, push_notifications=True,
@@ -132,7 +130,7 @@ class UserMobilePreferences:
     
     @classmethod
     def get_user_preferences(cls, user_id: str):
-        """Get user mobile preferences"""
+        
         if not SUPABASE_AVAILABLE:
             return cls(user_id=user_id)
         
@@ -164,7 +162,7 @@ class UserMobilePreferences:
     
     @classmethod
     def update_preferences(cls, user_id: str, **kwargs):
-        """Update user mobile preferences"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -192,7 +190,7 @@ class UserMobilePreferences:
 
 
 class OfflineData:
-    """Model for offline data caching"""
+    
     
     def __init__(self, id=None, user_id=None, data_type=None, data_id=None,
                  data_content=None, last_synced=None, is_dirty=False,
@@ -209,7 +207,7 @@ class OfflineData:
     
     @classmethod
     def cache_data(cls, user_id: str, data_type: str, data_id: str, data_content: dict):
-        """Cache data for offline access"""
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -239,7 +237,7 @@ class OfflineData:
     
     @classmethod
     def get_cached_data(cls, user_id: str, data_type: str = None):
-        """Get cached data for offline access"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -277,7 +275,7 @@ class OfflineData:
     
     @classmethod
     def mark_dirty(cls, user_id: str, data_type: str, data_id: str):
-        """Mark data as dirty (has local changes)"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -299,7 +297,7 @@ class OfflineData:
     
     @classmethod
     def clear_cache(cls, user_id: str, data_type: str = None):
-        """Clear cached data"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -322,7 +320,7 @@ class OfflineData:
 
 
 class DeviceSync:
-    """Model for cross-device synchronization"""
+    
     
     def __init__(self, id=None, user_id=None, device_id=None, device_name=None,
                  device_type=None, last_sync=None, sync_token=None, is_active=True,
@@ -340,7 +338,7 @@ class DeviceSync:
     
     @classmethod
     def register_device(cls, user_id: str, device_id: str, device_name: str, device_type: str):
-        """Register a new device for sync"""
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -372,7 +370,7 @@ class DeviceSync:
     
     @classmethod
     def get_user_devices(cls, user_id: str):
-        """Get all devices for a user"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -406,7 +404,7 @@ class DeviceSync:
     
     @classmethod
     def update_sync_time(cls, user_id: str, device_id: str):
-        """Update last sync time for a device"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -428,7 +426,7 @@ class DeviceSync:
 
 
 class AccessibilityAuditLog:
-    """Model for accessibility audit logging"""
+    
     
     def __init__(self, id=None, user_id=None, action_type=None, action_data=None, timestamp=None):
         self.id = id
@@ -439,7 +437,7 @@ class AccessibilityAuditLog:
     
     @classmethod
     def get_user_audit_log(cls, user_id: str, limit: int = 50):
-        """Get user's accessibility audit log"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -465,3 +463,4 @@ class AccessibilityAuditLog:
         except Exception as e:
             print(f"Error getting audit log: {e}")
             return []
+

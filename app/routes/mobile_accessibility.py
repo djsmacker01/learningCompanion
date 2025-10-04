@@ -19,18 +19,18 @@ mobile_accessibility = Blueprint('mobile_accessibility', __name__)
 @mobile_accessibility.route('/accessibility')
 @login_required
 def accessibility_dashboard():
-    """Main accessibility dashboard"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get user preferences
+        
         accessibility_prefs = UserAccessibilityPreferences.get_user_preferences(user.id)
         mobile_prefs = UserMobilePreferences.get_user_preferences(user.id)
         
-        # Get audit log
+        
         audit_log = AccessibilityAuditLog.get_user_audit_log(user.id, limit=10)
         
         return render_template('mobile_accessibility/dashboard.html',
@@ -46,7 +46,7 @@ def accessibility_dashboard():
 @mobile_accessibility.route('/accessibility/preferences', methods=['GET', 'POST'])
 @login_required
 def accessibility_preferences():
-    """Manage accessibility preferences"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -68,7 +68,7 @@ def accessibility_preferences():
             )
             
             if success:
-                # Log the action
+                
                 UserAccessibilityPreferences.log_accessibility_action(
                     user.id,
                     'preferences_updated',
@@ -84,7 +84,7 @@ def accessibility_preferences():
             else:
                 flash('Error updating accessibility preferences.', 'error')
         else:
-            # Pre-populate form with current preferences
+            
             prefs = UserAccessibilityPreferences.get_user_preferences(user.id)
             form.screen_reader_enabled.data = prefs.screen_reader_enabled
             form.high_contrast_mode.data = prefs.high_contrast_mode
@@ -104,7 +104,7 @@ def accessibility_preferences():
 @mobile_accessibility.route('/mobile/preferences', methods=['GET', 'POST'])
 @login_required
 def mobile_preferences():
-    """Manage mobile preferences"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -131,7 +131,7 @@ def mobile_preferences():
             else:
                 flash('Error updating mobile preferences.', 'error')
         else:
-            # Pre-populate form with current preferences
+            
             prefs = UserMobilePreferences.get_user_preferences(user.id)
             form.offline_mode.data = prefs.offline_mode
             form.auto_sync.data = prefs.auto_sync
@@ -151,17 +151,17 @@ def mobile_preferences():
 @mobile_accessibility.route('/mobile/offline')
 @login_required
 def offline_management():
-    """Manage offline data"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get cached data
+        
         cached_data = OfflineData.get_cached_data(user.id)
         
-        # Group by data type
+        
         data_by_type = {}
         for data in cached_data:
             if data.data_type not in data_by_type:
@@ -180,7 +180,7 @@ def offline_management():
 @mobile_accessibility.route('/mobile/offline/action', methods=['POST'])
 @login_required
 def offline_action():
-    """Handle offline data actions"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -194,7 +194,7 @@ def offline_action():
             action = form.action.data
             
             if action == 'download':
-                # Simulate downloading data for offline
+                
                 flash(f'Downloading {data_type} for offline access...', 'info')
             elif action == 'clear':
                 success = OfflineData.clear_cache(user.id, data_type if data_type != 'all' else None)
@@ -203,7 +203,7 @@ def offline_action():
                 else:
                     flash('Error clearing cache.', 'error')
             elif action == 'sync':
-                # Simulate syncing with server
+                
                 flash(f'Syncing {data_type} with server...', 'info')
         
         return redirect(url_for('mobile_accessibility.offline_management'))
@@ -216,14 +216,14 @@ def offline_action():
 @mobile_accessibility.route('/mobile/devices')
 @login_required
 def device_management():
-    """Manage registered devices"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get user devices
+        
         devices = DeviceSync.get_user_devices(user.id)
         
         return render_template('mobile_accessibility/device_management.html',
@@ -237,7 +237,7 @@ def device_management():
 @mobile_accessibility.route('/mobile/devices/register', methods=['GET', 'POST'])
 @login_required
 def register_device():
-    """Register a new device"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -247,7 +247,7 @@ def register_device():
         form = DeviceRegistrationForm()
         
         if form.validate_on_submit():
-            # Generate device ID
+            
             device_id = str(uuid.uuid4())
             
             device = DeviceSync.register_device(
@@ -273,7 +273,7 @@ def register_device():
 @mobile_accessibility.route('/accessibility/test', methods=['GET', 'POST'])
 @login_required
 def accessibility_test():
-    """Accessibility testing tools"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -283,7 +283,7 @@ def accessibility_test():
         form = AccessibilityTestForm()
         
         if form.validate_on_submit():
-            # Log the test
+            
             UserAccessibilityPreferences.log_accessibility_action(
                 user.id,
                 'accessibility_test',
@@ -306,14 +306,14 @@ def accessibility_test():
 @mobile_accessibility.route('/accessibility/audit')
 @login_required
 def accessibility_audit():
-    """View accessibility audit log"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get audit log
+        
         audit_log = AccessibilityAuditLog.get_user_audit_log(user.id, limit=100)
         
         return render_template('mobile_accessibility/audit_log.html',
@@ -327,7 +327,7 @@ def accessibility_audit():
 @mobile_accessibility.route('/api/accessibility/preferences')
 @login_required
 def api_accessibility_preferences():
-    """API endpoint for accessibility preferences"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -353,7 +353,7 @@ def api_accessibility_preferences():
 @mobile_accessibility.route('/api/mobile/preferences')
 @login_required
 def api_mobile_preferences():
-    """API endpoint for mobile preferences"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -379,14 +379,14 @@ def api_mobile_preferences():
 @mobile_accessibility.route('/api/offline/status')
 @login_required
 def api_offline_status():
-    """API endpoint for offline status"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get cached data count
+        
         cached_data = OfflineData.get_cached_data(user.id)
         
         return jsonify({
@@ -397,3 +397,4 @@ def api_offline_status():
     
     except Exception as e:
         return jsonify({'error': 'Error loading offline status'}), 500
+
