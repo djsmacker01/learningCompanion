@@ -1,6 +1,4 @@
-"""
-Forms for Quiz and Assessment System
-"""
+
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, IntegerField, BooleanField, RadioField, HiddenField, SubmitField
@@ -9,7 +7,7 @@ from wtforms.widgets import TextArea
 
 
 class CreateQuizForm(FlaskForm):
-    """Form for creating a new quiz"""
+    
     title = StringField('Quiz Title', validators=[DataRequired(), Length(min=1, max=255)])
     description = TextAreaField('Description', validators=[Optional(), Length(max=1000)])
     quiz_type = SelectField('Quiz Type', 
@@ -38,7 +36,7 @@ class CreateQuizForm(FlaskForm):
 
 
 class CreateQuestionForm(FlaskForm):
-    """Form for creating a new quiz question"""
+    
     question_text = TextAreaField('Question', 
                                  validators=[DataRequired(), Length(min=1, max=2000)],
                                  render_kw={'rows': 4, 'placeholder': 'Enter your question here...'})
@@ -63,7 +61,7 @@ class CreateQuestionForm(FlaskForm):
 
 
 class MultipleChoiceOptionForm(FlaskForm):
-    """Form for adding multiple choice options"""
+    
     option_text = StringField('Option Text', 
                              validators=[DataRequired(), Length(min=1, max=500)],
                              render_kw={'placeholder': 'Enter option text...'})
@@ -72,7 +70,7 @@ class MultipleChoiceOptionForm(FlaskForm):
 
 
 class TakeQuizForm(FlaskForm):
-    """Form for taking a quiz"""
+    
     answer = StringField('Your Answer', 
                         validators=[DataRequired(), Length(min=1, max=500)],
                         render_kw={'placeholder': 'Enter your answer...'})
@@ -80,7 +78,7 @@ class TakeQuizForm(FlaskForm):
 
 
 class FlashcardReviewForm(FlaskForm):
-    """Form for reviewing flashcards"""
+    
     quality = SelectField('How well did you know this?',
                          choices=[
                              (0, '0 - Complete blackout'),
@@ -96,7 +94,7 @@ class FlashcardReviewForm(FlaskForm):
 
 
 class QuizSearchForm(FlaskForm):
-    """Form for searching quizzes"""
+    
     search_term = StringField('Search Quizzes', 
                              validators=[Optional(), Length(min=1, max=100)],
                              render_kw={'placeholder': 'Search by title or description...'})
@@ -123,7 +121,7 @@ class QuizSearchForm(FlaskForm):
 
 
 class QuizSettingsForm(FlaskForm):
-    """Form for quiz settings and preferences"""
+    
     auto_advance = BooleanField('Auto-advance to next question')
     show_explanations = BooleanField('Show explanations immediately')
     shuffle_questions = BooleanField('Shuffle questions')
@@ -132,3 +130,4 @@ class QuizSettingsForm(FlaskForm):
                                default=30,
                                validators=[Optional(), NumberRange(min=5, max=300)])
     submit = SubmitField('Save Settings')
+

@@ -63,14 +63,14 @@ class EditSessionForm(FlaskForm):
     submit = SubmitField('Update Session')
     
     def validate_session_date(self, field):
-        """Validate that session date is not in the future"""
+        
         if field.data and field.data > date.today():
             raise ValidationError('Session date cannot be in the future')
     
     def validate_confidence_after(self, field):
-        """Validate confidence after is reasonable compared to before"""
+        
         if hasattr(self, 'confidence_before') and self.confidence_before.data and field.data:
-            # Allow some flexibility but warn about unrealistic jumps
+            
             diff = field.data - self.confidence_before.data
             if diff > 5:
                 raise ValidationError('Confidence improvement seems unrealistic. Please verify your ratings.')
@@ -92,6 +92,7 @@ class SessionFilterForm(FlaskForm):
             self.topic_id.choices = [('', 'All Topics')] + [(topic.id, topic.title) for topic in topics]
     
     def validate_date_to(self, field):
-        """Validate date range"""
+        
         if self.date_from.data and field.data and field.data < self.date_from.data:
             raise ValidationError('End date must be after start date')
+
