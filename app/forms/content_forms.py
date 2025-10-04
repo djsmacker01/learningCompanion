@@ -6,7 +6,7 @@ from wtforms.widgets import CheckboxInput, ListWidget
 
 
 class TopicNoteForm(FlaskForm):
-    """Form for creating/editing topic notes"""
+    
     
     title = StringField('Note Title', 
         validators=[
@@ -63,7 +63,7 @@ class TopicNoteForm(FlaskForm):
 
 
 class TopicAttachmentForm(FlaskForm):
-    """Form for uploading topic attachments"""
+    
     
     file = FileField('File', 
         validators=[
@@ -107,10 +107,10 @@ class TopicAttachmentForm(FlaskForm):
 
 
 class TopicTagForm(FlaskForm):
-    """Form for managing topic tags"""
+    
     
     tags = SelectMultipleField('Tags', 
-        choices=[],  # Will be populated dynamically
+        choices=[],  
         render_kw={
             'class': 'form-control',
             'multiple': True,
@@ -135,7 +135,7 @@ class TopicTagForm(FlaskForm):
 
 
 class TopicContentForm(FlaskForm):
-    """Form for updating topic content"""
+    
     
     title = StringField('Title', 
         validators=[
@@ -171,7 +171,7 @@ class TopicContentForm(FlaskForm):
     )
     
     tags = SelectMultipleField('Tags', 
-        choices=[],  # Will be populated dynamically
+        choices=[],  
         render_kw={
             'class': 'form-control',
             'multiple': True,
@@ -196,7 +196,7 @@ class TopicContentForm(FlaskForm):
 
 
 class TopicVersionForm(FlaskForm):
-    """Form for restoring topic versions"""
+    
     
     version_number = HiddenField('Version Number')
     
@@ -207,7 +207,7 @@ class TopicVersionForm(FlaskForm):
 
 
 class ContentSearchForm(FlaskForm):
-    """Form for searching content"""
+    
     
     query = StringField('Search', 
         validators=[
@@ -221,7 +221,7 @@ class ContentSearchForm(FlaskForm):
     )
     
     tags = SelectMultipleField('Filter by Tags', 
-        choices=[],  # Will be populated dynamically
+        choices=[],  
         render_kw={
             'class': 'form-control',
             'multiple': True,
@@ -245,3 +245,4 @@ class ContentSearchForm(FlaskForm):
     submit = SubmitField('Search', render_kw={
         'class': 'btn btn-primary'
     })
+
