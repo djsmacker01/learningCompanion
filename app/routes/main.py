@@ -112,3 +112,4 @@ def dashboard_stats():
 @login_required
 def test():
     return "Learning Companion is working! You can now test the topic functionality."
+

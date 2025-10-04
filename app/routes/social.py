@@ -19,14 +19,14 @@ social = Blueprint('social', __name__)
 @social.route('/social')
 @login_required
 def social_dashboard():
-    """Main social features dashboard"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get user's social data
+        
         friends = Friend.get_friends(user.id)
         pending_requests = Friend.get_pending_requests(user.id)
         user_groups = StudyGroup.get_user_groups(user.id)
@@ -50,7 +50,7 @@ def social_dashboard():
 @social.route('/social/friends')
 @login_required
 def friends_list():
-    """View and manage friends"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -72,7 +72,7 @@ def friends_list():
 @social.route('/social/friends/add', methods=['GET', 'POST'])
 @login_required
 def add_friend():
-    """Send a friend request"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -82,11 +82,11 @@ def add_friend():
         form = FriendRequestForm()
         
         if form.validate_on_submit():
-            # In a real app, you'd look up the user by email
-            # For now, we'll simulate finding a user
+            
+            
             friend_email = form.friend_email.data
             
-            # Simulate finding user by email (in real app, query database)
+            
             if friend_email == 'friend@example.com':
                 friend_id = 'mock-friend-id'
                 
@@ -110,7 +110,7 @@ def add_friend():
 @social.route('/social/friends/accept/<user_id>', methods=['POST'])
 @login_required
 def accept_friend_request(user_id):
-    """Accept a friend request"""
+    
     try:
         success = Friend.accept_friend_request(user_id)
         
@@ -129,7 +129,7 @@ def accept_friend_request(user_id):
 @social.route('/social/groups')
 @login_required
 def study_groups():
-    """View study groups"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -151,7 +151,7 @@ def study_groups():
 @social.route('/social/groups/create', methods=['GET', 'POST'])
 @login_required
 def create_study_group():
-    """Create a new study group"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -185,7 +185,7 @@ def create_study_group():
 @social.route('/social/groups/<group_id>/join', methods=['POST'])
 @login_required
 def join_study_group(group_id):
-    """Join a study group"""
+    
     try:
         success = StudyGroup.join_group(group_id)
         
@@ -204,14 +204,14 @@ def join_study_group(group_id):
 @social.route('/social/groups/<group_id>')
 @login_required
 def view_study_group(group_id):
-    """View a study group"""
+    
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        # Get group details (simplified for demo)
+        
         group = {
             'id': group_id,
             'name': 'Sample Study Group',
@@ -236,7 +236,7 @@ def view_study_group(group_id):
 @social.route('/social/challenges')
 @login_required
 def social_challenges():
-    """View social challenges"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -258,7 +258,7 @@ def social_challenges():
 @social.route('/social/challenges/create', methods=['GET', 'POST'])
 @login_required
 def create_challenge():
-    """Create a new social challenge"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -295,7 +295,7 @@ def create_challenge():
 @social.route('/social/challenges/<challenge_id>/join', methods=['POST'])
 @login_required
 def join_challenge(challenge_id):
-    """Join a challenge"""
+    
     try:
         success = SocialChallenge.join_challenge(challenge_id)
         
@@ -314,7 +314,7 @@ def join_challenge(challenge_id):
 @social.route('/social/challenges/<challenge_id>/progress', methods=['GET', 'POST'])
 @login_required
 def update_challenge_progress(challenge_id):
-    """Update challenge progress"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -348,7 +348,7 @@ def update_challenge_progress(challenge_id):
 @social.route('/social/achievements')
 @login_required
 def social_achievements():
-    """View and share achievements"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -370,7 +370,7 @@ def social_achievements():
 @social.route('/social/achievements/share', methods=['GET', 'POST'])
 @login_required
 def share_achievement():
-    """Share an achievement"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -410,7 +410,7 @@ def share_achievement():
 @social.route('/social/activity')
 @login_required
 def activity_feed():
-    """View social activity feed"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -430,7 +430,7 @@ def activity_feed():
 @social.route('/social/search')
 @login_required
 def social_search():
-    """Search social content"""
+    
     try:
         form = SocialSearchForm()
         
@@ -440,7 +440,7 @@ def social_search():
         
         if query:
             if search_type in ['all', 'groups']:
-                # Search study groups
+                
                 public_groups = StudyGroup.get_public_groups()
                 matching_groups = [g for g in public_groups if query.lower() in g.name.lower() or query.lower() in (g.description or '').lower()]
                 results.extend([{'type': 'group', 'data': g} for g in matching_groups])
@@ -459,7 +459,7 @@ def social_search():
 @social.route('/social/sessions/share', methods=['GET', 'POST'])
 @login_required
 def share_study_session():
-    """Share a study session with friends/groups"""
+    
     try:
         user = get_current_user()
         if not user:
@@ -468,13 +468,13 @@ def share_study_session():
         
         form = StudySessionSocialForm()
         
-        # Populate group choices
+        
         user_groups = StudyGroup.get_user_groups(user.id)
         form.group_id.choices = [(group.id, group.name) for group in user_groups]
         
         if form.validate_on_submit():
-            # In a real app, you'd create a social session record
-            # For now, we'll just show a success message
+            
+            
             flash('Study session shared successfully!', 'success')
             return redirect(url_for('sessions.session_history'))
         
@@ -483,3 +483,4 @@ def share_study_session():
     except Exception as e:
         flash('Error sharing study session.', 'error')
         return redirect(url_for('sessions.session_history'))
+
