@@ -33,6 +33,18 @@ def create_app(config_name='default'):
             return ''
         return text.replace('\n', '<br>')
     
+    @app.template_filter('safe_date')
+    def safe_date_filter(date_obj, format_str='%B %d, %Y'):
+        """Safely format a date, handling both datetime objects and strings"""
+        if date_obj is None:
+            return 'N/A'
+        if isinstance(date_obj, str):
+            return date_obj
+        try:
+            return date_obj.strftime(format_str)
+        except (AttributeError, TypeError):
+            return str(date_obj)
+    
     
     from app.routes.main import main as main_blueprint
     app.register_blueprint(main_blueprint)

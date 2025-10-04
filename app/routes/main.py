@@ -111,5 +111,9 @@ def dashboard_stats():
 @main.route('/test')
 @login_required
 def test():
-    return "Learning Companion is working! You can now test the topic functionality."
+    user = get_current_user()
+    if user:
+        topics = Topic.get_all_by_user(user.id)
+        return f"Learning Companion is working! User: {user.id}, Topics: {len(topics)}"
+    return "Learning Companion is working! No user found."
 

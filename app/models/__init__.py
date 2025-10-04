@@ -22,15 +22,15 @@ def get_supabase_client():
             supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
             
             if not supabase_url or not supabase_key:
-                print("❌ Supabase credentials not found in environment variables")
+                print("ERROR: Supabase credentials not found in environment variables")
                 SUPABASE_AVAILABLE = False
                 return None
             
             supabase = create_client(supabase_url, supabase_key)
             SUPABASE_AVAILABLE = True
-            print("✅ Supabase connected with service role key (RLS bypassed)")
+            print("SUCCESS: Supabase connected with service role key (RLS bypassed)")
         except Exception as e:
-            print(f"❌ Supabase not available: {e}")
+            print(f"ERROR: Supabase not available: {e}")
             supabase = None
             SUPABASE_AVAILABLE = False
     
@@ -106,7 +106,7 @@ class Topic:
         print(f"Environment SUPABASE_URL: {os.getenv('SUPABASE_URL')}")
         
         if not SUPABASE_AVAILABLE or not client:
-            print("❌ Supabase not available - cannot create topic")
+            print("ERROR: Supabase not available - cannot create topic")
             raise Exception("Supabase not available - cannot create topic")
         
         try:
@@ -131,7 +131,7 @@ class Topic:
             response = client.table('topics').insert(data).execute()
             if response.data:
                 topic_data = response.data[0]
-                print(f"✅ Created topic in Supabase: {topic_data['title']} (ID: {topic_data['id']})")
+                print(f"SUCCESS: Created topic in Supabase: {topic_data['title']} (ID: {topic_data['id']})")
                 return Topic(
                     topic_data['id'],
                     topic_data['title'],
@@ -156,7 +156,7 @@ class Topic:
                 )
             return None
         except Exception as e:
-            print(f"❌ Error creating topic in Supabase: {e}")
+            print(f"ERROR: Error creating topic in Supabase: {e}")
             print(f"Error type: {type(e)}")
             import traceback
             traceback.print_exc()
@@ -208,7 +208,7 @@ class Topic:
             
             return None
         except Exception as e:
-            print(f"❌ Error getting topic from Supabase: {e}")
+            print(f"ERROR: Error getting topic from Supabase: {e}")
             raise Exception(f"Failed to retrieve topic: {e}")
     
     @staticmethod
@@ -239,10 +239,10 @@ class Topic:
                     datetime.fromisoformat(topic_data['shared_at']) if topic_data.get('shared_at') else None
                 )
                 topics.append(topic)
-            print(f"✅ Retrieved {len(topics)} topics from Supabase for user {user_id}")
+            print(f"SUCCESS: Retrieved {len(topics)} topics from Supabase for user {user_id}")
             return topics
         except Exception as e:
-            print(f"❌ Error getting topics from Supabase: {e}")
+            print(f"ERROR: Error getting topics from Supabase: {e}")
             raise Exception(f"Failed to retrieve topics: {e}")
     
     def update(self, title, description):
@@ -262,11 +262,11 @@ class Topic:
                 topic_data = response.data[0]
                 self.title = topic_data['title']
                 self.description = topic_data['description']
-                print(f"✅ Updated topic in Supabase: {self.title}")
+                print(f"SUCCESS: Updated topic in Supabase: {self.title}")
                 return True
             return False
         except Exception as e:
-            print(f"❌ Error updating topic in Supabase: {e}")
+            print(f"ERROR: Error updating topic in Supabase: {e}")
             raise Exception(f"Failed to update topic: {e}")
     
     def delete(self):
@@ -283,11 +283,11 @@ class Topic:
             response = client.table('topics').update(data).eq('id', self.id).eq('user_id', self.user_id).execute()
             if response.data:
                 self.is_active = False
-                print(f"✅ Deleted topic in Supabase: {self.title}")
+                print(f"SUCCESS: Deleted topic in Supabase: {self.title}")
                 return True
             return False
         except Exception as e:
-            print(f"❌ Error deleting topic in Supabase: {e}")
+            print(f"ERROR: Error deleting topic in Supabase: {e}")
             raise Exception(f"Failed to delete topic: {e}")
 
     
