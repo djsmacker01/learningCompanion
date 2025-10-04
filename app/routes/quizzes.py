@@ -1,6 +1,7 @@
 
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+import json
 from flask_login import login_required
 from datetime import datetime, timedelta
 from app.models import Topic
@@ -238,6 +239,11 @@ def add_options(question_id):
 
 @quizzes.route('/<quiz_id>/take', methods=['GET', 'POST'])
 def take_quiz(quiz_id):
+    print("*** QUIZ ROUTE CALLED ***")
+    print(f"Method: {request.method}")
+    print(f"Quiz ID: {quiz_id}")
+    print(f"Request data: {dict(request.form)}")
+    print("*** END QUIZ ROUTE DEBUG ***")
     
     user = get_current_user()
     if not user:
@@ -299,7 +305,12 @@ def take_quiz(quiz_id):
     current_question = questions[current_question_index]
     form = TakeQuizForm()
     
+    print(f"Form validation check - validate_on_submit: {form.validate_on_submit()}")
+    print(f"Form errors: {form.errors}")
+    print(f"Form data: {form.data}")
+    
     if form.validate_on_submit():
+        print(f"Form submitted - Question ID: {current_question.id}, Answer: '{form.answer.data}', Question Type: {current_question.question_type}")
         
         attempt.submit_answer(current_question.id, form.answer.data)
         
@@ -335,6 +346,31 @@ def take_quiz(quiz_id):
                          attempt=attempt)
 
 
+@quizzes.route('/debug-quiz/<quiz_id>')
+def debug_quiz(quiz_id):
+    """Debug route to check quiz data"""
+    user = get_current_user()
+    if not user:
+        return "Not authenticated", 401
+    
+    quiz = Quiz.get_quiz_by_id(quiz_id, user.id)
+    if not quiz:
+        return f"Quiz not found for user {user.id}", 404
+    
+    questions = QuizQuestion.get_questions_by_quiz(quiz_id)
+    
+    debug_info = []
+    for question in questions:
+        debug_info.append({
+            'id': question.id,
+            'question_text': question.question_text,
+            'question_type': question.question_type,
+            'correct_answer': question.correct_answer,
+            'options': [{'text': opt.option_text, 'is_correct': opt.is_correct} for opt in question.options]
+        })
+    
+    return f"<pre>{json.dumps(debug_info, indent=2)}</pre>"
+
 @quizzes.route('/results/<attempt_id>')
 def quiz_results(attempt_id):
     
@@ -368,6 +404,7 @@ def quiz_results(attempt_id):
     qa_mapping = {}
     for answer in attempt.answers:
         qa_mapping[answer.question_id] = answer
+        print(f"Quiz Results Debug - Question ID: {answer.question_id}, User Answer: '{answer.user_answer}', Is Correct: {answer.is_correct}")
     
     
     passed = attempt.score >= quiz.passing_score
@@ -694,3 +731,174 @@ def generate_questions_page(quiz_id):
     
     return render_template('quizzes/generate_questions.html', quiz=quiz, topic=topic)
 
+
+@quizzes.route('/auto-generate/<topic_id>', methods=['GET', 'POST'])
+@login_required
+def auto_generate_quiz(topic_id):
+    """Auto-generate a complete quiz from topic description"""
+    
+    user = get_current_user()
+    if not user:
+        flash('User not authenticated.', 'error')
+        return redirect(url_for('auth.login'))
+    
+    # Get the topic
+    topic = Topic.get_topic_by_id(topic_id, user.id)
+    if not topic:
+        flash('Topic not found', 'error')
+        return redirect(url_for('quizzes.quiz_list'))
+    
+    if request.method == 'GET':
+        # Show the generation options form
+        return render_template('quizzes/auto_generate.html', topic=topic)
+    
+    # Handle POST request - generate the quiz
+    try:
+        data = request.get_json() if request.is_json else request.form
+        
+        # Get generation parameters
+        num_questions = int(data.get('num_questions', 5))
+        difficulty = data.get('difficulty', 'mixed')
+        question_types = data.get('question_types', ['multiple_choice', 'true_false', 'fill_blank'])
+        
+        # Validate parameters
+        if num_questions < 1 or num_questions > 20:
+            num_questions = 5
+        
+        if difficulty not in ['easy', 'medium', 'hard', 'mixed']:
+            difficulty = 'mixed'
+        
+        if isinstance(question_types, str):
+            question_types = [question_types]
+        
+        # Generate the quiz using our smart generator
+        quiz_data = SmartQuestionGenerator.generate_smart_quiz_from_topic(
+            topic.title, 
+            topic.description or "No description available",
+            num_questions, 
+            difficulty, 
+            question_types
+        )
+        
+        if not quiz_data or not quiz_data.get('questions'):
+            return jsonify({'error': 'Failed to generate quiz questions'}), 500
+        
+        # Create the quiz in the database
+        quiz = Quiz.create_quiz(
+            title=quiz_data['quiz_title'],
+            description=quiz_data['quiz_description'],
+            topic_id=topic_id,
+            user_id=user.id,
+            quiz_type='practice_test'
+        )
+        
+        if not quiz:
+            return jsonify({'error': 'Failed to create quiz'}), 500
+        
+        # Add questions to the quiz
+        questions_added = 0
+        for q_data in quiz_data['questions']:
+            question = QuizQuestion.create_question(
+                quiz_id=quiz.id,
+                question_text=q_data['question_text'],
+                question_type=q_data['question_type'],
+                correct_answer=q_data['correct_answer'],
+                explanation=q_data.get('explanation', ''),
+                points=q_data.get('points', 2)
+            )
+            
+            if question and q_data['question_type'] == 'multiple_choice':
+                # Add options for multiple choice questions
+                for option_data in q_data.get('options', []):
+                    QuizQuestionOption.create_option(
+                        question_id=question.id,
+                        option_text=option_data['text'],
+                        is_correct=option_data['is_correct']
+                    )
+            
+            if question:
+                questions_added += 1
+        
+        if questions_added == 0:
+            # Delete the quiz if no questions were added
+            Quiz.delete_quiz(quiz.id, user.id)
+            return jsonify({'error': 'Failed to add questions to quiz'}), 500
+        
+        # Return success response
+        response_data = {
+            'success': True,
+            'quiz_id': str(quiz.id),
+            'quiz_title': quiz.title,
+            'questions_added': questions_added,
+            'generation_method': quiz_data.get('generation_method', 'unknown'),
+            'redirect_url': url_for('quizzes.quiz_detail', quiz_id=quiz.id)
+        }
+        
+        if request.is_json:
+            return jsonify(response_data)
+        else:
+            flash(f'Successfully generated quiz "{quiz.title}" with {questions_added} questions!', 'success')
+            return redirect(url_for('quizzes.quiz_detail', quiz_id=quiz.id))
+    
+    except Exception as e:
+        print(f"Error in auto-generate quiz: {e}")
+        error_msg = f"Failed to generate quiz: {str(e)}"
+        
+        if request.is_json:
+            return jsonify({'error': error_msg}), 500
+        else:
+            flash(error_msg, 'error')
+            return redirect(url_for('quizzes.topic_quizzes', topic_id=topic_id))
+
+
+@quizzes.route('/api/auto-generate-preview/<topic_id>')
+@login_required
+def api_auto_generate_preview(topic_id):
+    """Generate a preview of questions without saving to database"""
+    
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not authenticated'}), 401
+    
+    # Get the topic
+    topic = Topic.get_topic_by_id(topic_id, user.id)
+    if not topic:
+        return jsonify({'error': 'Topic not found'}), 404
+    
+    try:
+        # Get parameters from query string
+        num_questions = int(request.args.get('num_questions', 3))
+        difficulty = request.args.get('difficulty', 'medium')
+        question_types = request.args.getlist('question_types') or ['multiple_choice']
+        
+        # Validate parameters
+        if num_questions < 1 or num_questions > 10:
+            num_questions = 3
+        
+        if difficulty not in ['easy', 'medium', 'hard', 'mixed']:
+            difficulty = 'medium'
+        
+        # Generate preview questions
+        quiz_data = SmartQuestionGenerator.generate_smart_quiz_from_topic(
+            topic.title,
+            topic.description or "No description available",
+            num_questions,
+            difficulty,
+            question_types
+        )
+        
+        if not quiz_data or not quiz_data.get('questions'):
+            return jsonify({'error': 'Failed to generate preview questions'}), 500
+        
+        # Return only the questions data for preview
+        return jsonify({
+            'success': True,
+            'questions': quiz_data['questions'][:num_questions],
+            'generation_method': quiz_data.get('generation_method', 'unknown'),
+            'quiz_title': quiz_data.get('quiz_title', f'Quiz: {topic.title}'),
+            'quiz_description': quiz_data.get('quiz_description', f'Test your knowledge of {topic.title}')
+        })
+    
+    except Exception as e:
+        print(f"Error in auto-generate preview: {e}")
+        return jsonify({'error': f'Failed to generate preview: {str(e)}'}), 500

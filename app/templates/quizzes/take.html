@@ -6,7 +6,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            
+
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-light">
                     <div class="d-flex justify-content-between align-items-center">
@@ -47,7 +47,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="quiz-form">
+                    <form method="POST" id="quiz-form"
+                        action="{{ url_for('quizzes.take_quiz', quiz_id=quiz.id, q=question_index) }}">
                         {{ form.hidden_tag() }}
 
                         <div class="mb-4">
@@ -111,7 +112,7 @@
                 </div>
             </div>
 
-            
+
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-light">
                     <h6 class="card-title mb-0">
@@ -185,17 +186,41 @@
     // Form validation
     const form = document.getElementById('quiz-form');
     const submitBtn = form.querySelector('input[type="submit"]');
+    const questionType = '{{ question.question_type }}'; // Define globally for all event listeners
 
     form.addEventListener('submit', function (e) {
         // Check if an answer is selected/entered
-        const questionType = '{{ question.question_type }}';
         let hasAnswer = false;
 
-        if (questionType === 'multiple_choice' || questionType === 'true_false') {
-            hasAnswer = form.querySelector('input[name="answer"]:checked') !== null;
+        // Detect the actual input type being used (not just the question type)
+        const radioButtons = form.querySelectorAll('input[name="answer"]:checked');
+        const textInputs = form.querySelectorAll('input[type="text"]');
+
+        if (radioButtons.length > 0) {
+            // Radio buttons are present and one is selected
+            hasAnswer = true;
+            console.log('Radio button validation: Selected option found');
+        } else if (textInputs.length > 0) {
+            // Text inputs are present, check if any have values
+            for (let input of textInputs) {
+                if (input.value && input.value.trim() !== '') {
+                    hasAnswer = true;
+                    break;
+                }
+            }
+
+            // Debug: log all inputs found
+            console.log('Text input validation:', {
+                allTextInputs: textInputs.length,
+                inputs: Array.from(textInputs).map(input => ({
+                    name: input.name,
+                    value: input.value,
+                    hasValue: input.value.trim() !== ''
+                })),
+                hasAnswer: hasAnswer
+            });
         } else {
-            const answerInput = form.querySelector('input[name="answer"]');
-            hasAnswer = answerInput && answerInput.value.trim() !== '';
+            console.log('No input fields found for validation');
         }
 
         if (!hasAnswer) {
@@ -204,6 +229,7 @@
             return false;
         }
 
+        console.log('Form validation passed, submitting form...');
         // Disable submit button to prevent double submission
         submitBtn.disabled = true;
         submitBtn.value = 'Submitting...';

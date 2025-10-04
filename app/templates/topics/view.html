@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="topic-view-container">
-    
+
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div class="flex-grow-1">
             <nav aria-label="breadcrumb">
@@ -26,7 +26,7 @@
             <h1 class="h2 mb-2">{{ topic.title }}</h1>
             <div class="d-flex align-items-center text-muted">
                 <i class="fas fa-calendar me-2"></i>
-                <span>Created {{ topic.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                <span>Created {{ topic.created_at | safe_date('%B %d, %Y at %I:%M %p') }}</span>
             </div>
         </div>
 
@@ -41,10 +41,10 @@
         </div>
     </div>
 
-    
+
     <div class="row">
         <div class="col-lg-8">
-            
+
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
@@ -58,7 +58,7 @@
                 </div>
             </div>
 
-            
+
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
@@ -80,8 +80,15 @@
                             </a>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <a href="#" class="btn btn-warning w-100">
+                            <a href="{{ url_for('quizzes.topic_quizzes', topic_id=topic.id) }}"
+                                class="btn btn-warning w-100">
                                 <i class="fas fa-question-circle me-2"></i>Practice Quiz
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('quizzes.auto_generate_quiz', topic_id=topic.id) }}"
+                                class="btn btn-success w-100">
+                                <i class="fas fa-magic me-2"></i>Auto-Generate Quiz
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -107,7 +114,7 @@
         </div>
 
         <div class="col-lg-4">
-            
+
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-info text-white">
                     <h5 class="card-title mb-0">
@@ -148,7 +155,7 @@
                 </div>
             </div>
 
-            
+
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">
@@ -159,7 +166,7 @@
                     <ul class="list-unstyled mb-0">
                         <li class="mb-2">
                             <strong>Created:</strong><br>
-                            <small class="text-muted">{{ topic.created_at.strftime('%B %d, %Y') }}</small>
+                            <small class="text-muted">{{ topic.created_at | safe_date }}</small>
                         </li>
                         <li class="mb-2">
                             <strong>Topic ID:</strong><br>
@@ -173,7 +180,7 @@
                 </div>
             </div>
 
-            
+
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-light">
                     <div class="d-flex justify-content-between align-items-center">
@@ -209,7 +216,7 @@
                             {% endif %}
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-medium">{{ session.session_date.strftime('%b %d, %Y') }}</div>
+                            <div class="fw-medium">{{ session.session_date | safe_date('%b %d, %Y') }}</div>
                             <div class="text-muted small">
                                 {{ session.duration_minutes }}m
                                 {% if session.confidence_after and session.confidence_before %}

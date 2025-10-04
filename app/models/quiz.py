@@ -316,12 +316,27 @@ class QuizAttempt:
         
         
         try:
-            question_result = supabase.table('quiz_questions').select('correct_answer').eq('id', question_id).execute()
+            question_result = supabase.table('quiz_questions').select('correct_answer, question_type').eq('id', question_id).execute()
             if not question_result.data:
                 return False
                 
             correct_answer = question_result.data[0]['correct_answer']
-            is_correct = str(user_answer).strip().lower() == str(correct_answer).strip().lower()
+            question_type = question_result.data[0]['question_type']
+            
+            print(f"Quiz Answer Debug - Question Type: {question_type}, User Answer: '{user_answer}', Correct Answer: '{correct_answer}'")
+            
+            is_correct = False
+            
+            if question_type == 'multiple_choice':
+                is_correct = self._compare_multiple_choice_answer(user_answer, correct_answer)
+            elif question_type == 'true_false':
+                is_correct = self._compare_true_false_answer(user_answer, correct_answer)
+            elif question_type == 'fill_blank':
+                is_correct = self._compare_fill_blank_answer(user_answer, correct_answer)
+            else:
+                is_correct = str(user_answer).strip().lower() == str(correct_answer).strip().lower()
+            
+            print(f"Final Result: {is_correct}")
             
             answer_data = {
                 'attempt_id': self.id,
@@ -342,6 +357,37 @@ class QuizAttempt:
             print(f"Error submitting answer: {e}")
             
         return False
+    
+    def _compare_multiple_choice_answer(self, user_answer: str, correct_answer: str) -> bool:
+        user_clean = str(user_answer).strip().lower()
+        correct_clean = str(correct_answer).strip().lower()
+        
+        print(f"Multiple Choice Comparison: '{user_clean}' vs '{correct_clean}' -> {user_clean == correct_clean}")
+        
+        if user_clean == correct_clean:
+            return True
+        
+        return False
+    
+    def _compare_true_false_answer(self, user_answer: str, correct_answer: str) -> bool:
+        user_clean = str(user_answer).strip().lower()
+        correct_clean = str(correct_answer).strip().lower()
+        
+        if user_clean in ['true', 't', '1', 'yes', 'y'] and correct_clean in ['true', 't', '1', 'yes', 'y']:
+            return True
+        if user_clean in ['false', 'f', '0', 'no', 'n'] and correct_clean in ['false', 'f', '0', 'no', 'n']:
+            return True
+        
+        return False
+    
+    def _compare_fill_blank_answer(self, user_answer: str, correct_answer: str) -> bool:
+        user_clean = str(user_answer).strip().lower()
+        correct_clean = str(correct_answer).strip().lower()
+        
+        if user_clean == correct_clean:
+            return True
+        
+        return False
 
     def complete_attempt(self) -> bool:
         
@@ -356,11 +402,16 @@ class QuizAttempt:
             correct_answers = sum(1 for answer in self.answers if answer.is_correct)
             score = int((correct_answers / total_questions * 100)) if total_questions > 0 else 0
             
+            print(f"Complete Attempt Debug - Total Questions: {total_questions}, Correct Answers: {correct_answers}, Score: {score}")
+            
             
             if self.started_at:
-                started = datetime.fromisoformat(self.started_at.replace('Z', '+00:00'))
-                time_taken = datetime.now() - started
-                time_taken_minutes = int(time_taken.total_seconds() / 60)
+                try:
+                    started = datetime.fromisoformat(self.started_at.replace('Z', '+00:00'))
+                    time_taken = datetime.now() - started
+                    time_taken_minutes = int(time_taken.total_seconds() / 60)
+                except (ValueError, TypeError):
+                    time_taken_minutes = 0
             else:
                 time_taken_minutes = 0
             
