@@ -24,7 +24,7 @@ class StudySession:
     @staticmethod
     def create_session(user_id, topic_id, session_date, duration_minutes, 
                       confidence_before, confidence_after, notes, session_type, completed=True):
-        # Get Supabase client dynamically
+        
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
             raise Exception("Supabase not available - cannot create session")
@@ -66,7 +66,7 @@ class StudySession:
     
     @staticmethod
     def get_user_sessions(user_id, limit=None):
-        """Get user's sessions (recent first)"""
+        
       
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
@@ -102,8 +102,8 @@ class StudySession:
     
     @staticmethod
     def get_topic_sessions(topic_id, user_id):
-        """Get all sessions for a specific topic"""
-        # Get Supabase client dynamically
+        
+        
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
             raise Exception("Supabase not available - cannot retrieve sessions")
@@ -134,7 +134,7 @@ class StudySession:
     
     @staticmethod
     def get_session_by_id(session_id, user_id):
-        """Get single session with user validation"""
+        
         
         client = get_supabase_client()
         if SUPABASE_AVAILABLE and client:
@@ -168,7 +168,7 @@ class StudySession:
         return None
     
     def update_session(self, **kwargs):
-        """Update session"""
+        
        
         client = get_supabase_client()
         if SUPABASE_AVAILABLE and client:
@@ -178,7 +178,7 @@ class StudySession:
                     if key == 'session_date':
                         if isinstance(value, datetime):
                             data[key] = value.isoformat()
-                        elif hasattr(value, 'isoformat'):  # Handle date objects
+                        elif hasattr(value, 'isoformat'):  
                             data[key] = value.isoformat()
                         else:
                             data[key] = value
@@ -212,7 +212,7 @@ class StudySession:
     
     @staticmethod
     def delete_session(session_id, user_id):
-        """Delete session"""
+        
         
         client = get_supabase_client()
         if SUPABASE_AVAILABLE and client:
@@ -235,7 +235,7 @@ class StudySession:
     
     @staticmethod
     def get_session_stats(user_id, days=30):
-        """Get session statistics for period"""
+        
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=days)
         
@@ -255,7 +255,7 @@ class StudySession:
                 elif hasattr(session_date, 'date') and not isinstance(session_date, datetime.date):
                     session_date = session_date.date()
                 
-                # Convert start_date and end_date to date objects for comparison
+                
                 if isinstance(start_date, datetime):
                     start_date = start_date.date()
                 if isinstance(end_date, datetime):
@@ -298,7 +298,7 @@ class StudySession:
     
     @staticmethod
     def get_topic_progress(topic_id, user_id):
-        """Calculate topic progress metrics"""
+        
         sessions = StudySession.get_topic_sessions(topic_id, user_id)
         
         if not sessions:
@@ -328,19 +328,19 @@ class StudySession:
         }
     
     def calculate_confidence_gain(self):
-        """Calculate confidence gain for this session"""
+        
         if self.confidence_after and self.confidence_before:
             return self.confidence_after - self.confidence_before
         return 0
     
     @staticmethod
     def get_session_streak(user_id):
-        """Calculate current study streak"""
+        
         sessions = StudySession.get_user_sessions(user_id)
         if not sessions:
             return 0
         
-        # Sort by date descending
+        
         sessions.sort(key=lambda x: x.session_date, reverse=True)
         
         streak = 0
@@ -369,7 +369,7 @@ class StudySession:
     
     @staticmethod
     def get_weekly_study_time(user_id):
-        """Get total study time this week"""
+        
         now = datetime.utcnow()
         week_start = now - timedelta(days=now.weekday())
         week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -378,3 +378,4 @@ class StudySession:
         week_sessions = [s for s in sessions if s.session_date >= week_start]
         
         return sum(s.duration_minutes for s in week_sessions)
+
