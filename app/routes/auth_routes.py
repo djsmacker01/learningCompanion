@@ -368,7 +368,7 @@ def validate_password():
     if not any(c.isdigit() for c in password):
         errors.append('Password must contain at least one number')
     
-    if not any(c in '!@
+    if not any(c in '!@#$%^&*(),.?":{}|<>' for c in password):
         errors.append('Password must contain at least one special character')
     
     valid = len(errors) == 0
