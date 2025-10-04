@@ -5,7 +5,7 @@ from wtforms.widgets import CheckboxInput
 
 
 class FriendRequestForm(FlaskForm):
-    """Form for sending friend requests"""
+    
     
     friend_email = StringField('Friend\'s Email', 
         validators=[
@@ -24,7 +24,7 @@ class FriendRequestForm(FlaskForm):
 
 
 class StudyGroupForm(FlaskForm):
-    """Form for creating study groups"""
+    
     
     name = StringField('Group Name', 
         validators=[
@@ -78,7 +78,7 @@ class StudyGroupForm(FlaskForm):
 
 
 class SocialChallengeForm(FlaskForm):
-    """Form for creating social challenges"""
+    
     
     title = StringField('Challenge Title', 
         validators=[
@@ -158,7 +158,7 @@ class SocialChallengeForm(FlaskForm):
 
 
 class ShareAchievementForm(FlaskForm):
-    """Form for sharing achievements"""
+    
     
     achievement_type = SelectField('Achievement Type', 
         choices=[
@@ -217,7 +217,7 @@ class ShareAchievementForm(FlaskForm):
 
 
 class StudySessionSocialForm(FlaskForm):
-    """Form for sharing study sessions"""
+    
     
     is_public = BooleanField('Make Session Public', 
         default=False,
@@ -241,7 +241,7 @@ class StudySessionSocialForm(FlaskForm):
     )
     
     group_id = SelectField('Study Group', 
-        choices=[],  # Will be populated dynamically
+        choices=[],  
         validators=[Optional()],
         render_kw={
             'class': 'form-control'
@@ -266,7 +266,7 @@ class StudySessionSocialForm(FlaskForm):
 
 
 class SocialSearchForm(FlaskForm):
-    """Form for searching social content"""
+    
     
     query = StringField('Search', 
         validators=[
@@ -298,7 +298,7 @@ class SocialSearchForm(FlaskForm):
 
 
 class GroupInviteForm(FlaskForm):
-    """Form for inviting users to study groups"""
+    
     
     invite_email = StringField('Email Address', 
         validators=[
@@ -329,7 +329,7 @@ class GroupInviteForm(FlaskForm):
 
 
 class ChallengeProgressForm(FlaskForm):
-    """Form for updating challenge progress"""
+    
     
     challenge_id = HiddenField('Challenge ID')
     
@@ -347,3 +347,4 @@ class ChallengeProgressForm(FlaskForm):
     submit = SubmitField('Update Progress', render_kw={
         'class': 'btn btn-success'
     })
+
