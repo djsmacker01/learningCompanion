@@ -124,3 +124,4 @@ class ReportIssueForm(FlaskForm):
         ('critical', 'Critical')
     ], default='medium')
 
+

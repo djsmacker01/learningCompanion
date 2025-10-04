@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 
 class ShareTopicForm(FlaskForm):
-    """Form for sharing a topic"""
+    
     
     expires_at = DateTimeField('Expires At (Optional)', 
         validators=[Optional()],
@@ -29,7 +29,7 @@ class ShareTopicForm(FlaskForm):
 
 
 class JoinTopicForm(FlaskForm):
-    """Form for joining a topic with share code"""
+    
     
     share_code = StringField('Share Code', 
         validators=[
@@ -46,3 +46,4 @@ class JoinTopicForm(FlaskForm):
     submit = SubmitField('Join Topic', render_kw={
         'class': 'btn btn-primary w-100'
     })
+

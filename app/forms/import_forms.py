@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Length, Optional
 
 
 class CSVImportForm(FlaskForm):
-    """Form for importing topics from CSV"""
+    
     
     csv_file = FileField('CSV File', 
         validators=[
@@ -24,7 +24,7 @@ class CSVImportForm(FlaskForm):
 
 
 class BulkTopicForm(FlaskForm):
-    """Form for creating multiple topics at once"""
+    
     
     topics_data = TextAreaField('Topics Data (one per line)', 
         validators=[
@@ -44,7 +44,7 @@ class BulkTopicForm(FlaskForm):
 
 
 class FileUploadForm(FlaskForm):
-    """Form for uploading study materials"""
+    
     
     file = FileField('Study Material', 
         validators=[
@@ -83,3 +83,4 @@ class FileUploadForm(FlaskForm):
     submit = SubmitField('Upload Material', render_kw={
         'class': 'btn btn-primary'
     })
+

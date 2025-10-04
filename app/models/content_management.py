@@ -1,6 +1,4 @@
-"""
-Content Management Models
-"""
+
 
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -10,7 +8,7 @@ import os
 
 
 class TopicAttachment:
-    """Model for topic file attachments"""
+    
     
     def __init__(self, id=None, topic_id=None, user_id=None, filename=None, 
                  original_filename=None, file_path=None, file_size=None, 
@@ -35,7 +33,7 @@ class TopicAttachment:
                          original_filename: str, file_path: str, file_size: int,
                          file_type: str, mime_type: str = None, 
                          description: str = None, is_public: bool = False):
-        """Create a new topic attachment"""
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -69,7 +67,7 @@ class TopicAttachment:
     
     @classmethod
     def get_topic_attachments(cls, topic_id: str, user_id: str):
-        """Get all attachments for a topic"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -106,7 +104,7 @@ class TopicAttachment:
     
     @classmethod
     def delete_attachment(cls, attachment_id: str, user_id: str):
-        """Delete an attachment"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -115,16 +113,16 @@ class TopicAttachment:
             return False
         
         try:
-            # Get attachment info first
+            
             response = client.table('topic_attachments').select('file_path').eq('id', attachment_id).eq('user_id', user_id).execute()
             
             if response.data:
-                # Delete from database
+                
                 client.table('topic_attachments').delete().eq('id', attachment_id).eq('user_id', user_id).execute()
                 
-                # Delete file from storage (implement based on your storage solution)
+                
                 file_path = response.data[0]['file_path']
-                # TODO: Implement file deletion from storage
+                
                 
                 return True
         except Exception as e:
@@ -134,7 +132,7 @@ class TopicAttachment:
 
 
 class TopicNote:
-    """Model for topic notes"""
+    
     
     def __init__(self, id=None, topic_id=None, user_id=None, title=None, 
                  content=None, note_type='general', is_public=False, 
@@ -153,7 +151,7 @@ class TopicNote:
     def create_note(cls, topic_id: str, user_id: str, title: str, 
                     content: str, note_type: str = 'general', 
                     is_public: bool = False):
-        """Create a new topic note"""
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -183,7 +181,7 @@ class TopicNote:
     
     @classmethod
     def get_topic_notes(cls, topic_id: str, user_id: str, note_type: str = None):
-        """Get notes for a topic"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -222,7 +220,7 @@ class TopicNote:
     @classmethod
     def update_note(cls, note_id: str, user_id: str, title: str = None, 
                     content: str = None, note_type: str = None):
-        """Update a note"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -249,7 +247,7 @@ class TopicNote:
     
     @classmethod
     def delete_note(cls, note_id: str, user_id: str):
-        """Delete a note"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -267,7 +265,7 @@ class TopicNote:
 
 
 class TopicVersion:
-    """Model for topic versioning"""
+    
     
     def __init__(self, id=None, topic_id=None, user_id=None, version_number=None,
                  title=None, description=None, notes=None, tags=None,
@@ -285,7 +283,7 @@ class TopicVersion:
     
     @classmethod
     def create_version(cls, topic_id: str, change_summary: str = None):
-        """Create a new version of a topic"""
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -294,7 +292,7 @@ class TopicVersion:
             return None
         
         try:
-            # Call the database function
+            
             response = client.rpc('create_topic_version', {
                 'p_topic_id': topic_id,
                 'p_change_summary': change_summary
@@ -309,7 +307,7 @@ class TopicVersion:
     
     @classmethod
     def get_topic_versions(cls, topic_id: str, user_id: str):
-        """Get all versions of a topic"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -343,7 +341,7 @@ class TopicVersion:
     
     @classmethod
     def restore_version(cls, topic_id: str, version_number: int):
-        """Restore a topic to a specific version"""
+        
         if not SUPABASE_AVAILABLE:
             return False
         
@@ -352,7 +350,7 @@ class TopicVersion:
             return False
         
         try:
-            # Call the database function
+            
             response = client.rpc('restore_topic_version', {
                 'p_topic_id': topic_id,
                 'p_version_number': version_number
@@ -366,7 +364,7 @@ class TopicVersion:
 
 
 class TopicTag:
-    """Model for topic tags"""
+    
     
     def __init__(self, id=None, name=None, color=None, description=None,
                  usage_count=0, created_at=None):
@@ -379,7 +377,7 @@ class TopicTag:
     
     @classmethod
     def get_all_tags(cls):
-        """Get all available tags"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -395,7 +393,7 @@ class TopicTag:
                 tag = cls(
                     id=data['id'],
                     name=data['name'],
-                    color=data.get('color', '#3B82F6'),
+                    color=data.get('color', '
                     description=data.get('description'),
                     usage_count=data.get('usage_count', 0),
                     created_at=datetime.fromisoformat(data['created_at'])
@@ -408,8 +406,8 @@ class TopicTag:
             return []
     
     @classmethod
-    def create_tag(cls, name: str, color: str = '#3B82F6', description: str = None):
-        """Create a new tag"""
+    def create_tag(cls, name: str, color: str = '
+        
         if not SUPABASE_AVAILABLE:
             return None
         
@@ -436,7 +434,7 @@ class TopicTag:
     
     @classmethod
     def search_tags(cls, query: str):
-        """Search tags by name"""
+        
         if not SUPABASE_AVAILABLE:
             return []
         
@@ -452,7 +450,7 @@ class TopicTag:
                 tag = cls(
                     id=data['id'],
                     name=data['name'],
-                    color=data.get('color', '#3B82F6'),
+                    color=data.get('color', '
                     description=data.get('description'),
                     usage_count=data.get('usage_count', 0),
                     created_at=datetime.fromisoformat(data['created_at'])
@@ -463,3 +461,4 @@ class TopicTag:
         except Exception as e:
             print(f"Error searching tags: {e}")
             return []
+

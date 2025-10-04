@@ -1,7 +1,4 @@
-"""
-Advanced Analytics Models for Learning Companion
-Epic 12: Smart Learning Analytics & Predictive Learning
-"""
+
 
 from app.models import get_supabase_client
 from datetime import datetime, timedelta
@@ -9,7 +6,7 @@ from typing import List, Dict, Optional, Tuple
 import json
 
 class LearningVelocity:
-    """Learning velocity tracking model"""
+    
     
     def __init__(self, user_id: str, topic_id: str = None, velocity_score: float = 0.0, 
                  learning_rate: float = 0.0, time_to_mastery: int = None, 
@@ -25,7 +22,7 @@ class LearningVelocity:
     
     @classmethod
     def create(cls, user_id: str, topic_id: str = None, **kwargs):
-        """Create new learning velocity record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -44,7 +41,7 @@ class LearningVelocity:
     
     @classmethod
     def get_user_velocity(cls, user_id: str, topic_id: str = None) -> List['LearningVelocity']:
-        """Get learning velocity for user"""
+        
         client = get_supabase_client()
         
         query = client.table('learning_velocity').select('*').eq('user_id', user_id)
@@ -56,10 +53,10 @@ class LearningVelocity:
     
     @classmethod
     def calculate_velocity(cls, user_id: str, topic_id: str, days_back: int = 30) -> float:
-        """Calculate learning velocity for user and topic"""
+        
         client = get_supabase_client()
         
-        # Get study sessions for the period
+        
         start_date = datetime.now() - timedelta(days=days_back)
         result = client.table('study_sessions').select('*').eq('user_id', user_id).eq('topic_id', topic_id).gte('created_at', start_date.isoformat()).execute()
         
@@ -73,12 +70,12 @@ class LearningVelocity:
         if total_time == 0:
             return 0.0
         
-        # Velocity = knowledge gained per hour of study
+        
         velocity = (avg_progress * 60.0) / total_time
-        return min(velocity, 100.0)  # Cap at 100
+        return min(velocity, 100.0)  
 
 class KnowledgeRetention:
-    """Knowledge retention tracking model"""
+    
     
     def __init__(self, user_id: str, topic_id: str = None, retention_score: float = 0.0,
                  forgetting_curve_slope: float = 0.0, retention_period_days: int = 7,
@@ -95,7 +92,7 @@ class KnowledgeRetention:
     
     @classmethod
     def create(cls, user_id: str, topic_id: str = None, **kwargs):
-        """Create new knowledge retention record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -114,7 +111,7 @@ class KnowledgeRetention:
     
     @classmethod
     def get_user_retention(cls, user_id: str, topic_id: str = None) -> List['KnowledgeRetention']:
-        """Get knowledge retention for user"""
+        
         client = get_supabase_client()
         
         query = client.table('knowledge_retention').select('*').eq('user_id', user_id)
@@ -126,10 +123,10 @@ class KnowledgeRetention:
     
     @classmethod
     def calculate_retention(cls, user_id: str, topic_id: str) -> float:
-        """Calculate retention score using forgetting curve"""
+        
         client = get_supabase_client()
         
-        # Get last review date
+        
         result = client.table('study_sessions').select('created_at').eq('user_id', user_id).eq('topic_id', topic_id).order('created_at', desc=True).limit(1).execute()
         
         if not result.data:
@@ -138,15 +135,15 @@ class KnowledgeRetention:
         last_review = datetime.fromisoformat(result.data[0]['created_at'].replace('Z', '+00:00'))
         days_since_review = (datetime.now() - last_review).days
         
-        # Ebbinghaus forgetting curve: R = e^(-t/S)
-        # Where R is retention, t is time, S is strength of memory (7 days half-life)
+        
+        
         forgetting_factor = 2.718281828 ** (-days_since_review / 7.0)
         retention_score = forgetting_factor * 100.0
         
         return max(retention_score, 0.0)
 
 class LearningEfficiency:
-    """Learning efficiency metrics model"""
+    
     
     def __init__(self, user_id: str, topic_id: str = None, efficiency_score: float = 0.0,
                  time_invested_minutes: int = 0, knowledge_gained_score: float = 0.0,
@@ -164,7 +161,7 @@ class LearningEfficiency:
     
     @classmethod
     def create(cls, user_id: str, topic_id: str = None, **kwargs):
-        """Create new learning efficiency record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -184,10 +181,10 @@ class LearningEfficiency:
     
     @classmethod
     def calculate_efficiency(cls, user_id: str, topic_id: str, session_id: str) -> float:
-        """Calculate learning efficiency for a session"""
+        
         client = get_supabase_client()
         
-        # Get session data
+        
         result = client.table('study_sessions').select('*').eq('id', session_id).eq('user_id', user_id).execute()
         
         if not result.data:
@@ -201,12 +198,12 @@ class LearningEfficiency:
         if duration == 0:
             return 0.0
         
-        # Efficiency = (progress * focus) / time
+        
         efficiency = (progress * focus_score) / duration
-        return min(efficiency, 100.0)  # Cap at 100
+        return min(efficiency, 100.0)  
 
 class LearningPath:
-    """Personalized learning path model"""
+    
     
     def __init__(self, user_id: str, path_name: str, path_description: str = None,
                  target_skill_level: str = 'intermediate', estimated_duration_days: int = 30,
@@ -225,7 +222,7 @@ class LearningPath:
     
     @classmethod
     def create(cls, user_id: str, path_name: str, **kwargs):
-        """Create new learning path"""
+        
         client = get_supabase_client()
         
         data = {
@@ -246,7 +243,7 @@ class LearningPath:
     
     @classmethod
     def get_user_paths(cls, user_id: str, active_only: bool = True) -> List['LearningPath']:
-        """Get learning paths for user"""
+        
         client = get_supabase_client()
         
         query = client.table('learning_paths').select('*').eq('user_id', user_id)
@@ -257,7 +254,7 @@ class LearningPath:
         return [cls(**item) for item in result.data] if result.data else []
 
 class LearningPathStep:
-    """Learning path step model"""
+    
     
     def __init__(self, path_id: str, step_order: int, step_title: str,
                  step_description: str = None, step_type: str = 'study',
@@ -278,7 +275,7 @@ class LearningPathStep:
     
     @classmethod
     def create(cls, path_id: str, step_order: int, step_title: str, **kwargs):
-        """Create new learning path step"""
+        
         client = get_supabase_client()
         
         data = {
@@ -300,14 +297,14 @@ class LearningPathStep:
     
     @classmethod
     def get_path_steps(cls, path_id: str) -> List['LearningPathStep']:
-        """Get steps for a learning path"""
+        
         client = get_supabase_client()
         
         result = client.table('learning_path_steps').select('*').eq('path_id', path_id).order('step_order').execute()
         return [cls(**item) for item in result.data] if result.data else []
 
 class KnowledgeGap:
-    """Knowledge gap detection model"""
+    
     
     def __init__(self, user_id: str, topic_id: str = None, gap_type: str = 'conceptual',
                  gap_severity: str = 'medium', gap_description: str = '',
@@ -327,7 +324,7 @@ class KnowledgeGap:
     
     @classmethod
     def create(cls, user_id: str, topic_id: str = None, **kwargs):
-        """Create new knowledge gap record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -348,17 +345,17 @@ class KnowledgeGap:
     
     @classmethod
     def detect_gaps(cls, user_id: str, topic_id: str) -> List['KnowledgeGap']:
-        """Detect knowledge gaps for user and topic"""
+        
         client = get_supabase_client()
         
-        # Analyze quiz results
+        
         quiz_result = client.table('quiz_attempts').select('score').eq('user_id', user_id).execute()
         if not quiz_result.data:
             return []
         
         avg_score = sum(attempt['score'] for attempt in quiz_result.data) / len(quiz_result.data)
         
-        # Determine gap severity and type
+        
         if avg_score < 40:
             gap_severity = 'critical'
             gap_type = 'conceptual'
@@ -372,7 +369,7 @@ class KnowledgeGap:
             gap_type = 'theoretical'
             gap_description = 'Minor knowledge gaps. Review recommended.'
         else:
-            return []  # No significant gaps
+            return []  
         
         gap = cls(
             user_id=user_id,
@@ -388,7 +385,7 @@ class KnowledgeGap:
         return [gap]
 
 class PredictiveAnalytics:
-    """Predictive learning analytics model"""
+    
     
     def __init__(self, user_id: str, topic_id: str = None, prediction_type: str = 'success_probability',
                  prediction_value: float = 0.0, confidence_level: float = 0.0,
@@ -408,7 +405,7 @@ class PredictiveAnalytics:
     
     @classmethod
     def create(cls, user_id: str, topic_id: str = None, **kwargs):
-        """Create new predictive analytics record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -429,30 +426,30 @@ class PredictiveAnalytics:
     
     @classmethod
     def predict_success_probability(cls, user_id: str, topic_id: str, exam_date: datetime) -> float:
-        """Predict success probability for exam"""
+        
         client = get_supabase_client()
         
-        # Get current progress
+        
         progress_result = client.table('study_sessions').select('progress_percentage').eq('user_id', user_id).eq('topic_id', topic_id).gte('created_at', (datetime.now() - timedelta(days=7)).isoformat()).execute()
         
         if not progress_result.data:
-            return 20.0  # Low probability if no recent activity
+            return 20.0  
         
         current_progress = sum(session['progress_percentage'] for session in progress_result.data) / len(progress_result.data)
         
-        # Calculate study velocity
+        
         velocity = LearningVelocity.calculate_velocity(user_id, topic_id, 14)
         
-        # Calculate days remaining
+        
         days_remaining = (exam_date - datetime.now()).days
         
         if days_remaining <= 0:
             return 90.0 if current_progress >= 80 else 20.0
         
-        # Calculate required velocity to reach 80% by exam date
+        
         required_velocity = (80.0 - current_progress) / days_remaining
         
-        # Success probability based on velocity comparison
+        
         if velocity >= required_velocity:
             success_probability = 85.0 + (velocity - required_velocity) * 2
         else:
@@ -461,7 +458,7 @@ class PredictiveAnalytics:
         return max(min(success_probability, 95.0), 5.0)
 
 class StudyTimeOptimization:
-    """Study time optimization model"""
+    
     
     def __init__(self, user_id: str, optimal_hour: int = 9, optimal_day_of_week: int = 1,
                  productivity_score: float = 0.0, focus_duration_minutes: int = 25,
@@ -478,7 +475,7 @@ class StudyTimeOptimization:
     
     @classmethod
     def create(cls, user_id: str, **kwargs):
-        """Create new study time optimization record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -497,14 +494,14 @@ class StudyTimeOptimization:
     
     @classmethod
     def get_user_optimization(cls, user_id: str) -> Optional['StudyTimeOptimization']:
-        """Get study time optimization for user"""
+        
         client = get_supabase_client()
         
         result = client.table('study_time_optimization').select('*').eq('user_id', user_id).order('created_at', desc=True).limit(1).execute()
         return cls(**result.data[0]) if result.data else None
 
 class BurnoutRisk:
-    """Burnout risk tracking model"""
+    
     
     def __init__(self, user_id: str, risk_level: str = 'low', risk_score: float = 0.0,
                  contributing_factors: List[str] = None, study_intensity_score: float = 0.0,
@@ -524,7 +521,7 @@ class BurnoutRisk:
     
     @classmethod
     def create(cls, user_id: str, **kwargs):
-        """Create new burnout risk record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -545,30 +542,30 @@ class BurnoutRisk:
     
     @classmethod
     def assess_risk(cls, user_id: str) -> 'BurnoutRisk':
-        """Assess burnout risk for user"""
+        
         client = get_supabase_client()
         
-        # Analyze recent study patterns
+        
         recent_sessions = client.table('study_sessions').select('*').eq('user_id', user_id).gte('created_at', (datetime.now() - timedelta(days=7)).isoformat()).execute()
         
         if not recent_sessions.data:
             return cls(user_id=user_id, risk_level='low', risk_score=10.0)
         
-        # Calculate study intensity
+        
         total_time = sum(session['duration_minutes'] for session in recent_sessions.data)
         avg_session_length = total_time / len(recent_sessions.data)
         
-        # Calculate rest adequacy (simplified)
-        rest_score = 100.0 - (total_time / 60.0)  # Hours per week
         
-        # Determine risk level
-        if avg_session_length > 120 and total_time > 20 * 60:  # Long sessions and >20 hours/week
+        rest_score = 100.0 - (total_time / 60.0)  
+        
+        
+        if avg_session_length > 120 and total_time > 20 * 60:  
             risk_level = 'high'
             risk_score = 80.0
             contributing_factors = ['long_study_sessions', 'high_weekly_hours']
             stress_indicators = ['fatigue', 'decreased_focus']
             recommended_actions = ['take_breaks', 'reduce_session_length', 'get_adequate_sleep']
-        elif avg_session_length > 90 or total_time > 15 * 60:  # Medium risk
+        elif avg_session_length > 90 or total_time > 15 * 60:  
             risk_level = 'medium'
             risk_score = 50.0
             contributing_factors = ['moderate_intensity']
@@ -593,7 +590,7 @@ class BurnoutRisk:
         )
 
 class GoalForecasting:
-    """Goal achievement forecasting model"""
+    
     
     def __init__(self, user_id: str, goal_id: str = None, goal_description: str = '',
                  target_completion_date: datetime = None, predicted_completion_date: datetime = None,
@@ -616,7 +613,7 @@ class GoalForecasting:
     
     @classmethod
     def create(cls, user_id: str, goal_description: str, target_completion_date: datetime, **kwargs):
-        """Create new goal forecasting record"""
+        
         client = get_supabase_client()
         
         data = {
@@ -639,13 +636,13 @@ class GoalForecasting:
     
     @classmethod
     def forecast_goal_achievement(cls, user_id: str, goal_description: str, target_date: datetime) -> 'GoalForecasting':
-        """Forecast goal achievement"""
+        
         client = get_supabase_client()
         
-        # Get current progress (simplified - would need actual goal tracking)
-        current_progress = 30.0  # Placeholder
         
-        # Calculate days remaining
+        current_progress = 30.0  
+        
+        
         days_remaining = (target_date - datetime.now()).days
         
         if days_remaining <= 0:
@@ -659,33 +656,33 @@ class GoalForecasting:
                 is_on_track=False
             )
         
-        # Calculate required velocity
+        
         required_velocity = (100.0 - current_progress) / days_remaining
         
-        # Get current velocity (simplified)
-        current_velocity = 2.0  # Placeholder
         
-        # Predict completion date
+        current_velocity = 2.0  
+        
+        
         if current_velocity > 0:
             predicted_days = (100.0 - current_progress) / current_velocity
             predicted_date = datetime.now() + timedelta(days=predicted_days)
         else:
-            predicted_date = target_date + timedelta(days=30)  # Overdue
+            predicted_date = target_date + timedelta(days=30)  
         
-        # Determine if on track
+        
         is_on_track = predicted_date <= target_date
         
-        # Calculate confidence
+        
         confidence = 80.0 if is_on_track else 40.0
         
-        # Identify risk factors
+        
         risk_factors = []
         if not is_on_track:
             risk_factors.append('insufficient_velocity')
         if days_remaining < 7:
             risk_factors.append('short_timeframe')
         
-        # Suggest mitigation strategies
+        
         mitigation_strategies = []
         if not is_on_track:
             mitigation_strategies.extend(['increase_study_time', 'improve_focus', 'seek_help'])
@@ -703,3 +700,4 @@ class GoalForecasting:
             risk_factors=risk_factors,
             mitigation_strategies=mitigation_strategies
         )
+
