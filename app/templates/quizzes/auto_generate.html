@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Auto-Generate Quiz - {{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-magic me-2"></i>Auto-Generate Quiz
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ topic.title }}</h5>
+                            <p class="text-muted mb-3">{{ topic.description[:200] }}{% if topic.description|length > 200
+                                %}...{% endif %}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-robot me-1"></i>AI-powered quiz generation from topic description
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('quizzes.topic_quizzes', topic_id=topic.id) }}"
+                                class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Quizzes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generation Options -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Quiz Generation Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="quizGenerationForm">
+                        <div class="row">
+                            <!-- Number of Questions -->
+                            <div class="col-md-6 mb-3">
+                                <label for="numQuestions" class="form-label">
+                                    <i class="fas fa-question-circle me-1"></i>Number of Questions
+                                </label>
+                                <select class="form-select" id="numQuestions" name="num_questions">
+                                    <option value="3">3 Questions (Quick Test)</option>
+                                    <option value="5" selected>5 Questions (Standard)</option>
+                                    <option value="10">10 Questions (Comprehensive)</option>
+                                    <option value="15">15 Questions (Thorough)</option>
+                                    <option value="20">20 Questions (Complete)</option>
+                                </select>
+                            </div>
+
+                            <!-- Difficulty Level -->
+                            <div class="col-md-6 mb-3">
+                                <label for="difficulty" class="form-label">
+                                    <i class="fas fa-chart-line me-1"></i>Difficulty Level
+                                </label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="easy">Easy (Basic Concepts)</option>
+                                    <option value="medium" selected>Medium (Balanced)</option>
+                                    <option value="hard">Hard (Advanced)</option>
+                                    <option value="mixed">Mixed (All Levels)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Question Types -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-list me-1"></i>Question Types
+                            </label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="multiple_choice"
+                                            id="mcQuestions" name="question_types" checked>
+                                        <label class="form-check-label" for="mcQuestions">
+                                            <i class="fas fa-list-ul me-1"></i>Multiple Choice
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="true_false"
+                                            id="tfQuestions" name="question_types" checked>
+                                        <label class="form-check-label" for="tfQuestions">
+                                            <i class="fas fa-check me-1"></i>True/False
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="fill_blank"
+                                            id="fbQuestions" name="question_types">
+                                        <label class="form-check-label" for="fbQuestions">
+                                            <i class="fas fa-edit me-1"></i>Fill in the Blank
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-info" id="previewBtn">
+                                <i class="fas fa-eye me-2"></i>Preview Questions
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="generateBtn">
+                                <i class="fas fa-magic me-2"></i>Generate Quiz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="card border-0 shadow-sm mb-4" id="previewCard" style="display: none;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Question Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="previewContent">
+                        <!-- Preview content will be loaded here -->
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary" id="generateFromPreview">
+                            <i class="fas fa-magic me-2"></i>Generate Full Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generation Progress -->
+            <div class="card border-0 shadow-sm mb-4" id="progressCard" style="display: none;">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Generating...</span>
+                    </div>
+                    <h5>Generating Your Quiz...</h5>
+                    <p class="text-muted">Our AI is analyzing your topic and creating questions. This may take a few
+                        moments.</p>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                            style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Please don't close this page while generating...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Status Indicator -->
+<div class="position-fixed bottom-0 end-0 p-3">
+    <div class="toast" id="aiStatusToast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-robot text-primary me-2"></i>
+            <strong class="me-auto">AI Generator</strong>
+            <small class="text-muted">Now</small>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            Ready to generate your quiz!
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('quizGenerationForm');
+        const previewBtn = document.getElementById('previewBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const previewCard = document.getElementById('previewCard');
+        const progressCard = document.getElementById('progressCard');
+        const previewContent = document.getElementById('previewContent');
+        const generateFromPreview = document.getElementById('generateFromPreview');
+        const toast = document.getElementById('aiStatusToast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Preview questions
+        previewBtn.addEventListener('click', function () {
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            // Add form data to params
+            for (let [key, value] of formData.entries()) {
+                if (key === 'question_types') {
+                    params.append(key, value);
+                } else {
+                    params.set(key, value);
+                }
+            }
+
+            // Show loading state
+            previewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating Preview...';
+            previewBtn.disabled = true;
+
+            fetch(`{{ url_for('quizzes.api_auto_generate_preview', topic_id=topic.id) }}?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayPreview(data);
+                        showToast(`Preview generated using ${data.generation_method}`, 'success');
+                    } else {
+                        showToast(data.error || 'Failed to generate preview', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Failed to generate preview. Please try again.', 'danger');
+                })
+                .finally(() => {
+                    previewBtn.innerHTML = '<i class="fas fa-eye me-2"></i>Preview Questions';
+                    previewBtn.disabled = false;
+                });
+        });
+
+        // Display preview questions
+        function displayPreview(data) {
+            let html = `
+            <div class="mb-3">
+                <h6><i class="fas fa-info-circle me-2"></i>Generation Method: ${data.generation_method}</h6>
+                <p class="text-muted">${data.quiz_description}</p>
+            </div>
+        `;
+
+            data.questions.forEach((question, index) => {
+                html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            Question ${index + 1} 
+                            <span class="badge bg-secondary ms-2">${question.question_type.replace('_', ' ').toUpperCase()}</span>
+                            <span class="badge bg-info ms-1">${question.difficulty}</span>
+                        </h6>
+                        <p class="card-text">${question.question_text}</p>
+            `;
+
+                if (question.question_type === 'multiple_choice' && question.options) {
+                    html += '<div class="options">';
+                    question.options.forEach((option, optIndex) => {
+                        const correctClass = option.is_correct ? 'text-success fw-bold' : '';
+                        html += `<div class="form-check ${correctClass}">`;
+                        html += `<input class="form-check-input" type="radio" disabled>`;
+                        html += `<label class="form-check-label ${correctClass}">${option.text}</label>`;
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                } else if (question.question_type === 'true_false') {
+                    html += `
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label">True</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" disabled>
+                        <label class="form-check-label">False</label>
+                    </div>
+                `;
+                } else if (question.question_type === 'fill_blank') {
+                    html += '<div class="form-control" style="background-color: #f8f9fa;">_____</div>';
+                }
+
+                html += `
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-lightbulb me-1"></i>Correct Answer: ${question.correct_answer}
+                            </small>
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-info">
+                                <i class="fas fa-info-circle me-1"></i>${question.explanation}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            });
+
+            previewContent.innerHTML = html;
+            previewCard.style.display = 'block';
+            previewCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Generate full quiz
+        function generateQuiz() {
+            const formData = new FormData(form);
+            const data = {
+                num_questions: parseInt(formData.get('num_questions')),
+                difficulty: formData.get('difficulty'),
+                question_types: formData.getAll('question_types')
+            };
+
+            // Show progress
+            progressCard.style.display = 'block';
+            progressCard.scrollIntoView({ behavior: 'smooth' });
+
+            // Simulate progress
+            const progressBar = document.querySelector('.progress-bar');
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            fetch('{{ url_for("quizzes.auto_generate_quiz", topic_id=topic.id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+
+                    if (data.success) {
+                        showToast(`Quiz "${data.quiz_title}" generated successfully with ${data.questions_added} questions!`, 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 2000);
+                    } else {
+                        showToast(data.error || 'Failed to generate quiz', 'danger');
+                        progressCard.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    clearInterval(progressInterval);
+                    console.error('Error:', error);
+                    showToast('Failed to generate quiz. Please try again.', 'danger');
+                    progressCard.style.display = 'none';
+                });
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            generateQuiz();
+        });
+
+        // Handle generate from preview
+        generateFromPreview.addEventListener('click', function () {
+            generateQuiz();
+        });
+
+        // Show initial toast
+        showToast('Ready to generate your quiz!', 'info');
+    });
+</script>
+{% endblock %}
