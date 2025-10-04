@@ -162,9 +162,9 @@ class CalendarWidget:
                     has_events = date in events_by_date
                     event_count = len(events_by_date.get(date, []))
                     
-                    html += f
+                    html += f'<td class="calendar-day{" has-events" if has_events else ""}" data-date="{date}" data-events="{event_count}">{day}</td>'
         
-        html += 
+        html += '</tr></tbody></table>'
         
         return html
 
