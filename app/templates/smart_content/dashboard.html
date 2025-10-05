@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Content Generator - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Header -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-success text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-magic fa-2x me-3"></i>
+                        <div>
+                            <h2 class="h4 mb-0">Smart Content Generator</h2>
+                            <p class="mb-0 opacity-75">AI-powered content creation for enhanced learning</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content Generation -->
+        <div class="col-lg-8">
+            <!-- Content Type Selection -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs text-primary me-2"></i>
+                        Generate Content
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="contentGenerationForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Select Topic</label>
+                                    <select class="form-select" id="contentTopicSelect" required>
+                                        <option value="">Choose a topic...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Content Type</label>
+                                    <select class="form-select" id="contentTypeSelect" required>
+                                        <option value="">Choose content type...</option>
+                                        <option value="study_notes">Study Notes</option>
+                                        <option value="interactive">Interactive Content</option>
+                                        <option value="visual">Visual Aids</option>
+                                        <option value="personalized">Personalized Content</option>
+                                        <option value="summary">Summary</option>
+                                        <option value="learning_path">Learning Path</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" id="subtypeRow" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Content Subtype</label>
+                                    <select class="form-select" id="contentSubtypeSelect">
+                                        <option value="">Choose subtype...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Learning Style</label>
+                                    <select class="form-select" id="learningStyleSelect">
+                                        <option value="visual">Visual</option>
+                                        <option value="auditory">Auditory</option>
+                                        <option value="kinesthetic">Kinesthetic</option>
+                                        <option value="reading">Reading/Writing</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success" onclick="generateContent()">
+                                <i class="fas fa-magic me-2"></i>Generate Content
+                            </button>
+                            <button type="button" class="btn btn-primary ms-2" onclick="generateComprehensivePackage()">
+                                <i class="fas fa-layer-group me-2"></i>Generate Full Package
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="contentGenerationResult" class="mt-3" style="display: none;">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Content Display -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt text-info me-2"></i>
+                        Generated Content
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="generatedContentDisplay">
+                        <div class="text-center py-4">
+                            <i class="fas fa-magic fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Generate content to see it here!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Content Types -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Content Types
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('study_notes')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-book text-primary me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Study Notes</h6>
+                                    <small class="text-muted">Comprehensive, summary, key points</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('interactive')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-gamepad text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Interactive Content</h6>
+                                    <small class="text-muted">Quizzes, flashcards, scenarios</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('visual')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-project-diagram text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Visual Aids</h6>
+                                    <small class="text-muted">Mind maps, diagrams, timelines</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('personalized')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-cog text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Personalized</h6>
+                                    <small class="text-muted">Adapted to your learning style</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('summary')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-compress-alt text-secondary me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Summaries</h6>
+                                    <small class="text-muted">Quick references and overviews</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="showContentTypeInfo('learning_path')">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-route text-purple me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Learning Paths</h6>
+                                    <small class="text-muted">Structured progression plans</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="loadContentTypes()">
+                            <i class="fas fa-sync me-2"></i>Refresh Content Types
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="showContentGenerator()">
+                            <i class="fas fa-cogs me-2"></i>Advanced Generator
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="showContentHistory()">
+                            <i class="fas fa-history me-2"></i>Generation History
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Tips -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        AI Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="aiTips">
+                        <div class="alert alert-info">
+                            <h6>Pro Tip:</h6>
+                            <p class="mb-0">Generate comprehensive study notes first, then create interactive content to
+                                test your understanding!</p>
+                        </div>
+                        <div class="alert alert-success">
+                            <h6>Learning Style:</h6>
+                            <p class="mb-0">Visual learners benefit most from mind maps and diagrams, while kinesthetic
+                                learners prefer interactive exercises.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Type Info Modal -->
+<div class="modal fade" id="contentTypeInfoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Content Type Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contentTypeInfoBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Content type configurations
+    const contentTypes = {
+        'study_notes': {
+            subtypes: ['comprehensive', 'summary', 'key_points', 'exam_focused'],
+            description: 'AI-generated study notes in various formats'
+        },
+        'interactive': {
+            subtypes: ['quiz', 'flashcards', 'scenarios', 'exercises'],
+            description: 'Interactive learning content'
+        },
+        'visual': {
+            subtypes: ['mind_map', 'diagram', 'timeline', 'flowchart'],
+            description: 'Visual learning aids and diagrams'
+        },
+        'personalized': {
+            subtypes: ['visual', 'auditory', 'kinesthetic', 'reading'],
+            description: 'Content adapted to learning style'
+        },
+        'summary': {
+            subtypes: ['overview', 'key_concepts', 'exam_summary', 'quick_reference'],
+            description: 'Various types of content summaries'
+        },
+        'learning_path': {
+            subtypes: ['beginner', 'intermediate', 'advanced'],
+            description: 'Structured learning progression'
+        }
+    };
+
+    // Load topics and content types on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTopics();
+        loadContentTypes();
+    });
+
+    function loadTopics() {
+        // This would load topics from your API
+        // For now, we'll use placeholder data
+        const topicSelect = document.getElementById('contentTopicSelect');
+        topicSelect.innerHTML = '<option value="">Choose a topic...</option>';
+        // Add your topics here
+    }
+
+    function loadContentTypes() {
+        // Load available content types
+        fetch('/content/api/content-types')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error loading content types:', data.error);
+                } else {
+                    console.log('Content types loaded:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading content types:', error);
+            });
+    }
+
+    // Handle content type selection
+    document.getElementById('contentTypeSelect').addEventListener('change', function () {
+        const contentType = this.value;
+        const subtypeRow = document.getElementById('subtypeRow');
+        const subtypeSelect = document.getElementById('contentSubtypeSelect');
+
+        if (contentType && contentTypes[contentType]) {
+            subtypeSelect.innerHTML = '<option value="">Choose subtype...</option>';
+            contentTypes[contentType].subtypes.forEach(subtype => {
+                const option = document.createElement('option');
+                option.value = subtype;
+                option.textContent = subtype.charAt(0).toUpperCase() + subtype.slice(1).replace('_', ' ');
+                subtypeSelect.appendChild(option);
+            });
+            subtypeRow.style.display = 'block';
+        } else {
+            subtypeRow.style.display = 'none';
+        }
+    });
+
+    function generateContent() {
+        const topicId = document.getElementById('contentTopicSelect').value;
+        const contentType = document.getElementById('contentTypeSelect').value;
+        const subtype = document.getElementById('contentSubtypeSelect').value;
+        const learningStyle = document.getElementById('learningStyleSelect').value;
+
+        if (!topicId || !contentType) {
+            alert('Please select a topic and content type');
+            return;
+        }
+
+        let url = '';
+        let params = new URLSearchParams();
+
+        switch (contentType) {
+            case 'study_notes':
+                url = `/content/api/generate-notes/${topicId}`;
+                if (subtype) params.append('type', subtype);
+                break;
+            case 'interactive':
+                url = `/content/api/generate-interactive/${topicId}`;
+                if (subtype) params.append('type', subtype);
+                break;
+            case 'visual':
+                url = `/content/api/generate-visual/${topicId}`;
+                if (subtype) params.append('type', subtype);
+                break;
+            case 'personalized':
+                url = `/content/api/generate-personalized/${topicId}`;
+                params.append('style', learningStyle);
+                break;
+            case 'summary':
+                url = `/content/api/generate-summary/${topicId}`;
+                if (subtype) params.append('type', subtype);
+                break;
+            case 'learning_path':
+                url = `/content/api/generate-learning-path/${topicId}`;
+                if (subtype) params.append('difficulty', subtype);
+                break;
+            default:
+                alert('Invalid content type');
+                return;
+        }
+
+        if (params.toString()) url += '?' + params.toString();
+
+        // Show loading
+        const resultDiv = document.getElementById('contentGenerationResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Generating content...</div>';
+        resultDiv.style.display = 'block';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    displayGeneratedContent(data);
+                    resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i>Content generated successfully!</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error generating content</div>';
+            });
+    }
+
+    function generateComprehensivePackage() {
+        const topicId = document.getElementById('contentTopicSelect').value;
+        const learningStyle = document.getElementById('learningStyleSelect').value;
+
+        if (!topicId) {
+            alert('Please select a topic');
+            return;
+        }
+
+        const types = ['notes', 'quiz', 'summary', 'visual'];
+        let url = `/content/api/comprehensive-generation/${topicId}?learning_style=${learningStyle}`;
+        types.forEach(type => url += `&types=${type}`);
+
+        const resultDiv = document.getElementById('contentGenerationResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Generating comprehensive content package...</div>';
+        resultDiv.style.display = 'block';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    displayComprehensiveContent(data);
+                    resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check me-2"></i>Comprehensive content package generated!</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error generating comprehensive package</div>';
+            });
+    }
+
+    function displayGeneratedContent(data) {
+        const displayDiv = document.getElementById('generatedContentDisplay');
+
+        let content = '';
+        if (data.notes) {
+            content = `<div class="generated-content"><h6>Generated Study Notes</h6><div class="content-text">${data.notes.replace(/\n/g, '<br>')}</div></div>`;
+        } else if (data.content) {
+            content = `<div class="generated-content"><h6>Generated Content</h6><pre>${JSON.stringify(data.content, null, 2)}</pre></div>`;
+        } else if (data.summary) {
+            content = `<div class="generated-content"><h6>Generated Summary</h6><div class="content-text">${data.summary.replace(/\n/g, '<br>')}</div></div>`;
+        } else if (data.visual) {
+            content = `<div class="generated-content"><h6>Generated Visual Aid</h6><pre>${JSON.stringify(data.visual, null, 2)}</pre></div>`;
+        }
+
+        displayDiv.innerHTML = content;
+    }
+
+    function displayComprehensiveContent(data) {
+        const displayDiv = document.getElementById('generatedContentDisplay');
+
+        let content = '<div class="comprehensive-content">';
+        content += '<h6>Comprehensive Content Package</h6>';
+
+        if (data.study_notes && data.study_notes.notes) {
+            content += '<div class="content-section"><h6>Study Notes</h6><div class="content-text">' + data.study_notes.notes.replace(/\n/g, '<br>') + '</div></div>';
+        }
+
+        if (data.summary && data.summary.summary) {
+            content += '<div class="content-section"><h6>Summary</h6><div class="content-text">' + data.summary.summary.replace(/\n/g, '<br>') + '</div></div>';
+        }
+
+        if (data.interactive_quiz && data.interactive_quiz.content) {
+            content += '<div class="content-section"><h6>Interactive Quiz</h6><pre>' + JSON.stringify(data.interactive_quiz.content, null, 2) + '</pre></div>';
+        }
+
+        if (data.visual_aids && data.visual_aids.visual) {
+            content += '<div class="content-section"><h6>Visual Aids</h6><pre>' + JSON.stringify(data.visual_aids.visual, null, 2) + '</pre></div>';
+        }
+
+        content += '</div>';
+        displayDiv.innerHTML = content;
+    }
+
+    function showContentTypeInfo(type) {
+        const modal = new bootstrap.Modal(document.getElementById('contentTypeInfoModal'));
+        const body = document.getElementById('contentTypeInfoBody');
+
+        if (contentTypes[type]) {
+            const config = contentTypes[type];
+            body.innerHTML = `
+                <h6>${type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ')}</h6>
+                <p>${config.description}</p>
+                <h6>Available Subtypes:</h6>
+                <ul>
+                    ${config.subtypes.map(subtype => `<li>${subtype.charAt(0).toUpperCase() + subtype.slice(1).replace('_', ' ')}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        modal.show();
+    }
+
+    function showContentGenerator() {
+        window.location.href = '/content/generator';
+    }
+
+    function showContentHistory() {
+        alert('Content history feature coming soon!');
+    }
+</script>
+
+<style>
+    .generated-content {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .content-text {
+        white-space: pre-wrap;
+        font-family: inherit;
+        line-height: 1.6;
+    }
+
+    .comprehensive-content .content-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #fff;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .comprehensive-content .content-section h6 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
