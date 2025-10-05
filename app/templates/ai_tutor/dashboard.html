@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tutor - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- AI Tutor Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-robot fa-2x me-3"></i>
+                        <div>
+                            <h2 class="h4 mb-0">AI Study Companion</h2>
+                            <p class="mb-0 opacity-75">Your personalized learning assistant</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalized Recommendations -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Personalized Study Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recommendations.recommendations %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Study Schedule</h6>
+                            <p class="text-muted">{{ recommendations.recommendations.study_schedule }}</p>
+
+                            <h6 class="text-primary">Quiz Practice</h6>
+                            <p class="text-muted">{{ recommendations.recommendations.quiz_practice }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Topic Review</h6>
+                            <p class="text-muted">{{ recommendations.recommendations.topic_review }}</p>
+
+                            <h6 class="text-primary">Break Tips</h6>
+                            <p class="text-muted">{{ recommendations.recommendations.break_tips }}</p>
+                        </div>
+                    </div>
+
+                    {% if recommendations.recommendations.improvement_areas %}
+                    <div class="mt-3">
+                        <h6 class="text-primary">Focus Areas</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for area in recommendations.recommendations.improvement_areas %}
+                            <span class="badge bg-warning text-dark">{{ area }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if recommendations.recommendations.next_steps %}
+                    <div class="mt-3">
+                        <h6 class="text-primary">Next Steps</h6>
+                        <ul class="list-unstyled">
+                            {% for step in recommendations.recommendations.next_steps %}
+                            <li class="mb-1">
+                                <i class="fas fa-check-circle text-success me-2"></i>{{ step }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Start studying to get personalized recommendations!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Learning Analytics -->
+            {% if recommendations.data_analysis %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar text-info me-2"></i>
+                        Your Learning Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <h3 class="text-primary mb-1">{{ recommendations.data_analysis.total_study_time_hours
+                                    }}h</h3>
+                                <p class="text-muted mb-0">Total Study Time</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <h3 class="text-success mb-1">{{ recommendations.data_analysis.total_quizzes_taken }}
+                                </h3>
+                                <p class="text-muted mb-0">Quizzes Taken</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <h3 class="text-warning mb-1">{{ recommendations.data_analysis.avg_quiz_score }}%</h3>
+                                <p class="text-muted mb-0">Avg Quiz Score</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <h3 class="text-info mb-1">{{ recommendations.data_analysis.total_topics }}</h3>
+                                <p class="text-muted mb-0">Topics Studied</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Study Consistency: <span
+                                class="badge bg-{{ 'success' if recommendations.data_analysis.study_consistency == 'Excellent' else 'warning' if recommendations.data_analysis.study_consistency == 'Good' else 'danger' }}">{{
+                                recommendations.data_analysis.study_consistency }}</span></h6>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('ai_tutor.tutor_chat') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-comments me-2"></i>Chat with AI Tutor
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-success w-100" onclick="detectLearningStyle()">
+                                <i class="fas fa-brain me-2"></i>Detect Learning Style
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-info w-100" onclick="refreshRecommendations()">
+                                <i class="fas fa-sync me-2"></i>Refresh Recommendations
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- AI Features -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-magic me-2"></i>AI Features
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action" onclick="showGradePrediction()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-crystal-ball text-primary me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Grade Prediction</h6>
+                                    <small class="text-muted">Predict your exam grades</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" onclick="showStudyPlan()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar-alt text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Study Plan Generator</h6>
+                                    <small class="text-muted">Create personalized study plans</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" onclick="showConceptExplainer()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lightbulb text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Concept Explainer</h6>
+                                    <small class="text-muted">Get AI explanations</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" onclick="showAdaptiveQuiz()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-question-circle text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Adaptive Quiz</h6>
+                                    <small class="text-muted">Smart quiz recommendations</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history text-secondary me-2"></i>
+                        Recent AI Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <i class="fas fa-robot fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No recent AI activity</p>
+                        <small class="text-muted">Start using AI features to see your activity here</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Grade Prediction Modal -->
+<div class="modal fade" id="gradePredictionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Grade Prediction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="gradePredictionForm">
+                    <div class="mb-3">
+                        <label class="form-label">Select Topic</label>
+                        <select class="form-select" id="gradeTopicSelect" required>
+                            <option value="">Choose a topic...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Exam Date (Optional)</label>
+                        <input type="date" class="form-control" id="examDate">
+                    </div>
+                </form>
+                <div id="gradePredictionResult" class="mt-3" style="display: none;">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="predictGrade()">Predict Grade</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Study Plan Modal -->
+<div class="modal fade" id="studyPlanModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Study Plan Generator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studyPlanForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Select Topic</label>
+                                <select class="form-select" id="studyPlanTopicSelect" required>
+                                    <option value="">Choose a topic...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Target Grade</label>
+                                <select class="form-select" id="targetGrade">
+                                    <option value="">Any grade</option>
+                                    <option value="9">Grade 9</option>
+                                    <option value="8">Grade 8</option>
+                                    <option value="7">Grade 7</option>
+                                    <option value="6">Grade 6</option>
+                                    <option value="5">Grade 5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Time Available (minutes per day)</label>
+                        <input type="number" class="form-control" id="timeAvailable" placeholder="e.g., 60">
+                    </div>
+                </form>
+                <div id="studyPlanResult" class="mt-3" style="display: none;">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="generateStudyPlan()">Generate Plan</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Load topics for dropdowns
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTopics();
+    });
+
+    function loadTopics() {
+        // This would load topics from your API
+        // For now, we'll use placeholder data
+        const topicSelects = document.querySelectorAll('#gradeTopicSelect, #studyPlanTopicSelect');
+        topicSelects.forEach(select => {
+            select.innerHTML = '<option value="">Choose a topic...</option>';
+            // Add your topics here
+        });
+    }
+
+    function detectLearningStyle() {
+        // Show loading
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Detecting...';
+        btn.disabled = true;
+
+        fetch('/ai-tutor/api/learning-style')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    alert(`Your learning style: ${data.learning_style.style} (${data.learning_style.confidence}% confidence)`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error detecting learning style');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    function refreshRecommendations() {
+        // Reload the page to get fresh recommendations
+        location.reload();
+    }
+
+    function showGradePrediction() {
+        const modal = new bootstrap.Modal(document.getElementById('gradePredictionModal'));
+        modal.show();
+    }
+
+    function showStudyPlan() {
+        const modal = new bootstrap.Modal(document.getElementById('studyPlanModal'));
+        modal.show();
+    }
+
+    function predictGrade() {
+        const topicId = document.getElementById('gradeTopicSelect').value;
+        const examDate = document.getElementById('examDate').value;
+
+        if (!topicId) {
+            alert('Please select a topic');
+            return;
+        }
+
+        let url = `/ai-tutor/api/predict-grade/${topicId}`;
+        if (examDate) {
+            url += `?exam_date=${examDate}`;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('gradePredictionResult');
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>Predicted Grade: ${data.predicted_grade}</h6>
+                            <p>Confidence: ${data.confidence}%</p>
+                            ${data.recommendations ? `<p>Recommendations: ${data.recommendations.join(', ')}</p>` : ''}
+                        </div>
+                    `;
+                }
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('gradePredictionResult').innerHTML = '<div class="alert alert-danger">Error predicting grade</div>';
+                document.getElementById('gradePredictionResult').style.display = 'block';
+            });
+    }
+
+    function generateStudyPlan() {
+        const topicId = document.getElementById('studyPlanTopicSelect').value;
+        const targetGrade = document.getElementById('targetGrade').value;
+        const timeAvailable = document.getElementById('timeAvailable').value;
+
+        if (!topicId) {
+            alert('Please select a topic');
+            return;
+        }
+
+        let url = `/ai-tutor/api/study-plan/${topicId}`;
+        const params = new URLSearchParams();
+        if (targetGrade) params.append('target_grade', targetGrade);
+        if (timeAvailable) params.append('time_available', timeAvailable);
+        if (params.toString()) url += '?' + params.toString();
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('studyPlanResult');
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6>Study Plan Generated!</h6>
+                            <pre>${JSON.stringify(data.study_plan, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('studyPlanResult').innerHTML = '<div class="alert alert-danger">Error generating study plan</div>';
+                document.getElementById('studyPlanResult').style.display = 'block';
+            });
+    }
+</script>
+{% endblock %}
