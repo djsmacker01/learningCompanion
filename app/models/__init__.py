@@ -188,9 +188,11 @@ class Topic:
                 )
             
             
-            shared_response = client.table('topics').select('*').eq('id', topic_id).eq('is_active', True).in_('id', 
-                client.table('shared_topic_access').select('topic_id').eq('user_id', user_id)
-            ).execute()
+            # Check if user has shared access to this topic
+            shared_access = client.table('shared_topic_access').select('topic_id').eq('topic_id', topic_id).eq('user_id', user_id).execute()
+            
+            if shared_access.data:
+                shared_response = client.table('topics').select('*').eq('id', topic_id).eq('is_active', True).execute()
             
             if shared_response.data:
                 topic_data = shared_response.data[0]
@@ -295,49 +297,142 @@ class Topic:
     def share_topic(topic_id, user_id, expires_at=None, max_uses=None):
         
         if not SUPABASE_AVAILABLE:
+            print("Supabase not available for sharing topic")
             return None
         
         try:
             client = get_supabase_client()
             
+            print(f"Attempting to share topic {topic_id} for user {user_id}")
             
             topic = Topic.get_by_id(topic_id, user_id)
             if not topic:
+                print(f"Topic {topic_id} not found for user {user_id}")
                 return None
             
+            print(f"Topic found: {topic.title}")
             
-            response = client.rpc('share_topic', {
-                'p_topic_id': topic_id,
-                'p_expires_at': expires_at.isoformat() if expires_at else None,
-                'p_max_uses': max_uses
-            }).execute()
+            # Generate share code manually since RPC function has auth issues
+            import secrets
+            import string
+            
+            # Generate a unique 8-character share code
+            while True:
+                share_code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                
+                # Check if code already exists
+                existing = client.table('topic_shares').select('id').eq('share_code', share_code).execute()
+                if not existing.data:
+                    break
+            
+            # Insert into topic_shares table directly
+            share_data = {
+                'topic_id': topic_id,
+                'share_code': share_code,
+                'created_by': user_id,
+                'expires_at': expires_at.isoformat() if expires_at else None,
+                'max_uses': max_uses,
+                'use_count': 0,
+                'is_active': True
+            }
+            
+            response = client.table('topic_shares').insert(share_data).execute()
             
             if response.data:
-                return response.data
+                # Update the topic to mark it as shared
+                from datetime import datetime
+                client.table('topics').update({
+                    'is_shared': True,
+                    'share_code': share_code,
+                    'shared_at': datetime.now().isoformat()
+                }).eq('id', topic_id).execute()
+                
+                print(f"Share code generated successfully: {share_code}")
+                return share_code
+            
             return None
         except Exception as e:
             print(f"Error sharing topic: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     @staticmethod
     def join_topic_with_code(share_code, user_id):
         
         if not SUPABASE_AVAILABLE:
+            print("Supabase not available for joining topic")
             return None
         
         try:
             client = get_supabase_client()
             
+            print(f"Attempting to join topic with share code: {share_code} for user: {user_id}")
             
-            response = client.rpc('join_topic_with_code', {
-                'p_share_code': share_code
-            }).execute()
+            # Find the share record
+            share_result = client.table('topic_shares').select('*').eq('share_code', share_code).eq('is_active', True).execute()
             
-            if response.data:
-                return response.data
+            if not share_result.data:
+                print(f"No active share found for code: {share_code}")
+                return None
+            
+            share_record = share_result.data[0]
+            topic_id = share_record['topic_id']
+            
+            print(f"Found share record for topic: {topic_id}")
+            
+            # Check if topic exists and is active
+            topic_result = client.table('topics').select('id, title').eq('id', topic_id).eq('is_active', True).execute()
+            
+            if not topic_result.data:
+                print(f"Topic {topic_id} not found or inactive")
+                return None
+            
+            print(f"Topic found: {topic_result.data[0]['title']}")
+            
+            # Check expiration
+            if share_record.get('expires_at'):
+                from datetime import datetime
+                expires_at = datetime.fromisoformat(share_record['expires_at'].replace('Z', '+00:00'))
+                if expires_at < datetime.now():
+                    print(f"Share code expired at {expires_at}")
+                    return None
+            
+            # Check max uses
+            if share_record.get('max_uses') and share_record.get('use_count', 0) >= share_record['max_uses']:
+                print(f"Share code has reached maximum uses: {share_record['use_count']}/{share_record['max_uses']}")
+                return None
+            
+            # Check if user already has access
+            existing_access = client.table('shared_topic_access').select('id').eq('topic_id', topic_id).eq('user_id', user_id).execute()
+            
+            if existing_access.data:
+                print(f"User {user_id} already has access to topic {topic_id}")
+                return topic_id
+            
+            # Grant access
+            access_data = {
+                'topic_id': topic_id,
+                'user_id': user_id,
+                'share_code': share_code
+            }
+            
+            access_result = client.table('shared_topic_access').insert(access_data).execute()
+            
+            if access_result.data:
+                # Update use count
+                client.table('topic_shares').update({
+                    'use_count': share_record.get('use_count', 0) + 1
+                }).eq('id', share_record['id']).execute()
+                
+                print(f"Successfully joined topic {topic_id} with share code {share_code}")
+                return topic_id
+            
             return None
         except Exception as e:
             print(f"Error joining topic: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     @staticmethod

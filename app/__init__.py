@@ -109,5 +109,11 @@ def create_app(config_name='default'):
     from app.routes.gcse_resources import gcse_resources as gcse_resources_blueprint
     app.register_blueprint(gcse_resources_blueprint)
 
+    from app.routes.ai_tutor import ai_tutor as ai_tutor_blueprint
+    app.register_blueprint(ai_tutor_blueprint)
+
+    from app.routes.predictive_analytics import predictive_analytics as predictive_analytics_blueprint
+    app.register_blueprint(predictive_analytics_blueprint)
+
     return app
 
