@@ -33,6 +33,47 @@ def create_app(config_name='default'):
             return ''
         return text.replace('\n', '<br>')
     
+    @app.template_filter('format_document')
+    def format_document_filter(text):
+        """Format document content with simple, clean HTML structure"""
+        if text is None:
+            return ''
+        
+        import re
+        
+        # Split into lines
+        lines = text.split('\n')
+        formatted_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                formatted_lines.append('<br>')
+                continue
+            
+            # Only format obvious headings (short lines that are all caps)
+            if (line.isupper() and 
+                len(line) < 50 and 
+                not line.endswith('.') and 
+                not line.endswith(',') and
+                not line.startswith('File:') and
+                not line.startswith('Size:') and
+                not line.startswith('Word count:') and
+                not line.startswith('Extraction method:') and
+                not line.startswith('File type:') and
+                not line.startswith('EXTRACTED CONTENT') and
+                not line.startswith('KEY SECTIONS FOUND') and
+                not line.startswith('- ')):
+                formatted_lines.append(f'<h5 class="document-heading">{line}</h5>')
+            # If line looks like a separator line (dashes or equals)
+            elif re.match(r'^[=\-]{3,}$', line):
+                formatted_lines.append('<hr class="document-separator">')
+            # Regular content - just preserve as paragraph
+            else:
+                formatted_lines.append(f'<p class="document-paragraph">{line}</p>')
+        
+        return '\n'.join(formatted_lines)
+    
     @app.template_filter('safe_date')
     def safe_date_filter(date_obj, format_str='%B %d, %Y'):
         """Safely format a date, handling both datetime objects and strings"""
