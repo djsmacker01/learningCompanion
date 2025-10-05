@@ -115,5 +115,8 @@ def create_app(config_name='default'):
     from app.routes.predictive_analytics import predictive_analytics as predictive_analytics_blueprint
     app.register_blueprint(predictive_analytics_blueprint)
 
+    from app.routes.smart_content import smart_content as smart_content_blueprint
+    app.register_blueprint(smart_content_blueprint)
+
     return app
 
