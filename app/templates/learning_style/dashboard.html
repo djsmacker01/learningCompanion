@@ -1,0 +1,702 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Style Detection - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Header -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-info text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-brain fa-2x me-3"></i>
+                        <div>
+                            <h2 class="h4 mb-0">Learning Style Detection & Personalization</h2>
+                            <p class="mb-0 opacity-75">Advanced AI-powered learning style analysis and adaptive learning
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Learning Style Assessment -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-check text-primary me-2"></i>
+                        Learning Style Assessment
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="assessmentContainer">
+                        <div class="text-center py-4">
+                            <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+                            <h5>Discover Your Learning Style</h5>
+                            <p class="text-muted">Take our comprehensive assessment to understand how you learn best</p>
+                            <button class="btn btn-primary btn-lg" onclick="startLearningStyleAssessment()">
+                                <i class="fas fa-play me-2"></i>Start Assessment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adaptive Learning Path Generator -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-route text-success me-2"></i>
+                        Adaptive Learning Path Generator
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="adaptiveLearningPathForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Subject</label>
+                                    <select class="form-select" id="pathSubject" required>
+                                        <option value="">Choose a subject...</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="English">English</option>
+                                        <option value="Science">Science</option>
+                                        <option value="History">History</option>
+                                        <option value="Geography">Geography</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Level</label>
+                                    <select class="form-select" id="pathCurrentLevel" required>
+                                        <option value="beginner">Beginner</option>
+                                        <option value="intermediate">Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Target Level</label>
+                                    <select class="form-select" id="pathTargetLevel" required>
+                                        <option value="intermediate">Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                        <option value="expert">Expert</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Learning Style</label>
+                                    <select class="form-select" id="pathLearningStyle" required>
+                                        <option value="visual">Visual</option>
+                                        <option value="auditory">Auditory</option>
+                                        <option value="kinesthetic">Kinesthetic</option>
+                                        <option value="reading_writing">Reading/Writing</option>
+                                        <option value="multimodal">Multimodal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="createAdaptiveLearningPath()">
+                            <i class="fas fa-magic me-2"></i>Generate Learning Path
+                        </button>
+                    </form>
+
+                    <div id="adaptiveLearningPathResult" class="mt-3" style="display: none;">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intelligent Study Schedule -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt text-warning me-2"></i>
+                        Intelligent Study Schedule
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="studyScheduleForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Learning Style</label>
+                                    <select class="form-select" id="scheduleLearningStyle" required>
+                                        <option value="visual">Visual</option>
+                                        <option value="auditory">Auditory</option>
+                                        <option value="kinesthetic">Kinesthetic</option>
+                                        <option value="reading_writing">Reading/Writing</option>
+                                        <option value="multimodal">Multimodal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Available Time (hours per day)</label>
+                                    <input type="number" class="form-control" id="availableTime" value="3" min="1"
+                                        max="12">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subjects to Study</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="subjectMath"
+                                            value="Mathematics">
+                                        <label class="form-check-label" for="subjectMath">Mathematics</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="subjectEnglish"
+                                            value="English">
+                                        <label class="form-check-label" for="subjectEnglish">English</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="subjectScience"
+                                            value="Science">
+                                        <label class="form-check-label" for="subjectScience">Science</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-warning" onclick="createIntelligentStudySchedule()">
+                            <i class="fas fa-clock me-2"></i>Create Study Schedule
+                        </button>
+                    </form>
+
+                    <div id="studyScheduleResult" class="mt-3" style="display: none;">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Progress Analysis -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line text-info me-2"></i>
+                        Learning Progress Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="progressAnalysisForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Analysis Period</label>
+                                    <select class="form-select" id="analysisPeriod">
+                                        <option value="7_days">Last 7 Days</option>
+                                        <option value="30_days" selected>Last 30 Days</option>
+                                        <option value="90_days">Last 90 Days</option>
+                                        <option value="all_time">All Time</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Analysis Depth</label>
+                                    <select class="form-select" id="analysisDepth">
+                                        <option value="basic">Basic</option>
+                                        <option value="comprehensive" selected>Comprehensive</option>
+                                        <option value="detailed">Detailed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-info" onclick="analyzeLearningProgress()">
+                            <i class="fas fa-search me-2"></i>Analyze Progress
+                        </button>
+                    </form>
+
+                    <div id="progressAnalysisResult" class="mt-3" style="display: none;">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Learning Styles Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Learning Styles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="learningStylesInfo">
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">Loading learning styles...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action" onclick="generateLearningInsights()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lightbulb text-warning me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Generate Insights</h6>
+                                    <small class="text-muted">AI-powered learning insights</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" onclick="personalizeContent()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-cog text-info me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Personalize Content</h6>
+                                    <small class="text-muted">Adapt content to your style</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action"
+                            onclick="viewPersonalizationCenter()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-cogs text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Personalization Center</h6>
+                                    <small class="text-muted">Advanced personalization</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Tips -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tips me-2"></i>Learning Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary">
+                        <h6>Visual Learners:</h6>
+                        <p class="mb-0">Use mind maps, diagrams, and color coding to organize information effectively.
+                        </p>
+                    </div>
+                    <div class="alert alert-success">
+                        <h6>Auditory Learners:</h6>
+                        <p class="mb-0">Record yourself explaining concepts and listen to educational podcasts.</p>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h6>Kinesthetic Learners:</h6>
+                        <p class="mb-0">Take frequent breaks and use hands-on activities to reinforce learning.</p>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6>Reading/Writing Learners:</h6>
+                        <p class="mb-0">Take detailed notes and create written summaries to solidify understanding.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assessment Modal -->
+<div class="modal fade" id="assessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Learning Style Assessment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="assessmentContent">
+                    <!-- Assessment questions will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitAssessment()" id="submitAssessmentBtn"
+                    disabled>Submit Assessment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentQuestionIndex = 0;
+    let assessmentQuestions = [];
+    let assessmentAnswers = [];
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        loadLearningStyles();
+    });
+
+    function loadLearningStyles() {
+        fetch('/learning-style/api/learning-styles')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error loading learning styles:', data.error);
+                    return;
+                }
+
+                displayLearningStyles(data.learning_styles);
+            })
+            .catch(error => {
+                console.error('Error loading learning styles:', error);
+            });
+    }
+
+    function displayLearningStyles(learningStyles) {
+        const container = document.getElementById('learningStylesInfo');
+        let html = '';
+
+        learningStyles.forEach(style => {
+            html += `
+                <div class="mb-3">
+                    <h6 class="text-primary">${style.name}</h6>
+                    <p class="small text-muted mb-2">${style.description}</p>
+                    <div class="small">
+                        <strong>Key Characteristics:</strong>
+                        <ul class="mb-0">
+                            ${style.characteristics.map(char => `<li>${char}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function startLearningStyleAssessment() {
+        fetch('/learning-style/api/learning-style-assessment')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error loading assessment:', data.error);
+                    return;
+                }
+
+                assessmentQuestions = data.assessment_questions;
+                currentQuestionIndex = 0;
+                assessmentAnswers = [];
+
+                showAssessmentQuestion();
+
+                const modal = new bootstrap.Modal(document.getElementById('assessmentModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error loading assessment:', error);
+            });
+    }
+
+    function showAssessmentQuestion() {
+        const container = document.getElementById('assessmentContent');
+        const question = assessmentQuestions[currentQuestionIndex];
+
+        let html = `
+            <div class="assessment-question">
+                <h6>Question ${currentQuestionIndex + 1} of ${assessmentQuestions.length}</h6>
+                <p class="mb-3">${question.question}</p>
+                <div class="form-group">
+        `;
+
+        question.options.forEach(option => {
+            html += `
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="question_${question.id}" 
+                           id="option_${option.id}" value="${option.style}" 
+                           onchange="selectAnswer('${option.style}')">
+                    <label class="form-check-label" for="option_${option.id}">
+                        ${option.text}
+                    </label>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <div class="progress mb-3">
+                    <div class="progress-bar" style="width: ${((currentQuestionIndex + 1) / assessmentQuestions.length) * 100}%"></div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function selectAnswer(style) {
+        assessmentAnswers[currentQuestionIndex] = {
+            question_id: assessmentQuestions[currentQuestionIndex].id,
+            style: style
+        };
+
+        // Enable submit button if all questions answered
+        if (assessmentAnswers.length === assessmentQuestions.length &&
+            assessmentAnswers.every(answer => answer !== undefined)) {
+            document.getElementById('submitAssessmentBtn').disabled = false;
+        }
+    }
+
+    function submitAssessment() {
+        const submitBtn = document.getElementById('submitAssessmentBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+        fetch('/learning-style/api/submit-assessment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                answers: assessmentAnswers
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error submitting assessment:', data.error);
+                    alert('Error submitting assessment: ' + data.error);
+                    return;
+                }
+
+                // Show results
+                showAssessmentResults(data.assessment_results);
+            })
+            .catch(error => {
+                console.error('Error submitting assessment:', error);
+                alert('Error submitting assessment');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Assessment';
+            });
+    }
+
+    function showAssessmentResults(results) {
+        const container = document.getElementById('assessmentContent');
+        const analysis = results.analysis;
+
+        let html = `
+            <div class="text-center mb-4">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h5>Assessment Complete!</h5>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Your Primary Learning Style</h6>
+                            <h4 class="text-primary">${results.primary_learning_style.toUpperCase()}</h4>
+                            <p class="card-text">${analysis.recommendations[0] || 'Great choice!'}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Style Scores</h6>
+                            ${Object.entries(results.style_scores).map(([style, score]) => `
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>${style.charAt(0).toUpperCase() + style.slice(1)}:</span>
+                                    <span>${score}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h6>Personalized Recommendations:</h6>
+                <ul>
+                    ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function createAdaptiveLearningPath() {
+        const subject = document.getElementById('pathSubject').value;
+        const currentLevel = document.getElementById('pathCurrentLevel').value;
+        const targetLevel = document.getElementById('pathTargetLevel').value;
+        const learningStyle = document.getElementById('pathLearningStyle').value;
+
+        if (!subject) {
+            alert('Please select a subject');
+            return;
+        }
+
+        const resultDiv = document.getElementById('adaptiveLearningPathResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Creating adaptive learning path...</div>';
+        resultDiv.style.display = 'block';
+
+        fetch('/learning-style/api/create-adaptive-learning-path', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subject: subject,
+                current_level: currentLevel,
+                target_level: targetLevel,
+                learning_style: learningStyle
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h6>Adaptive Learning Path Created!</h6>
+                        <p>Subject: ${data.subject}</p>
+                        <p>Learning Style: ${data.learning_style}</p>
+                        <p>Estimated Completion: ${data.estimated_completion_time}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error creating adaptive learning path</div>';
+            });
+    }
+
+    function createIntelligentStudySchedule() {
+        const learningStyle = document.getElementById('scheduleLearningStyle').value;
+        const availableTime = document.getElementById('availableTime').value;
+
+        const selectedSubjects = [];
+        if (document.getElementById('subjectMath').checked) selectedSubjects.push('Mathematics');
+        if (document.getElementById('subjectEnglish').checked) selectedSubjects.push('English');
+        if (document.getElementById('subjectScience').checked) selectedSubjects.push('Science');
+
+        if (selectedSubjects.length === 0) {
+            alert('Please select at least one subject');
+            return;
+        }
+
+        const resultDiv = document.getElementById('studyScheduleResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Creating intelligent study schedule...</div>';
+        resultDiv.style.display = 'block';
+
+        const availableTimeData = {};
+        for (let day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']) {
+            availableTimeData[day] = {
+                'morning': Math.floor(availableTime * 0.3),
+                'afternoon': Math.floor(availableTime * 0.4),
+                'evening': Math.floor(availableTime * 0.3)
+            };
+        }
+
+        fetch('/learning-style/api/create-intelligent-study-schedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                learning_style: learningStyle,
+                available_time: availableTimeData,
+                subjects: selectedSubjects,
+                priorities: selectedSubjects.reduce((acc, subject, index) => {
+                    acc[subject] = index === 0 ? 'high' : 'medium';
+                    return acc;
+                }, {})
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        <h6>Intelligent Study Schedule Created!</h6>
+                        <p>Learning Style: ${data.user_learning_style}</p>
+                        <p>Effectiveness Score: ${data.schedule_effectiveness_score}%</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error creating study schedule</div>';
+            });
+    }
+
+    function analyzeLearningProgress() {
+        const timePeriod = document.getElementById('analysisPeriod').value;
+        const analysisDepth = document.getElementById('analysisDepth').value;
+
+        const resultDiv = document.getElementById('progressAnalysisResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Analyzing learning progress...</div>';
+        resultDiv.style.display = 'block';
+
+        fetch(`/learning-style/api/analyze-learning-progress?time_period=${timePeriod}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <h6>Learning Progress Analysis Complete!</h6>
+                        <p>Time Period: ${data.time_period}</p>
+                        <p>Learning Velocity: ${data.learning_velocity}%</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error analyzing learning progress</div>';
+            });
+    }
+
+    function generateLearningInsights() {
+        alert('Learning insights generation feature coming soon!');
+    }
+
+    function personalizeContent() {
+        alert('Content personalization feature coming soon!');
+    }
+
+    function viewPersonalizationCenter() {
+        window.location.href = '/learning-style/personalization-center';
+    }
+</script>
+{% endblock %}
