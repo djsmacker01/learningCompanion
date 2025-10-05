@@ -462,56 +462,68 @@ def import_materials():
                     return render_template('topics/import_materials.html', form=form)
                 
                 # Process the uploaded file
-                from app.utils.pdf_processor import PDFProcessor
-                pdf_processor = PDFProcessor()
+                from app.utils.document_processor import DocumentProcessor
+                doc_processor = DocumentProcessor()
                 
-                # Check if PDF processing is available
-                if not PDFProcessor.is_pdf_processing_available():
-                    # Fallback: create topic without content extraction
+                # Check if document processing is available
+                available_formats = DocumentProcessor.is_document_processing_available()
+                file_extension = file.filename.split('.')[-1].lower() if '.' in file.filename else 'unknown'
+                
+                # Check if the file type is supported
+                supported_formats = DocumentProcessor.get_supported_formats()
+                if file_extension not in supported_formats:
                     topic = Topic.create(
                         title=title,
-                        description=f"{description}\n\nUploaded file: {file.filename}\n\nNote: PDF content extraction is not available. Please install PDF processing libraries.",
+                        description=f"{description}\n\nUploaded file: {file.filename}\n\nUnsupported file type: {file_extension}\n\nSupported formats: {', '.join(supported_formats)}",
                         user_id=user.id
                     )
                     
                     if topic:
-                        flash(f'Material "{title}" uploaded successfully! (PDF content extraction unavailable)', 'warning')
+                        flash(f'Material "{title}" uploaded but file type not supported. See topic details for supported formats.', 'warning')
                         return redirect(url_for('topics.view_topic', topic_id=topic.id))
                     else:
                         flash('Failed to create topic for material.', 'error')
                         return render_template('topics/import_materials.html', form=form)
                 
-                # Process the PDF
-                processing_result = pdf_processor.process_uploaded_pdf(file)
+                # Process the document
+                processing_result = doc_processor.process_document(file)
                 
                 if processing_result['success']:
                     content_info = processing_result['content_info']
                     file_info = processing_result['file_info']
+                    file_type = processing_result.get('file_type', file_extension)
                     
                     # Create enhanced description with extracted content
                     enhanced_description = f"{description}\n\n"
-                    enhanced_description += f"📄 Uploaded file: {file_info['original_filename']}\n"
-                    enhanced_description += f"📊 File size: {file_info['file_size']:,} bytes\n"
-                    enhanced_description += f"📝 Word count: {content_info['word_count']:,} words\n"
-                    enhanced_description += f"🔧 Extraction method: {content_info['extraction_method']}\n\n"
+                    enhanced_description += f"File: {file_info['original_filename']}\n"
+                    enhanced_description += f"Size: {file_info['file_size']:,} bytes\n"
+                    enhanced_description += f"Word count: {content_info['word_count']:,} words\n"
+                    enhanced_description += f"Extraction method: {content_info['extraction_method']}\n"
+                    enhanced_description += f"File type: {file_type.upper()}\n\n"
                     
-                    if content_info['text_content']:
-                        enhanced_description += "📖 EXTRACTED CONTENT:\n"
+                    if content_info.get('cleaned_text'):
+                        enhanced_description += f"EXTRACTED CONTENT FROM {file_type.upper()}:\n"
                         enhanced_description += "=" * 50 + "\n\n"
                         
                         # Add the extracted text (truncate if too long)
-                        extracted_text = content_info['text_content']
+                        extracted_text = content_info['cleaned_text']
                         if len(extracted_text) > 5000:
                             enhanced_description += extracted_text[:5000] + "\n\n... (content truncated - full content available in topic details) ..."
                         else:
                             enhanced_description += extracted_text
                         
                         # Add key sections if available
-                        if content_info['key_sections']:
-                            enhanced_description += "\n\n🔑 KEY SECTIONS FOUND:\n"
+                        if content_info.get('key_sections'):
+                            enhanced_description += "\n\nKEY SECTIONS FOUND:\n"
                             enhanced_description += "-" * 30 + "\n"
                             for section in content_info['key_sections'][:10]:  # Limit to 10 sections
-                                enhanced_description += f"• {section['title']}\n"
+                                enhanced_description += f"- {section['title']}\n"
+                    
+                    # Add special handling for markdown files
+                    if file_type == 'markdown' and content_info.get('html_content'):
+                        enhanced_description += "\n\nRENDERED MARKDOWN:\n"
+                        enhanced_description += "-" * 30 + "\n"
+                        enhanced_description += "(HTML content available for rich display)\n"
                     
                     # Create the topic with extracted content
                     topic = Topic.create(
@@ -521,25 +533,65 @@ def import_materials():
                     )
                     
                     if topic:
-                        flash(f'Material "{title}" uploaded and processed successfully! Content extracted from PDF.', 'success')
+                        flash(f'Material "{title}" uploaded and processed successfully! Content extracted from {file_type.upper()} document.', 'success')
                         return redirect(url_for('topics.view_topic', topic_id=topic.id))
                     else:
                         flash('Failed to create topic for material.', 'error')
                 else:
-                    # PDF processing failed, create topic with error info
+                    # Document processing failed, create topic with detailed error info
                     error_msg = processing_result.get('error', 'Unknown error')
+                    is_image_based = processing_result.get('is_image_based', False)
+                    suggestions = processing_result.get('suggestions', [])
+                    file_info = processing_result.get('file_info', {})
+                    
+                    # Create enhanced error description
+                    error_description = f"{description}\n\n"
+                    error_description += f"Uploaded file: {file.filename}\n"
+                    error_description += f"File size: {file_info.get('file_size', 0):,} bytes\n"
+                    error_description += f"File type: {file_extension.upper()}\n"
+                    extraction_method = processing_result.get('extraction_method', 'unknown')
+                    if 'content_info' in processing_result and processing_result['content_info']:
+                        extraction_method = processing_result['content_info'].get('extraction_method', extraction_method)
+                    error_description += f"Extraction method attempted: {extraction_method}\n\n"
+                    
+                    if is_image_based:
+                        error_description += "IMAGE-BASED PDF DETECTED\n"
+                        error_description += "=" * 30 + "\n\n"
+                        error_description += f"Issue: {error_msg}\n\n"
+                        error_description += "SOLUTIONS:\n"
+                        for i, suggestion in enumerate(suggestions, 1):
+                            error_description += f"{i}. {suggestion}\n"
+                        error_description += "\nNote: This PDF appears to be a scanned image rather than text-based content."
+                    else:
+                        error_description += f"{file_extension.upper()} Processing Error: {error_msg}\n\n"
+                        
+                        # Add suggestions if available
+                        if suggestions:
+                            error_description += "SUGGESTIONS:\n"
+                            for i, suggestion in enumerate(suggestions, 1):
+                                error_description += f"{i}. {suggestion}\n"
+                        
+                        # Add library installation info if needed
+                        if "not available" in error_msg.lower():
+                            required_libs = DocumentProcessor.get_required_libraries()
+                            if required_libs:
+                                error_description += f"\nRequired libraries: {', '.join(required_libs)}"
+                    
                     topic = Topic.create(
                         title=title,
-                        description=f"{description}\n\nUploaded file: {file.filename}\n\n❌ PDF Processing Error: {error_msg}",
+                        description=error_description,
                         user_id=user.id
                     )
                     
                     if topic:
-                        flash(f'Material "{title}" uploaded but PDF processing failed: {error_msg}', 'warning')
+                        if is_image_based:
+                            flash(f'Material "{title}" uploaded but appears to be an image-based PDF. See topic details for solutions.', 'warning')
+                        else:
+                            flash(f'Material "{title}" uploaded but {file_extension.upper()} processing failed: {error_msg}', 'warning')
                         return redirect(url_for('topics.view_topic', topic_id=topic.id))
                     else:
                         flash('Failed to create topic for material.', 'error')
-                    
+                        
             except Exception as e:
                 flash(f'Error uploading material: {str(e)}', 'error')
         
@@ -550,35 +602,59 @@ def import_materials():
         return redirect(url_for('topics.list_topics'))
 
 
-@topics.route('/topics/test-pdf-processing')
+@topics.route('/topics/test-document-processing')
 @login_required
-def test_pdf_processing():
-    """Test route to verify PDF processing functionality"""
+def test_document_processing():
+    """Test route to verify document processing functionality"""
     try:
         user = get_current_user()
         if not user:
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        from app.utils.pdf_processor import PDFProcessor
+        from app.utils.document_processor import DocumentProcessor
         
-        # Check PDF processing availability
-        is_available = PDFProcessor.is_pdf_processing_available()
-        required_libs = PDFProcessor.get_required_libraries()
+        # Check document processing availability
+        available_formats = DocumentProcessor.is_document_processing_available()
+        supported_formats = DocumentProcessor.get_supported_formats()
+        required_libs = DocumentProcessor.get_required_libraries()
         
         result = {
-            'pdf_processing_available': is_available,
+            'available_formats': available_formats,
+            'supported_formats': supported_formats,
             'required_libraries': required_libs,
-            'status': 'ready' if is_available else 'missing_libraries'
+            'status': 'ready' if any(available_formats.values()) else 'missing_libraries'
         }
         
-        return f"""
-        <h2>PDF Processing Status</h2>
-        <p><strong>Available:</strong> {is_available}</p>
-        <p><strong>Required Libraries:</strong> {required_libs}</p>
-        <p><strong>Status:</strong> {result['status']}</p>
-        <p><a href="{{ url_for('topics.import_materials') }}">← Back to Upload</a></p>
+        # Create detailed status display
+        status_html = """
+        <h2>Document Processing Status</h2>
+        <div style="font-family: monospace; background: #f5f5f5; padding: 20px; border-radius: 5px;">
         """
+        
+        status_html += f"<h3>Supported Formats:</h3><ul>"
+        for format_type in supported_formats:
+            status = "✅" if available_formats.get(format_type, False) else "❌"
+            status_html += f"<li>{status} {format_type.upper()}</li>"
+        status_html += "</ul>"
+        
+        status_html += f"<h3>Library Status:</h3><ul>"
+        for lib, available in available_formats.items():
+            status = "✅ Available" if available else "❌ Missing"
+            status_html += f"<li><strong>{lib}:</strong> {status}</li>"
+        status_html += "</ul>"
+        
+        if required_libs:
+            status_html += f"<h3>Missing Libraries:</h3><ul>"
+            for lib in required_libs:
+                status_html += f"<li>{lib}</li>"
+            status_html += "</ul>"
+        
+        status_html += f"<p><strong>Overall Status:</strong> {result['status']}</p>"
+        status_html += "</div>"
+        status_html += '<p><a href="' + url_for('topics.import_materials') + '">← Back to Upload</a></p>'
+        
+        return status_html
         
     except Exception as e:
         return f"Error: {str(e)}"

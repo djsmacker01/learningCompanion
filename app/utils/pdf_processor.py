@@ -27,6 +27,14 @@ try:
 except ImportError:
     PDFMINER_AVAILABLE = False
 
+try:
+    import pytesseract
+    from PIL import Image
+    import fitz  # PyMuPDF
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+
 class PDFProcessor:
     """PDF content extraction and processing utility"""
     
@@ -44,20 +52,51 @@ class PDFProcessor:
         try:
             text_content = ""
             pages_info = []
+            extraction_method = "none"
             
-            # Try multiple PDF extraction methods
+            # First try standard text extraction
             if PDFPLUMBER_AVAILABLE:
                 text_content, pages_info = self._extract_with_pdfplumber(file_path)
+                extraction_method = "pdfplumber"
             elif PyPDF2 and PDF_AVAILABLE:
                 text_content, pages_info = self._extract_with_pypdf2(file_path)
+                extraction_method = "pypdf2"
             elif PDFMINER_AVAILABLE:
                 text_content, pages_info = self._extract_with_pdfminer(file_path)
-            else:
+                extraction_method = "pdfminer"
+            
+            # If no text extracted, try OCR for image-based PDFs
+            if not text_content.strip() and OCR_AVAILABLE:
+                print("No text found, attempting OCR extraction...")
+                ocr_result = self._extract_with_ocr(file_path)
+                if ocr_result['success']:
+                    text_content = ocr_result['text_content']
+                    pages_info = ocr_result['pages_info']
+                    extraction_method = "ocr"
+                    print(f"OCR extracted {len(text_content)} characters")
+            
+            # If still no content, return helpful error message
+            if not text_content.strip():
+                error_message = "No extractable text found in PDF."
+                if extraction_method == "pdfplumber" or extraction_method == "pypdf2":
+                    error_message += " This appears to be an image-based PDF (scanned document)."
+                if not OCR_AVAILABLE:
+                    error_message += " OCR (Optical Character Recognition) is not available to extract text from images."
+                else:
+                    error_message += " OCR extraction failed - Tesseract may not be properly installed."
+                
                 return {
                     'success': False,
-                    'error': 'No PDF processing libraries available. Please install PyPDF2, pdfplumber, or pdfminer',
+                    'error': error_message,
                     'text_content': '',
-                    'pages_info': []
+                    'pages_info': pages_info,
+                    'extraction_method': extraction_method,
+                    'is_image_based': True,
+                    'suggestions': [
+                        "Try uploading a PDF with selectable text instead of a scanned image",
+                        "Install Tesseract OCR for image-based PDF support",
+                        "Convert the PDF to a text-based format before uploading"
+                    ]
                 }
             
             # Process the extracted text
@@ -69,7 +108,7 @@ class PDFProcessor:
                 'pages_info': pages_info,
                 'word_count': processed_content['word_count'],
                 'key_sections': processed_content['key_sections'],
-                'extraction_method': processed_content['extraction_method']
+                'extraction_method': extraction_method
             }
             
         except Exception as e:
@@ -77,7 +116,8 @@ class PDFProcessor:
                 'success': False,
                 'error': f'Error extracting PDF content: {str(e)}',
                 'text_content': '',
-                'pages_info': []
+                'pages_info': [],
+                'extraction_method': 'error'
             }
     
     def _extract_with_pdfplumber(self, file_path: str) -> Tuple[str, List[Dict]]:
@@ -160,6 +200,68 @@ class PDFProcessor:
         
         return text_content, pages_info
     
+    def _extract_with_ocr(self, file_path: str) -> Dict:
+        """Extract text using OCR for image-based PDFs"""
+        try:
+            import pytesseract
+            from PIL import Image
+            import fitz  # PyMuPDF
+            
+            text_content = ""
+            pages_info = []
+            
+            # Open PDF with PyMuPDF
+            pdf_document = fitz.open(file_path)
+            
+            for page_num in range(pdf_document.page_count):
+                page = pdf_document[page_num]
+                
+                # Convert PDF page to image
+                mat = fitz.Matrix(2.0, 2.0)  # Scale factor for better OCR
+                pix = page.get_pixmap(matrix=mat)
+                img_data = pix.tobytes("png")
+                
+                # Convert to PIL Image
+                image = Image.open(io.BytesIO(img_data))
+                
+                # Extract text using OCR
+                page_text = pytesseract.image_to_string(image, lang='eng')
+                
+                if page_text.strip():
+                    text_content += page_text + "\n\n"
+                    pages_info.append({
+                        'page_number': page_num + 1,
+                        'text_length': len(page_text),
+                        'word_count': len(page_text.split()),
+                        'has_text': True,
+                        'extraction_method': 'ocr'
+                    })
+                else:
+                    pages_info.append({
+                        'page_number': page_num + 1,
+                        'text_length': 0,
+                        'word_count': 0,
+                        'has_text': False,
+                        'extraction_method': 'ocr'
+                    })
+            
+            pdf_document.close()
+            
+            return {
+                'success': True,
+                'text_content': text_content,
+                'pages_info': pages_info
+            }
+            
+        except Exception as e:
+            print(f"OCR extraction failed: {e}")
+            return {
+                'success': False,
+                'text_content': "",
+                'pages_info': [],
+                'error': str(e)
+            }
+    
     def _process_extracted_text(self, text_content: str) -> Dict:
         """Process and clean extracted text"""
         if not text_content:
@@ -176,12 +278,8 @@ class PDFProcessor:
         # Extract key sections
         key_sections = self._extract_key_sections(cleaned_text)
         
-        # Determine extraction method used
-        extraction_method = "pdfplumber" if PDFPLUMBER_AVAILABLE else (
-            "pypdf2" if PDF_AVAILABLE else (
-                "pdfminer" if PDFMINER_AVAILABLE else "none"
-            )
-        )
+        # Determine extraction method used (passed from calling function)
+        # This will be overridden by the actual method used
         
         return {
             'cleaned_text': cleaned_text,
@@ -325,7 +423,7 @@ class PDFProcessor:
     @staticmethod
     def is_pdf_processing_available() -> bool:
         """Check if PDF processing libraries are available"""
-        return PDFPLUMBER_AVAILABLE or PDF_AVAILABLE or PDFMINER_AVAILABLE
+        return PDFPLUMBER_AVAILABLE or PDF_AVAILABLE or PDFMINER_AVAILABLE or OCR_AVAILABLE
     
     @staticmethod
     def get_required_libraries() -> List[str]:
@@ -337,4 +435,7 @@ class PDFProcessor:
             libraries.append('PyPDF2')
         if not PDFMINER_AVAILABLE:
             libraries.append('pdfminer.six')
+        if not OCR_AVAILABLE:
+            libraries.append('pytesseract')
+            libraries.append('PyMuPDF')
         return libraries
