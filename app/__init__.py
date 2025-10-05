@@ -118,5 +118,11 @@ def create_app(config_name='default'):
     from app.routes.smart_content import smart_content as smart_content_blueprint
     app.register_blueprint(smart_content_blueprint)
 
+    from app.routes.gcse_ai import gcse_ai as gcse_ai_blueprint
+    app.register_blueprint(gcse_ai_blueprint)
+
+    from app.routes.learning_style import learning_style as learning_style_blueprint
+    app.register_blueprint(learning_style_blueprint)
+
     return app
 
