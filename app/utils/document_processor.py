@@ -131,7 +131,7 @@ class DocumentProcessor:
             }
     
     def _process_docx(self, file_path: str, file_info: Dict) -> Dict:
-        """Process DOCX files with better formatting preservation"""
+        """Process DOCX files with clean formatting preservation"""
         if not DOCX_AVAILABLE:
             return {
                 'success': False,
@@ -144,22 +144,17 @@ class DocumentProcessor:
             doc = Document(file_path)
             text_content = ""
             
-            # Extract text from paragraphs with better formatting
+            # Extract text from paragraphs with clean formatting
             for paragraph in doc.paragraphs:
                 paragraph_text = paragraph.text.strip()
                 if paragraph_text:
-                    # Check if this looks like a heading (shorter, might be bold)
-                    if len(paragraph_text) < 100 and not paragraph_text.endswith('.'):
-                        # Likely a heading, add extra spacing
-                        text_content += "\n" + paragraph_text + "\n"
-                    else:
-                        text_content += paragraph_text + "\n"
+                    text_content += paragraph_text + "\n"
             
             # Add separator before tables
             if doc.tables:
                 text_content += "\n" + "="*50 + "\n"
             
-            # Extract text from tables with better formatting
+            # Extract text from tables with clean formatting
             for table_idx, table in enumerate(doc.tables):
                 text_content += f"\nTABLE {table_idx + 1}:\n"
                 for row_idx, row in enumerate(table.rows):
@@ -397,25 +392,78 @@ class DocumentProcessor:
         # Remove more than 2 consecutive empty lines
         result = re.sub(r'\n{3,}', '\n\n', result)
         
+        # Add extra formatting for better readability
+        result = self._format_for_display(result)
+        
         return result.strip()
     
+    def _format_for_display(self, text: str) -> str:
+        """Format text for better display in HTML"""
+        import re
+        
+        lines = text.split('\n')
+        formatted_lines = []
+        
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if not line:
+                formatted_lines.append("")
+                continue
+            
+            # If line is all caps and short, it's likely a heading
+            if line.isupper() and len(line) < 100 and not line.endswith('.'):
+                # Add spacing around headings
+                formatted_lines.append("")
+                formatted_lines.append(line)
+                formatted_lines.append("-" * min(len(line), 50))
+                formatted_lines.append("")
+            # If line starts with bullet points or dashes
+            elif re.match(r'^[\•\-\*]\s+', line):
+                formatted_lines.append(f"  {line}")
+            # If line looks like a date range or location
+            elif re.match(r'^(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)', line, re.IGNORECASE):
+                formatted_lines.append(f"  {line}")
+            # If line looks like a job title or company
+            elif len(line) < 80 and not line.endswith('.') and not line.endswith(','):
+                formatted_lines.append(f"  {line}")
+            else:
+                formatted_lines.append(line)
+        
+        return '\n'.join(formatted_lines)
+    
     def _extract_key_sections(self, text: str) -> List[Dict]:
-        """Extract key sections from the text"""
+        """Extract key sections from the text with better CV/document detection"""
         import re
         
         sections = []
         
-        # Look for common section patterns
+        # Look for common section patterns (including CV-specific ones)
         section_patterns = [
             r'(Chapter\s+\d+[:\s]+[^\n]+)',
             r'(Section\s+\d+[:\s]+[^\n]+)',
             r'(^\d+\.\s+[^\n]+)',  # Numbered sections
             r'(^[A-Z][A-Z\s]{2,}:)',  # All caps headings
             r'(^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*:)',  # Title case headings
+            r'(Personal\s+Statement)',
+            r'(Key\s+Skills)',
+            r'(Employment\s+History)',
+            r'(Work\s+Experience)',
+            r'(Education)',
+            r'(Qualifications)',
+            r'(Training)',
+            r'(Certifications)',
+            r'(Interests)',
+            r'(References)',
+            r'(Contact\s+Information)',
+            r'(Professional\s+Summary)',
+            r'(Objective)',
+            r'(Skills)',
+            r'(Experience)',
+            r'(Summary)',
         ]
         
         for pattern in section_patterns:
-            matches = re.findall(pattern, text, re.MULTILINE)
+            matches = re.findall(pattern, text, re.MULTILINE | re.IGNORECASE)
             for match in matches:
                 if len(match.strip()) > 3:
                     sections.append({
@@ -423,15 +471,29 @@ class DocumentProcessor:
                         'type': 'heading'
                     })
         
-        # Look for key terms
+        # Look for lines that look like headings (short lines, possibly all caps or title case)
+        lines = text.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line and len(line) < 50:  # Short lines are likely headings
+                # Check if it's all caps or title case
+                if (line.isupper() or 
+                    (line.istitle() and not line.endswith('.') and not line.endswith(','))):
+                    if line not in [s['title'] for s in sections]:  # Avoid duplicates
+                        sections.append({
+                            'title': line,
+                            'type': 'heading'
+                        })
+        
+        # Look for key terms (but be more selective)
         words = re.findall(r'\b[A-Z][a-z]+\b', text)
         word_freq = {}
         for word in words:
-            if len(word) > 4:
+            if len(word) > 5 and word.lower() not in ['the', 'and', 'for', 'with', 'this', 'that', 'from', 'they', 'have', 'been', 'were', 'said', 'each', 'which', 'their', 'time', 'will', 'about', 'there', 'could', 'other', 'after', 'first', 'well', 'also', 'work', 'year', 'years', 'good', 'much', 'some', 'these', 'would', 'more', 'very', 'when', 'make', 'help', 'through', 'before', 'right', 'being', 'many', 'may', 'such', 'into', 'over', 'think', 'even', 'most', 'seem', 'like', 'just', 'where', 'most', 'only', 'know', 'than', 'other', 'then', 'them', 'these', 'so', 'some', 'her', 'would', 'make', 'like', 'into', 'him', 'time', 'two', 'more', 'go', 'no', 'way', 'could', 'my', 'than', 'first', 'water', 'been', 'call', 'who', 'oil', 'sit', 'now', 'find', 'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part']:
                 word_freq[word] = word_freq.get(word, 0) + 1
         
-        # Add frequent terms as key concepts
-        for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10]:
+        # Add frequent terms as key concepts (but limit and be more selective)
+        for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:5]:
             if freq > 2:
                 sections.append({
                     'title': word,

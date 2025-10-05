@@ -53,7 +53,7 @@
                 </div>
                 <div class="card-body">
                     <div class="topic-description">
-                        {{ topic.description|nl2br }}
+                        {{ topic.description|format_document|safe }}
                     </div>
                 </div>
             </div>
@@ -310,6 +310,52 @@
         padding: 0.75rem;
         margin: 1rem 0;
         border-radius: 0.25rem;
+    }
+
+    .document-heading {
+        color: #2c3e50;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin: 1.5rem 0 0.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3498db;
+    }
+
+    .document-separator {
+        border: none;
+        border-top: 1px solid #bdc3c7;
+        margin: 1rem 0;
+    }
+
+    .document-bullet {
+        margin: 0.5rem 0;
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .document-bullet:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #3498db;
+        font-weight: bold;
+    }
+
+    .document-date {
+        color: #7f8c8d;
+        font-style: italic;
+        margin: 0.5rem 0;
+    }
+
+    .document-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0.75rem 0 0.25rem 0;
+    }
+
+    .document-paragraph {
+        margin: 0.5rem 0;
+        line-height: 1.6;
     }
 
     .stat-item {
