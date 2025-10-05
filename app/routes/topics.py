@@ -443,37 +443,145 @@ def import_topics_bulk():
 @topics.route('/topics/import/materials', methods=['GET', 'POST'])
 @login_required
 def import_materials():
-    
-    form = FileUploadForm()
-    
-    if form.validate_on_submit():
-        try:
-            file = form.file.data
-            title = form.title.data.strip()
-            description = form.description.data.strip()
-            
-            if not file:
-                flash('No file selected.', 'error')
-                return render_template('topics/import_materials.html', form=form)
-            
-            
-            
-            topic = Topic.create(
-                title=title,
-                description=f"{description}\n\nUploaded file: {file.filename}",
-                user_id=user.id
-            )
-            
-            if topic:
-                flash(f'Material "{title}" uploaded successfully!', 'success')
-                return redirect(url_for('topics.view_topic', topic_id=topic.id))
-            else:
-                flash('Failed to create topic for material.', 'error')
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        form = FileUploadForm()
+        
+        if form.validate_on_submit():
+            try:
+                file = form.file.data
+                title = form.title.data.strip()
+                description = form.description.data.strip()
                 
-        except Exception as e:
-            flash(f'Error uploading material: {str(e)}', 'error')
+                if not file:
+                    flash('No file selected.', 'error')
+                    return render_template('topics/import_materials.html', form=form)
+                
+                # Process the uploaded file
+                from app.utils.pdf_processor import PDFProcessor
+                pdf_processor = PDFProcessor()
+                
+                # Check if PDF processing is available
+                if not PDFProcessor.is_pdf_processing_available():
+                    # Fallback: create topic without content extraction
+                    topic = Topic.create(
+                        title=title,
+                        description=f"{description}\n\nUploaded file: {file.filename}\n\nNote: PDF content extraction is not available. Please install PDF processing libraries.",
+                        user_id=user.id
+                    )
+                    
+                    if topic:
+                        flash(f'Material "{title}" uploaded successfully! (PDF content extraction unavailable)', 'warning')
+                        return redirect(url_for('topics.view_topic', topic_id=topic.id))
+                    else:
+                        flash('Failed to create topic for material.', 'error')
+                        return render_template('topics/import_materials.html', form=form)
+                
+                # Process the PDF
+                processing_result = pdf_processor.process_uploaded_pdf(file)
+                
+                if processing_result['success']:
+                    content_info = processing_result['content_info']
+                    file_info = processing_result['file_info']
+                    
+                    # Create enhanced description with extracted content
+                    enhanced_description = f"{description}\n\n"
+                    enhanced_description += f"📄 Uploaded file: {file_info['original_filename']}\n"
+                    enhanced_description += f"📊 File size: {file_info['file_size']:,} bytes\n"
+                    enhanced_description += f"📝 Word count: {content_info['word_count']:,} words\n"
+                    enhanced_description += f"🔧 Extraction method: {content_info['extraction_method']}\n\n"
+                    
+                    if content_info['text_content']:
+                        enhanced_description += "📖 EXTRACTED CONTENT:\n"
+                        enhanced_description += "=" * 50 + "\n\n"
+                        
+                        # Add the extracted text (truncate if too long)
+                        extracted_text = content_info['text_content']
+                        if len(extracted_text) > 5000:
+                            enhanced_description += extracted_text[:5000] + "\n\n... (content truncated - full content available in topic details) ..."
+                        else:
+                            enhanced_description += extracted_text
+                        
+                        # Add key sections if available
+                        if content_info['key_sections']:
+                            enhanced_description += "\n\n🔑 KEY SECTIONS FOUND:\n"
+                            enhanced_description += "-" * 30 + "\n"
+                            for section in content_info['key_sections'][:10]:  # Limit to 10 sections
+                                enhanced_description += f"• {section['title']}\n"
+                    
+                    # Create the topic with extracted content
+                    topic = Topic.create(
+                        title=title,
+                        description=enhanced_description,
+                        user_id=user.id
+                    )
+                    
+                    if topic:
+                        flash(f'Material "{title}" uploaded and processed successfully! Content extracted from PDF.', 'success')
+                        return redirect(url_for('topics.view_topic', topic_id=topic.id))
+                    else:
+                        flash('Failed to create topic for material.', 'error')
+                else:
+                    # PDF processing failed, create topic with error info
+                    error_msg = processing_result.get('error', 'Unknown error')
+                    topic = Topic.create(
+                        title=title,
+                        description=f"{description}\n\nUploaded file: {file.filename}\n\n❌ PDF Processing Error: {error_msg}",
+                        user_id=user.id
+                    )
+                    
+                    if topic:
+                        flash(f'Material "{title}" uploaded but PDF processing failed: {error_msg}', 'warning')
+                        return redirect(url_for('topics.view_topic', topic_id=topic.id))
+                    else:
+                        flash('Failed to create topic for material.', 'error')
+                    
+            except Exception as e:
+                flash(f'Error uploading material: {str(e)}', 'error')
+        
+        return render_template('topics/import_materials.html', form=form)
     
-    return render_template('topics/import_materials.html', form=form)
+    except Exception as e:
+        flash('Error loading upload page.', 'error')
+        return redirect(url_for('topics.list_topics'))
+
+
+@topics.route('/topics/test-pdf-processing')
+@login_required
+def test_pdf_processing():
+    """Test route to verify PDF processing functionality"""
+    try:
+        user = get_current_user()
+        if not user:
+            flash('User not authenticated.', 'error')
+            return redirect(url_for('auth.login'))
+        
+        from app.utils.pdf_processor import PDFProcessor
+        
+        # Check PDF processing availability
+        is_available = PDFProcessor.is_pdf_processing_available()
+        required_libs = PDFProcessor.get_required_libraries()
+        
+        result = {
+            'pdf_processing_available': is_available,
+            'required_libraries': required_libs,
+            'status': 'ready' if is_available else 'missing_libraries'
+        }
+        
+        return f"""
+        <h2>PDF Processing Status</h2>
+        <p><strong>Available:</strong> {is_available}</p>
+        <p><strong>Required Libraries:</strong> {required_libs}</p>
+        <p><strong>Status:</strong> {result['status']}</p>
+        <p><a href="{{ url_for('topics.import_materials') }}">← Back to Upload</a></p>
+        """
+        
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 
 @topics.route('/topics/<topic_id>/content', methods=['GET', 'POST'])
