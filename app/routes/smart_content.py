@@ -249,6 +249,180 @@ def get_content_types():
         print(f"Error getting content types: {e}")
         return jsonify({'error': 'Failed to get content types'}), 500
 
+@smart_content.route('/api/topics')
+@login_required
+def get_user_topics():
+    """Get user's topics for content generation"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        # Get user's topics from database
+        from app.models import Topic
+        topics = Topic.get_all_by_user(user.id)
+        
+        # Format topics for dropdown
+        topics_data = []
+        for topic in topics:
+            topics_data.append({
+                'id': topic.id,
+                'title': topic.title,
+                'description': topic.description
+            })
+        
+        return jsonify({
+            'topics': topics_data
+        })
+    
+    except Exception as e:
+        print(f"Error getting topics: {e}")
+        return jsonify({'error': 'Failed to get topics'}), 500
+
+@smart_content.route('/api/history')
+@login_required
+def get_generation_history():
+    """Get user's content generation history"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        from app.models import get_supabase_client, SUPABASE_AVAILABLE
+        
+        if not SUPABASE_AVAILABLE:
+            return jsonify({'error': 'Database unavailable'}), 500
+        
+        supabase = get_supabase_client()
+        
+        # Get generation history with topic details
+        # Note: Using created_at instead of generated_at (as per schema)
+        # First try without the join to see if we have any data
+        history_result = supabase.table('generated_content')\
+            .select('*')\
+            .eq('user_id', user.id)\
+            .order('created_at', desc=True)\
+            .limit(50)\
+            .execute()
+        
+        print(f"Debug: Found {len(history_result.data)} items in generated_content for user {user.id}")
+        
+        history_data = []
+        for item in history_result.data:
+            # Get topic title - try to fetch it separately if needed
+            topic_title = 'Unknown Topic'
+            topic_id = item.get('topic_id')
+            
+            if topic_id:
+                try:
+                    topic_result = supabase.table('topics')\
+                        .select('title')\
+                        .eq('id', topic_id)\
+                        .execute()
+                    if topic_result.data and len(topic_result.data) > 0:
+                        topic_title = topic_result.data[0].get('title', 'Unknown Topic')
+                except Exception as e:
+                    print(f"Error fetching topic title: {e}")
+            
+            # Handle content_data which is JSONB
+            content_data = item.get('content_data', {})
+            if isinstance(content_data, str):
+                content_data_str = content_data
+            else:
+                content_data_str = str(content_data)
+            
+            history_item = {
+                'id': item.get('id'),
+                'topic_id': topic_id,
+                'topic_title': topic_title,
+                'content_type': item.get('content_type', 'Unknown'),
+                'content_subtype': item.get('content_subtype', ''),
+                'generated_at': item.get('created_at'),  # Using created_at from schema
+                'content_preview': content_data_str[:100] + '...' if len(content_data_str) > 100 else content_data_str
+            }
+            history_data.append(history_item)
+            
+        print(f"Debug: Returning {len(history_data)} history items")
+        
+        return jsonify({
+            'history': history_data,
+            'total': len(history_data)
+        })
+    
+    except Exception as e:
+        print(f"Error getting generation history: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to get generation history: {str(e)}'}), 500
+
+@smart_content.route('/api/history/<content_id>')
+@login_required
+def get_content_details(content_id):
+    """Get detailed view of a specific generated content"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        from app.models import get_supabase_client, SUPABASE_AVAILABLE
+        
+        if not SUPABASE_AVAILABLE:
+            return jsonify({'error': 'Database unavailable'}), 500
+        
+        supabase = get_supabase_client()
+        
+        # Get the specific content item
+        content_result = supabase.table('generated_content')\
+            .select('*')\
+            .eq('id', content_id)\
+            .eq('user_id', user.id)\
+            .execute()
+        
+        if not content_result.data or len(content_result.data) == 0:
+            return jsonify({'error': 'Content not found'}), 404
+        
+        content_item = content_result.data[0]
+        
+        # Get topic title
+        topic_title = 'Unknown Topic'
+        topic_id = content_item.get('topic_id')
+        if topic_id:
+            try:
+                topic_result = supabase.table('topics')\
+                    .select('title, description')\
+                    .eq('id', topic_id)\
+                    .execute()
+                if topic_result.data and len(topic_result.data) > 0:
+                    topic_title = topic_result.data[0].get('title', 'Unknown Topic')
+            except Exception as e:
+                print(f"Error fetching topic: {e}")
+        
+        # Parse content_data
+        content_data = content_item.get('content_data', {})
+        if isinstance(content_data, str):
+            import json
+            try:
+                content_data = json.loads(content_data)
+            except:
+                pass
+        
+        return jsonify({
+            'id': content_item.get('id'),
+            'topic_id': topic_id,
+            'topic_title': topic_title,
+            'content_type': content_item.get('content_type'),
+            'content_subtype': content_item.get('content_subtype'),
+            'content_data': content_data,
+            'created_at': content_item.get('created_at'),
+            'updated_at': content_item.get('updated_at')
+        })
+    
+    except Exception as e:
+        print(f"Error getting content details: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to get content details: {str(e)}'}), 500
+
 @smart_content.route('/generator')
 @login_required
 def content_generator():
