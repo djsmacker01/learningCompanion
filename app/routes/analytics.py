@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
 from app.routes.topics import get_current_user
 from datetime import datetime, timedelta
@@ -21,10 +21,15 @@ def analytics_dashboard():
             return render_template('analytics/dashboard.html', 
                                  error="Analytics not available - Supabase connection failed")
         
+        print(f"DEBUG: Loading analytics for user {user.id}")
         analytics_data = get_user_analytics(user.id, client)
-        topic_analytics = get_topic_analytics(user.id, client)
-        learning_insights = get_learning_insights(user.id, client)
+        print(f"DEBUG: Analytics data: {analytics_data}")
         
+        topic_analytics = get_topic_analytics(user.id, client)
+        print(f"DEBUG: Topic analytics: {topic_analytics}")
+        
+        learning_insights = get_learning_insights(user.id, client)
+        print(f"DEBUG: Learning insights: {learning_insights}")
         
         return render_template('analytics/dashboard.html',
                              analytics_data=analytics_data,
@@ -33,17 +38,21 @@ def analytics_dashboard():
     
     except Exception as e:
         print(f"Error loading analytics: {e}")
+        import traceback
+        traceback.print_exc()
         return render_template('analytics/dashboard.html', 
                              error="Error loading analytics data")
 
 @analytics.route('/analytics/api/overview')
-@login_required
 def analytics_overview():
     try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
         user = get_current_user()
         if not user:
-            flash('User not authenticated.', 'error')
-            return redirect(url_for('auth.login'))
+            return jsonify({'error': 'User not authenticated'}), 401
         client = get_supabase_client()
         
         if not SUPABASE_AVAILABLE or not client:
@@ -432,4 +441,406 @@ def get_learning_trends_data(user_id, client):
     except Exception as e:
         print(f"Error getting learning trends: {e}")
         return {'trends': []}
+
+# Predictive Analytics Routes
+@analytics.route('/analytics/performance-trends')
+def performance_trends():
+    """Get performance trends analysis"""
+    try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        client = get_supabase_client()
+        if not SUPABASE_AVAILABLE or not client:
+            return jsonify({'error': 'Analytics not available'}), 500
+        
+        # Get user's study sessions for analysis
+        sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).order('session_date').execute()
+        sessions = sessions_response.data if sessions_response.data else []
+        
+        if not sessions:
+            return jsonify({
+                'overall_trend': 'No Data',
+                'total_topics_analyzed': 0,
+                'analysis_period_days': 0,
+                'strengths_weaknesses': {
+                    'strengths': ['Start studying to see your strengths'],
+                    'weaknesses': ['No weaknesses identified yet']
+                }
+            })
+        
+        # Calculate trends
+        total_sessions = len(sessions)
+        total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
+        avg_session_length = total_study_time / total_sessions if total_sessions > 0 else 0
+        
+        # Calculate confidence trends
+        confidence_gains = []
+        for session in sessions:
+            if session.get('confidence_after') and session.get('confidence_before'):
+                gain = session['confidence_after'] - session['confidence_before']
+                confidence_gains.append(gain)
+        
+        avg_confidence_gain = sum(confidence_gains) / len(confidence_gains) if confidence_gains else 0
+        
+        # Determine overall trend
+        if avg_confidence_gain > 1:
+            overall_trend = 'Improving'
+        elif avg_confidence_gain > 0:
+            overall_trend = 'Stable'
+        else:
+            overall_trend = 'Declining'
+        
+        # Get unique topics
+        topic_ids = list(set(session.get('topic_id') for session in sessions if session.get('topic_id')))
+        total_topics_analyzed = len(topic_ids)
+        
+        # Calculate analysis period
+        if sessions:
+            first_session = min(sessions, key=lambda x: x.get('session_date', ''))
+            last_session = max(sessions, key=lambda x: x.get('session_date', ''))
+            try:
+                first_date = datetime.fromisoformat(first_session['session_date'].replace('T', ' ').split('.')[0])
+                last_date = datetime.fromisoformat(last_session['session_date'].replace('T', ' ').split('.')[0])
+                analysis_period_days = (last_date - first_date).days + 1
+            except:
+                analysis_period_days = 30
+        else:
+            analysis_period_days = 0
+        
+        # Generate strengths and weaknesses
+        strengths = []
+        weaknesses = []
+        
+        if avg_confidence_gain > 1:
+            strengths.append('Strong confidence improvement')
+        if total_sessions > 10:
+            strengths.append('Consistent study habits')
+        if avg_session_length > 30:
+            strengths.append('Effective study sessions')
+        
+        if avg_confidence_gain < 0:
+            weaknesses.append('Confidence declining')
+        if total_sessions < 5:
+            weaknesses.append('Need more study sessions')
+        if avg_session_length < 15:
+            weaknesses.append('Study sessions too short')
+        
+        return jsonify({
+            'overall_trend': overall_trend,
+            'total_topics_analyzed': total_topics_analyzed,
+            'analysis_period_days': analysis_period_days,
+            'strengths_weaknesses': {
+                'strengths': strengths if strengths else ['Keep up the good work!'],
+                'weaknesses': weaknesses if weaknesses else ['No major weaknesses identified']
+            }
+        })
+    
+    except Exception as e:
+        print(f"Error getting performance trends: {e}")
+        return jsonify({'error': 'Failed to get performance trends'}), 500
+
+@analytics.route('/analytics/grade-prediction/<topic_id>')
+def grade_prediction(topic_id):
+    """Predict grade for a specific topic"""
+    try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        client = get_supabase_client()
+        if not SUPABASE_AVAILABLE or not client:
+            return jsonify({'error': 'Analytics not available'}), 500
+        
+        # Get topic information
+        topic_response = client.table('topics').select('*').eq('id', topic_id).eq('user_id', user.id).execute()
+        if not topic_response.data:
+            return jsonify({'error': 'Topic not found'}), 404
+        
+        topic = topic_response.data[0]
+        
+        # Get sessions for this topic
+        sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).eq('topic_id', topic_id).execute()
+        sessions = sessions_response.data if sessions_response.data else []
+        
+        if not sessions:
+            return jsonify({
+                'predictions': {
+                    'ensemble': {
+                        'grade': 'N/A',
+                        'confidence': 0,
+                        'model_count': 1
+                    }
+                },
+                'recommendations': ['Start studying this topic to get grade predictions']
+            })
+        
+        # Calculate performance metrics
+        total_sessions = len(sessions)
+        total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
+        avg_session_length = total_study_time / total_sessions if total_sessions > 0 else 0
+        
+        # Calculate confidence trends
+        confidence_gains = []
+        for session in sessions:
+            if session.get('confidence_after') and session.get('confidence_before'):
+                gain = session['confidence_after'] - session['confidence_before']
+                confidence_gains.append(gain)
+        
+        avg_confidence_gain = sum(confidence_gains) / len(confidence_gains) if confidence_gains else 0
+        
+        # Simple grade prediction algorithm
+        base_grade = 5  # Start with grade 5
+        
+        # Adjust based on confidence gain
+        if avg_confidence_gain > 2:
+            grade_adjustment = 2
+        elif avg_confidence_gain > 1:
+            grade_adjustment = 1
+        elif avg_confidence_gain > 0:
+            grade_adjustment = 0
+        else:
+            grade_adjustment = -1
+        
+        # Adjust based on study time
+        if total_study_time > 300:  # More than 5 hours
+            time_adjustment = 1
+        elif total_study_time > 120:  # More than 2 hours
+            time_adjustment = 0
+        else:
+            time_adjustment = -1
+        
+        # Adjust based on session frequency
+        if total_sessions > 10:
+            frequency_adjustment = 1
+        elif total_sessions > 5:
+            frequency_adjustment = 0
+        else:
+            frequency_adjustment = -1
+        
+        predicted_grade = min(9, max(1, base_grade + grade_adjustment + time_adjustment + frequency_adjustment))
+        
+        # Calculate confidence
+        confidence = min(95, max(20, 50 + (avg_confidence_gain * 10) + (total_sessions * 2)))
+        
+        # Generate recommendations
+        recommendations = []
+        if predicted_grade < 7:
+            recommendations.append('Increase study time for this topic')
+            recommendations.append('Focus on understanding core concepts')
+        if total_sessions < 5:
+            recommendations.append('Study this topic more frequently')
+        if avg_confidence_gain < 1:
+            recommendations.append('Review previous material to boost confidence')
+        
+        return jsonify({
+            'predictions': {
+                'ensemble': {
+                    'grade': predicted_grade,
+                    'confidence': round(confidence),
+                    'model_count': 3
+                }
+            },
+            'recommendations': recommendations
+        })
+    
+    except Exception as e:
+        print(f"Error predicting grade: {e}")
+        return jsonify({'error': 'Failed to predict grade'}), 500
+
+@analytics.route('/analytics/trajectory/<topic_id>')
+def learning_trajectory(topic_id):
+    """Analyze learning trajectory for a topic"""
+    try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        client = get_supabase_client()
+        if not SUPABASE_AVAILABLE or not client:
+            return jsonify({'error': 'Analytics not available'}), 500
+        
+        days_back = request.args.get('days_back', 30, type=int)
+        
+        # Get sessions for this topic within the specified period
+        cutoff_date = datetime.now() - timedelta(days=days_back)
+        sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).eq('topic_id', topic_id).gte('session_date', cutoff_date.isoformat()).order('session_date').execute()
+        sessions = sessions_response.data if sessions_response.data else []
+        
+        if not sessions:
+            return jsonify({
+                'data_points': 0,
+                'analysis_period_days': days_back,
+                'insights': ['No study sessions found for this period']
+            })
+        
+        # Analyze trajectory
+        data_points = len(sessions)
+        total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
+        
+        # Calculate confidence progression
+        confidence_progression = []
+        for session in sessions:
+            if session.get('confidence_after'):
+                confidence_progression.append(session['confidence_after'])
+        
+        # Generate insights
+        insights = []
+        if len(confidence_progression) > 1:
+            if confidence_progression[-1] > confidence_progression[0]:
+                insights.append('Confidence is improving over time')
+            elif confidence_progression[-1] < confidence_progression[0]:
+                insights.append('Confidence has declined recently')
+            else:
+                insights.append('Confidence has remained stable')
+        
+        if total_study_time > 180:  # More than 3 hours
+            insights.append('Good study time investment in this topic')
+        elif total_study_time < 60:  # Less than 1 hour
+            insights.append('Consider spending more time on this topic')
+        
+        if data_points > 5:
+            insights.append('Consistent study pattern detected')
+        elif data_points < 3:
+            insights.append('Study sessions are infrequent')
+        
+        return jsonify({
+            'data_points': data_points,
+            'analysis_period_days': days_back,
+            'insights': insights
+        })
+    
+    except Exception as e:
+        print(f"Error analyzing trajectory: {e}")
+        return jsonify({'error': 'Failed to analyze trajectory'}), 500
+
+@analytics.route('/analytics/insights')
+def ai_insights():
+    """Get AI-powered learning insights"""
+    try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        client = get_supabase_client()
+        if not SUPABASE_AVAILABLE or not client:
+            return jsonify({'error': 'Analytics not available'}), 500
+        
+        # Get user's study data
+        sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).order('session_date', desc=True).limit(20).execute()
+        sessions = sessions_response.data if sessions_response.data else []
+        
+        if not sessions:
+            return jsonify({
+                'key_insights': ['Start studying to get personalized insights'],
+                'recommendations': ['Create your first topic and begin studying']
+            })
+        
+        # Analyze study patterns
+        total_sessions = len(sessions)
+        total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
+        avg_session_length = total_study_time / total_sessions if total_sessions > 0 else 0
+        
+        # Calculate confidence trends
+        confidence_gains = []
+        for session in sessions:
+            if session.get('confidence_after') and session.get('confidence_before'):
+                gain = session['confidence_after'] - session['confidence_before']
+                confidence_gains.append(gain)
+        
+        avg_confidence_gain = sum(confidence_gains) / len(confidence_gains) if confidence_gains else 0
+        
+        # Generate insights
+        key_insights = []
+        recommendations = []
+        
+        if avg_confidence_gain > 2:
+            key_insights.append('Excellent learning progress - confidence is improving significantly')
+            recommendations.append('Continue with your current study approach')
+        elif avg_confidence_gain > 0:
+            key_insights.append('Steady learning progress detected')
+            recommendations.append('Consider increasing study intensity for faster progress')
+        else:
+            key_insights.append('Learning progress needs attention')
+            recommendations.append('Review study methods and consider different approaches')
+        
+        if avg_session_length > 45:
+            key_insights.append('Long study sessions are effective for your learning')
+            recommendations.append('Maintain your current session length')
+        elif avg_session_length < 20:
+            key_insights.append('Short study sessions may limit deep learning')
+            recommendations.append('Try extending study sessions to 25-30 minutes')
+        
+        if total_sessions > 15:
+            key_insights.append('Consistent study habits are well established')
+            recommendations.append('Keep up the regular study routine')
+        elif total_sessions < 5:
+            key_insights.append('Study frequency could be improved')
+            recommendations.append('Aim for at least 3-4 study sessions per week')
+        
+        return jsonify({
+            'key_insights': key_insights,
+            'recommendations': recommendations
+        })
+    
+    except Exception as e:
+        print(f"Error getting AI insights: {e}")
+        return jsonify({'error': 'Failed to get AI insights'}), 500
+
+@analytics.route('/analytics/api/topics')
+def analytics_topics():
+    """Get user's topics for analytics dropdowns"""
+    try:
+        print(f"DEBUG: Analytics topics API called")
+        print(f"DEBUG: current_user.is_authenticated: {current_user.is_authenticated}")
+        
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            print("DEBUG: User not authenticated, returning 401")
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        user = get_current_user()
+        if not user:
+            print("DEBUG: get_current_user returned None, returning 401")
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        print(f"DEBUG: User authenticated: {user.id}")
+        
+        client = get_supabase_client()
+        if not SUPABASE_AVAILABLE or not client:
+            return jsonify({'error': 'Analytics not available'}), 500
+        
+        # Get user's topics
+        print(f"DEBUG: Querying topics for user {user.id}")
+        topics_response = client.table('topics').select('id, title, description').eq('user_id', user.id).eq('is_active', True).order('title').execute()
+        topics = topics_response.data if topics_response.data else []
+        
+        print(f"DEBUG: Found {len(topics)} topics")
+        for topic in topics:
+            print(f"DEBUG: Topic - {topic.get('title', 'No title')} (ID: {topic.get('id', 'No ID')})")
+        
+        return jsonify({
+            'topics': topics
+        })
+    
+    except Exception as e:
+        print(f"Error getting topics for analytics: {e}")
+        return jsonify({'error': 'Failed to get topics'}), 500
 
