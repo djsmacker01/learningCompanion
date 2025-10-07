@@ -96,6 +96,22 @@ class UserProfile:
             print(f"Error creating user profile: {e}")
             return None
     
+    def get_learning_style(self):
+        """Get the user's saved learning style"""
+        if not SUPABASE_AVAILABLE:
+            return None
+        
+        try:
+            supabase = get_supabase_client()
+            response = supabase.table('ai_learning_styles').select('*').eq('user_id', self.user_id).execute()
+            
+            if response.data:
+                return response.data[0]
+            return None
+        except Exception as e:
+            print(f"Error getting learning style: {e}")
+            return None
+
     def update_profile(self, **kwargs) -> bool:
         
         if not SUPABASE_AVAILABLE:
@@ -374,8 +390,11 @@ class AuthUser:
         self.profile = None
         if self.id:
             try:
-                from app.models.gamification import UserProfile as GamificationProfile
-                self.profile = GamificationProfile.get_or_create_profile(self.id)
+                # Use the auth UserProfile which has privacy_level and other profile fields
+                self.profile = UserProfile.get_by_user_id(self.id)
+                if not self.profile:
+                    # Create a default profile if none exists
+                    self.profile = UserProfile.create_profile(self.id)
             except Exception as e:
                 print(f"Warning: Could not load profile: {e}")
     
@@ -405,6 +424,17 @@ class AuthUser:
         
         return str(self.id) if self.id else None
     
+    def get_gamification_profile(self):
+        """Get the gamification profile for XP, levels, etc."""
+        if not self.id:
+            return None
+        try:
+            from app.models.gamification import UserProfile as GamificationProfile
+            return GamificationProfile.get_or_create_profile(self.id)
+        except Exception as e:
+            print(f"Warning: Could not load gamification profile: {e}")
+            return None
+    
     def check_password(self, password: str) -> bool:
         
         if not self.password_hash:
@@ -430,6 +460,47 @@ class AuthUser:
             return None
         except Exception as e:
             print(f"Error getting user by email: {e}")
+            return None
+    
+    @classmethod
+    def get_by_username(cls, username: str) -> Optional['AuthUser']:
+        
+        if not SUPABASE_AVAILABLE:
+            return None
+        
+        try:
+            supabase = get_supabase_client()
+            response = supabase.table('users').select('*').eq('username', username).execute()
+            
+            if response.data:
+                return cls(response.data[0])
+            return None
+        except Exception as e:
+            print(f"Error getting user by username: {e}")
+            return None
+    
+    @classmethod
+    def get_by_username_or_email(cls, identifier: str) -> Optional['AuthUser']:
+        
+        if not SUPABASE_AVAILABLE:
+            return None
+        
+        try:
+            supabase = get_supabase_client()
+            
+            # Try username first
+            response = supabase.table('users').select('*').eq('username', identifier).execute()
+            if response.data:
+                return cls(response.data[0])
+            
+            # Try email
+            response = supabase.table('users').select('*').eq('email', identifier).execute()
+            if response.data:
+                return cls(response.data[0])
+            
+            return None
+        except Exception as e:
+            print(f"Error getting user by username or email: {e}")
             return None
     
     @classmethod

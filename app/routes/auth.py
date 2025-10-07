@@ -6,8 +6,26 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
         
-        flash('Login functionality coming soon!', 'info')
+        if not username or not password:
+            flash('Please fill in all fields.', 'error')
+            return render_template('auth/login.html')
+        
+        # Import here to avoid circular imports
+        from app.models.auth import AuthUser
+        
+        # Try to find user by username or email
+        user = AuthUser.get_by_username_or_email(username)
+        
+        if user and user.check_password(password):
+            login_user(user, remember=True)
+            flash(f'Welcome back, {user.username}!', 'success')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Invalid username or password.', 'error')
+    
     return render_template('auth/login.html')
 
 @auth.route('/register', methods=['GET', 'POST'])
