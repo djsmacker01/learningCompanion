@@ -6,7 +6,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            
+
             <div class="text-center mb-5">
                 <h1 class="h2 mb-3">
                     <i class="fas fa-stopwatch text-primary me-2"></i>Study Timer
@@ -15,11 +15,11 @@
             </div>
 
             <div class="row">
-                
+
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-5 text-center">
-                            
+
                             <div class="timer-display mb-4">
                                 <div class="timer-circle mx-auto mb-3" id="timer-circle">
                                     <div class="timer-text">
@@ -29,20 +29,75 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="timer-controls mb-4">
                                 <button class="btn btn-success btn-lg me-3" id="start-btn" onclick="startTimer()">
                                     <i class="fas fa-play me-2"></i>Start
                                 </button>
-                                <button class="btn btn-warning btn-lg me-3" id="pause-btn" onclick="pauseTimer()" disabled>
+                                <button class="btn btn-warning btn-lg me-3" id="pause-btn" onclick="pauseTimer()"
+                                    disabled>
                                     <i class="fas fa-pause me-2"></i>Pause
                                 </button>
-                                <button class="btn btn-danger btn-lg" id="stop-btn" onclick="stopTimer()" disabled>
+                                <button class="btn btn-danger btn-lg me-3" id="stop-btn" onclick="stopTimer()" disabled>
                                     <i class="fas fa-stop me-2"></i>Stop
                                 </button>
+                                <!-- Sound Controls Section -->
+                                <div class="sound-controls-section">
+                                    <h6 class="text-white mb-3">
+                                        <i class="fas fa-volume-up me-2"></i>Sound Notifications
+                                    </h6>
+                                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-3">
+                                        <!-- Sound Toggle -->
+                                        <div class="sound-control-item">
+                                            <button class="btn btn-outline-secondary btn-lg" id="sound-toggle"
+                                                onclick="toggleSound()">
+                                                <i class="fas fa-volume-up me-2" id="sound-icon"></i>
+                                                <span id="sound-text">Sound On</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Test Sound -->
+                                        <div class="sound-control-item">
+                                            <button class="btn btn-outline-info btn-lg" id="test-sound"
+                                                onclick="testSound()" title="Test notification sound">
+                                                <i class="fas fa-play me-2"></i>Test
+                                            </button>
+                                        </div>
+
+                                        <!-- Sound Selection -->
+                                        <div class="sound-control-item">
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-primary btn-lg dropdown-toggle"
+                                                    type="button" id="soundDropdown" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fas fa-music me-2"></i>
+                                                    <span id="selected-sound">Beep</span>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="soundDropdown">
+                                                    <li><a class="dropdown-item" href="#"
+                                                            onclick="selectSound('beep')"><i
+                                                                class="fas fa-volume-up me-2"></i>Beep</a></li>
+                                                    <li><a class="dropdown-item" href="#"
+                                                            onclick="selectSound('chime')"><i
+                                                                class="fas fa-bell me-2"></i>Chime</a></li>
+                                                    <li><a class="dropdown-item" href="#"
+                                                            onclick="selectSound('bell')"><i
+                                                                class="fas fa-bell me-2"></i>Bell</a></li>
+                                                    <li><a class="dropdown-item" href="#"
+                                                            onclick="selectSound('notification')"><i
+                                                                class="fas fa-exclamation-circle me-2"></i>Notification</a>
+                                                    </li>
+                                                    <li><a class="dropdown-item" href="#"
+                                                            onclick="selectSound('success')"><i
+                                                                class="fas fa-check-circle me-2"></i>Success</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            
+
                             <div class="session-info" id="session-info" style="display: none;">
                                 <div class="alert alert-info">
                                     <h6 class="alert-heading">
@@ -56,7 +111,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="session-completion" id="session-completion" style="display: none;">
                                 <div class="card border-success">
                                     <div class="card-header bg-success text-white">
@@ -69,7 +124,8 @@
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Confidence After Session (1-10)</label>
-                                                    <input type="range" class="form-range" id="confidence-after" min="1" max="10" value="5">
+                                                    <input type="range" class="form-range" id="confidence-after" min="1"
+                                                        max="10" value="5">
                                                     <div class="d-flex justify-content-between text-muted small">
                                                         <span>1</span>
                                                         <span id="confidence-display">5</span>
@@ -78,16 +134,18 @@
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Actual Duration (minutes)</label>
-                                                    <input type="number" class="form-control" id="actual-duration" min="1" max="480" value="25">
+                                                    <input type="number" class="form-control" id="actual-duration"
+                                                        min="1" max="480" value="25">
                                                 </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Session Notes</label>
-                                                <textarea class="form-control" id="session-notes" rows="3" 
-                                                          placeholder="What did you learn? Any insights or challenges?"></textarea>
+                                                <textarea class="form-control" id="session-notes" rows="3"
+                                                    placeholder="What did you learn? Any insights or challenges?"></textarea>
                                             </div>
                                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                                <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetTimer()">
+                                                <button type="button" class="btn btn-outline-secondary me-md-2"
+                                                    onclick="resetTimer()">
                                                     <i class="fas fa-redo me-2"></i>Start New Session
                                                 </button>
                                                 <button type="submit" class="btn btn-success">
@@ -102,7 +160,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-light border-0">
@@ -121,36 +179,42 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Session Type</label>
                                     <select class="form-select" id="session-type" required>
-                                        <option value="study">Study</option>
-                                        <option value="review">Review</option>
                                         <option value="practice">Practice</option>
+                                        <option value="review">Review</option>
+                                        <option value="reading">Reading</option>
+                                        <option value="project">Project</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Confidence Before (1-10)</label>
-                                    <input type="range" class="form-range" id="confidence-before" min="1" max="10" value="5">
+                                    <input type="range" class="form-range" id="confidence-before" min="1" max="10"
+                                        value="5">
                                     <div class="d-flex justify-content-between text-muted small">
                                         <span>1 - Beginner</span>
                                         <span id="confidence-before-display">5</span>
                                         <span>10 - Expert</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label">Timer Duration</label>
                                     <div class="btn-group w-100" role="group">
-                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(15)">15m</button>
-                                        <button type="button" class="btn btn-outline-primary active" onclick="setTimerDuration(25)">25m</button>
-                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(45)">45m</button>
-                                        <button type="button" class="btn btn-outline-primary" onclick="setTimerDuration(60)">1h</button>
+                                        <button type="button" class="btn btn-outline-primary"
+                                            onclick="setTimerDuration(15)">15m</button>
+                                        <button type="button" class="btn btn-outline-primary active"
+                                            onclick="setTimerDuration(25)">25m</button>
+                                        <button type="button" class="btn btn-outline-primary"
+                                            onclick="setTimerDuration(45)">45m</button>
+                                        <button type="button" class="btn btn-outline-primary"
+                                            onclick="setTimerDuration(60)">1h</button>
                                     </div>
                                 </div>
-                                
+
                                 <div class="d-grid">
                                     <button type="button" class="btn btn-primary" onclick="setupSession()">
                                         <i class="fas fa-play me-2"></i>Setup Session
@@ -160,7 +224,7 @@
                         </div>
                     </div>
 
-                    
+
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-light border-0">
                             <h5 class="card-title mb-0">
@@ -191,265 +255,582 @@
 </div>
 
 <style>
-.timer-circle {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
+    .timer-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
 
-.timer-text {
-    color: white;
-    text-align: center;
-}
+    .timer-text {
+        color: white;
+        text-align: center;
+    }
 
-.timer-time {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
+    .timer-time {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
 
-.timer-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
+    .timer-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
 
-.timer-circle.break {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
+    .timer-circle.break {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
 
-.timer-circle.completed {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
+    .timer-circle.completed {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    /* Sound Controls Styling */
+    .sound-controls-section {
+        margin: 1rem auto;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 600px;
+        text-align: center;
+    }
+
+    .sound-control-item {
+        margin: 0.25rem 0;
+    }
+
+    .sound-controls-section .btn {
+        min-width: 120px;
+        transition: all 0.3s ease;
+    }
+
+    .sound-controls-section .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .sound-controls-section .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .sound-controls-section .dropdown-item {
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .sound-controls-section .dropdown-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+        .sound-controls-section .d-flex {
+            flex-direction: column;
+            align-items: center !important;
+        }
+
+        .sound-controls-section .btn {
+            width: 100%;
+            max-width: 200px;
+            margin-bottom: 0.5rem;
+        }
+    }
 </style>
 
 <script>
-let timer = null;
-let timeLeft = 25 * 60; // 25 minutes in seconds
-let isRunning = false;
-let currentSession = null;
-let timerDuration = 25; // minutes
+    let timer = null;
+    let timeLeft = 25 * 60; // 25 minutes in seconds
+    let isRunning = false;
+    let currentSession = null;
+    let timerDuration = 25; // minutes
 
-// Timer functions
-function startTimer() {
-    if (!currentSession) {
-        alert('Please setup a session first!');
-        return;
+    // Audio elements for notifications
+    let notificationSound = null;
+    let isSoundEnabled = true;
+    let selectedSoundType = 'beep'; // Default sound type
+
+    // Toggle sound on/off
+    function toggleSound() {
+        isSoundEnabled = !isSoundEnabled;
+        const soundIcon = document.getElementById('sound-icon');
+        const soundText = document.getElementById('sound-text');
+        const soundToggle = document.getElementById('sound-toggle');
+
+        if (isSoundEnabled) {
+            soundIcon.className = 'fas fa-volume-up me-2';
+            soundText.textContent = 'Sound On';
+            soundToggle.className = 'btn btn-outline-secondary btn-lg';
+        } else {
+            soundIcon.className = 'fas fa-volume-mute me-2';
+            soundText.textContent = 'Sound Off';
+            soundToggle.className = 'btn btn-outline-danger btn-lg';
+        }
     }
-    
-    isRunning = true;
-    timer = setInterval(updateTimer, 1000);
-    
-    document.getElementById('start-btn').disabled = true;
-    document.getElementById('pause-btn').disabled = false;
-    document.getElementById('stop-btn').disabled = false;
-    
-    // Show session info
-    document.getElementById('session-info').style.display = 'block';
-}
 
-function pauseTimer() {
-    isRunning = false;
-    clearInterval(timer);
-    
-    document.getElementById('start-btn').disabled = false;
-    document.getElementById('pause-btn').disabled = true;
-}
+    // Test notification sound
+    function testSound() {
+        if (typeof window.playNotificationSound === 'function') {
+            window.playNotificationSound();
+            showNotification('Test sound played!', 'info');
+        } else {
+            showNotification('Audio not initialized. Please refresh the page.', 'warning');
+        }
+    }
 
-function stopTimer() {
-    isRunning = false;
-    clearInterval(timer);
-    
-    document.getElementById('start-btn').disabled = false;
-    document.getElementById('pause-btn').disabled = true;
-    document.getElementById('stop-btn').disabled = true;
-    
-    // Show completion form
-    showCompletionForm();
-}
+    // Select sound type
+    function selectSound(soundType) {
+        selectedSoundType = soundType;
+        const selectedSoundElement = document.getElementById('selected-sound');
+        if (selectedSoundElement) {
+            selectedSoundElement.textContent = soundType.charAt(0).toUpperCase() + soundType.slice(1);
+        }
 
-function updateTimer() {
-    timeLeft--;
-    
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    document.getElementById('timer-time').textContent = timeString;
-    
-    if (timeLeft <= 0) {
-        // Timer finished
+        // Update dropdown button text
+        const dropdownButton = document.getElementById('soundDropdown');
+        if (dropdownButton) {
+            const icon = dropdownButton.querySelector('i');
+            if (icon) {
+                // Update icon based on sound type
+                const iconMap = {
+                    'beep': 'fas fa-volume-up',
+                    'chime': 'fas fa-bell',
+                    'bell': 'fas fa-bell',
+                    'notification': 'fas fa-exclamation-circle',
+                    'success': 'fas fa-check-circle'
+                };
+                icon.className = iconMap[soundType] + ' me-2';
+            }
+        }
+
+        showNotification(`Sound changed to ${soundType.charAt(0).toUpperCase() + soundType.slice(1)}`, 'success');
+    }
+
+    // Initialize audio notification
+    function initAudio() {
+        try {
+            // Create a simple beep sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create different sound patterns
+            const soundPatterns = {
+                'beep': {
+                    frequencies: [800, 1000, 800],
+                    times: [0, 0.1, 0.2],
+                    duration: 0.5,
+                    volume: 0.3
+                },
+                'chime': {
+                    frequencies: [523, 659, 784, 1047],
+                    times: [0, 0.1, 0.2, 0.3],
+                    duration: 1.0,
+                    volume: 0.25
+                },
+                'bell': {
+                    frequencies: [800, 1000, 1200, 1000],
+                    times: [0, 0.15, 0.3, 0.45],
+                    duration: 0.8,
+                    volume: 0.3
+                },
+                'notification': {
+                    frequencies: [440, 554, 659],
+                    times: [0, 0.1, 0.2],
+                    duration: 0.6,
+                    volume: 0.35
+                },
+                'success': {
+                    frequencies: [523, 659, 784],
+                    times: [0, 0.1, 0.2],
+                    duration: 0.7,
+                    volume: 0.3
+                }
+            };
+
+            // Create a function to play notification sound
+            window.playNotificationSound = function () {
+                if (!isSoundEnabled) return;
+
+                try {
+                    const pattern = soundPatterns[selectedSoundType] || soundPatterns['beep'];
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    // Set oscillator type based on sound
+                    oscillator.type = selectedSoundType === 'chime' ? 'sine' : 'square';
+
+                    // Create the sound pattern
+                    pattern.frequencies.forEach((freq, index) => {
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + pattern.times[index]);
+                    });
+
+                    gainNode.gain.setValueAtTime(pattern.volume, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + pattern.duration);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + pattern.duration);
+                } catch (e) {
+                    console.log('Audio notification failed:', e);
+                }
+            };
+        } catch (e) {
+            console.log('Audio initialization failed:', e);
+            isSoundEnabled = false;
+        }
+    }
+
+    // Timer functions
+    function startTimer() {
+        if (!currentSession) {
+            alert('Please setup a session first!');
+            return;
+        }
+
+        isRunning = true;
+        timer = setInterval(updateTimer, 1000);
+
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('pause-btn').disabled = false;
+        document.getElementById('stop-btn').disabled = false;
+
+        // Show session info
+        document.getElementById('session-info').style.display = 'block';
+    }
+
+    function pauseTimer() {
         isRunning = false;
         clearInterval(timer);
-        document.getElementById('timer-circle').classList.add('completed');
-        document.getElementById('timer-label').textContent = 'Time\'s Up!';
-        
-        document.getElementById('start-btn').disabled = true;
+
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('pause-btn').disabled = true;
+    }
+
+    function stopTimer() {
+        isRunning = false;
+        clearInterval(timer);
+
+        document.getElementById('start-btn').disabled = false;
         document.getElementById('pause-btn').disabled = true;
         document.getElementById('stop-btn').disabled = true;
-        
+
         // Show completion form
         showCompletionForm();
     }
-}
 
-function resetTimer() {
-    isRunning = false;
-    clearInterval(timer);
-    timeLeft = timerDuration * 60;
-    
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    document.getElementById('timer-time').textContent = timeString;
-    document.getElementById('timer-label').textContent = 'Focus Time';
-    document.getElementById('timer-circle').classList.remove('completed', 'break');
-    
-    document.getElementById('start-btn').disabled = false;
-    document.getElementById('pause-btn').disabled = true;
-    document.getElementById('stop-btn').disabled = true;
-    
-    // Hide forms
-    document.getElementById('session-info').style.display = 'none';
-    document.getElementById('session-completion').style.display = 'none';
-    
-    currentSession = null;
-}
+    function updateTimer() {
+        timeLeft--;
 
-function setTimerDuration(minutes) {
-    timerDuration = minutes;
-    timeLeft = minutes * 60;
-    
-    const timeString = `${minutes.toString().padStart(2, '0')}:00`;
-    document.getElementById('timer-time').textContent = timeString;
-    
-    // Update active button
-    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-}
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-function setupSession() {
-    const topicId = document.getElementById('session-topic').value;
-    const sessionType = document.getElementById('session-type').value;
-    const confidenceBefore = document.getElementById('confidence-before').value;
-    
-    if (!topicId) {
-        alert('Please select a topic!');
-        return;
+        const timerTime = document.getElementById('timer-time');
+        if (timerTime) {
+            timerTime.textContent = timeString;
+        }
+
+        if (timeLeft <= 0) {
+            // Timer finished
+            isRunning = false;
+            clearInterval(timer);
+            document.getElementById('timer-circle').classList.add('completed');
+            const timerLabel = document.getElementById('timer-label');
+            if (timerLabel) {
+                timerLabel.textContent = 'Time\'s Up!';
+            }
+
+            // Play notification sound
+            if (typeof window.playNotificationSound === 'function') {
+                window.playNotificationSound();
+            }
+
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = true;
+
+            // Show completion form
+            showCompletionForm();
+        }
     }
-    
-    // Create session via API
-    fetch('/sessions/api/start-timer', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            topic_id: parseInt(topicId),
-            session_type: sessionType,
-            confidence_before: parseInt(confidenceBefore)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            currentSession = {
-                id: data.session_id,
+
+    function resetTimer() {
+        isRunning = false;
+        clearInterval(timer);
+        timeLeft = timerDuration * 60;
+
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        const timerTime = document.getElementById('timer-time');
+        if (timerTime) {
+            timerTime.textContent = timeString;
+        }
+        const timerLabel = document.getElementById('timer-label');
+        if (timerLabel) {
+            timerLabel.textContent = 'Focus Time';
+        }
+        document.getElementById('timer-circle').classList.remove('completed', 'break');
+
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('pause-btn').disabled = true;
+        document.getElementById('stop-btn').disabled = true;
+
+        // Hide forms
+        document.getElementById('session-info').style.display = 'none';
+        document.getElementById('session-completion').style.display = 'none';
+
+        currentSession = null;
+    }
+
+    function setTimerDuration(minutes) {
+        timerDuration = minutes;
+        timeLeft = minutes * 60;
+
+        const timeString = `${minutes.toString().padStart(2, '0')}:00`;
+        const timerTime = document.getElementById('timer-time');
+        if (timerTime) {
+            timerTime.textContent = timeString;
+        }
+
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function setupSession() {
+        const topicId = document.getElementById('session-topic').value;
+        const sessionType = document.getElementById('session-type').value;
+        const confidenceBefore = document.getElementById('confidence-before').value;
+
+        if (!topicId) {
+            showNotification('Please select a topic!', 'warning');
+            return;
+        }
+
+        // Create session via API
+        fetch('/sessions/api/start-timer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
                 topic_id: topicId,
                 session_type: sessionType,
-                confidence_before: confidenceBefore,
-                start_time: new Date()
-            };
-            
-            // Update session info display
-            const topicSelect = document.getElementById('session-topic');
-            const selectedTopic = topicSelect.options[topicSelect.selectedIndex].text;
-            
-            document.getElementById('current-topic').textContent = selectedTopic;
-            document.getElementById('current-type').textContent = sessionType.charAt(0).toUpperCase() + sessionType.slice(1);
-            document.getElementById('session-start-time').textContent = currentSession.start_time.toLocaleTimeString();
-            
-            // Enable start button
-            document.getElementById('start-btn').disabled = false;
-            
-            alert('Session setup complete! Click Start to begin your timer.');
-        } else {
-            alert('Error setting up session: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error setting up session. Please try again.');
-    });
-}
-
-function showCompletionForm() {
-    document.getElementById('session-completion').style.display = 'block';
-    
-    // Set actual duration to timer duration by default
-    document.getElementById('actual-duration').value = timerDuration;
-}
-
-// Event listeners
-document.getElementById('confidence-before').addEventListener('input', function() {
-    document.getElementById('confidence-before-display').textContent = this.value;
-});
-
-document.getElementById('confidence-after').addEventListener('input', function() {
-    document.getElementById('confidence-display').textContent = this.value;
-});
-
-document.getElementById('complete-session-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (!currentSession) {
-        alert('No active session to complete!');
-        return;
-    }
-    
-    const confidenceAfter = document.getElementById('confidence-after').value;
-    const actualDuration = document.getElementById('actual-duration').value;
-    const notes = document.getElementById('session-notes').value;
-    
-    // Complete session via API
-    fetch('/sessions/api/complete-timer', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            session_id: currentSession.id,
-            duration_minutes: parseInt(actualDuration),
-            confidence_after: parseInt(confidenceAfter),
-            notes: notes
+                confidence_before: parseInt(confidenceBefore)
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`Session completed! Confidence improved by ${data.confidence_gain} points.`);
-            // Redirect to session detail page
-            window.location.href = `/sessions/${currentSession.id}`;
-        } else {
-            alert('Error completing session: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error completing session. Please try again.');
-    });
-});
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSession = {
+                        id: data.session_id,
+                        topic_id: topicId,
+                        session_type: sessionType,
+                        confidence_before: confidenceBefore,
+                        start_time: new Date()
+                    };
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('confidence-before-display').textContent = document.getElementById('confidence-before').value;
-    document.getElementById('confidence-display').textContent = document.getElementById('confidence-after').value;
-});
+                    // Update session info display
+                    const topicSelect = document.getElementById('session-topic');
+                    const selectedTopic = topicSelect.options[topicSelect.selectedIndex].text;
+
+                    const currentTopic = document.getElementById('current-topic');
+                    if (currentTopic) {
+                        currentTopic.textContent = selectedTopic;
+                    }
+
+                    const currentType = document.getElementById('current-type');
+                    if (currentType) {
+                        currentType.textContent = sessionType.charAt(0).toUpperCase() + sessionType.slice(1);
+                    }
+
+                    const sessionStartTime = document.getElementById('session-start-time');
+                    if (sessionStartTime) {
+                        sessionStartTime.textContent = currentSession.start_time.toLocaleTimeString();
+                    }
+
+                    // Enable start button
+                    document.getElementById('start-btn').disabled = false;
+
+                    showNotification('Session setup complete! Click Start to begin your timer.', 'success');
+                } else {
+                    // Log the full error response for debugging
+                    console.error('Session setup failed:', data);
+
+                    // Handle different types of errors
+                    if (data.error && data.error.includes('User not authenticated')) {
+                        showNotification('Your session has expired. Please refresh the page and log in again to use the study timer.', 'warning');
+                        // Redirect to login after a delay
+                        setTimeout(() => {
+                            window.location.href = '/auth/login';
+                        }, 3000);
+                    } else if (data.error && data.error.includes('next_recommended_date_future')) {
+                        const fixMessage = `Database Constraint Issue Detected!
+
+The study session timer is blocked by a database constraint: 'next_recommended_date_future'
+
+TO FIX THIS ISSUE:
+1. Go to your Supabase dashboard
+2. Open the SQL Editor
+3. Run this command:
+   ${data.sql_command || 'ALTER TABLE user_analytics DROP CONSTRAINT IF EXISTS next_recommended_date_future;'}
+4. Click "Run" to execute the command
+5. Try the timer again
+
+This will permanently fix the issue and allow session creation.`;
+
+                        alert(fixMessage);
+                    } else if (data.error && data.error.includes('Database constraint')) {
+                        showNotification('Session creation is temporarily unavailable due to a database issue. Please try again later or contact support if the problem persists.', 'danger');
+                    } else {
+                        showNotification('Error setting up session: ' + data.error, 'danger');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                console.error('Error details:', error);
+                showNotification('Error setting up session. Please try again. Check console for details.', 'danger');
+            });
+    }
+
+    function showCompletionForm() {
+        document.getElementById('session-completion').style.display = 'block';
+
+        // Set actual duration to timer duration by default
+        document.getElementById('actual-duration').value = timerDuration;
+    }
+
+    // Event listeners
+    const confidenceBefore = document.getElementById('confidence-before');
+    const confidenceAfter = document.getElementById('confidence-after');
+
+    if (confidenceBefore) {
+        confidenceBefore.addEventListener('input', function () {
+            const display = document.getElementById('confidence-before-display');
+            if (display) {
+                display.textContent = this.value;
+            }
+        });
+    }
+
+    if (confidenceAfter) {
+        confidenceAfter.addEventListener('input', function () {
+            const display = document.getElementById('confidence-display');
+            if (display) {
+                display.textContent = this.value;
+            }
+        });
+    }
+
+    // Notification function for styled alerts
+    function showNotification(message, type = 'info') {
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.custom-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        const alertClass = type === 'warning' ? 'warning' : type === 'success' ? 'success' : type === 'danger' ? 'danger' : 'info';
+        notification.className = 'custom-notification alert alert-' + alertClass + ' alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+
+        // Set icon based on type
+        const icon = type === 'warning' ? 'fas fa-exclamation-triangle' :
+            type === 'success' ? 'fas fa-check-circle' :
+                type === 'danger' ? 'fas fa-times-circle' :
+                    'fas fa-info-circle';
+
+        notification.innerHTML = `
+            <i class="${icon} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    document.getElementById('complete-session-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (!currentSession) {
+            alert('No active session to complete!');
+            return;
+        }
+
+        const confidenceAfter = document.getElementById('confidence-after').value;
+        const actualDuration = document.getElementById('actual-duration').value;
+        const notes = document.getElementById('session-notes').value;
+
+        // Complete session via API
+        fetch('/sessions/api/complete-timer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                session_id: currentSession.id,
+                duration_minutes: parseInt(actualDuration),
+                confidence_after: parseInt(confidenceAfter),
+                notes: notes
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Session completed! Confidence improved by ${data.confidence_gain} points.`);
+                    // Redirect to session detail page
+                    window.location.href = `/sessions/${currentSession.id}`;
+                } else {
+                    alert('Error completing session: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error completing session. Please try again.');
+            });
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize audio notifications
+        initAudio();
+
+        // Safely initialize confidence displays with null checks
+        const confidenceBeforeDisplay = document.getElementById('confidence-before-display');
+        const confidenceDisplay = document.getElementById('confidence-display');
+        const confidenceBefore = document.getElementById('confidence-before');
+        const confidenceAfter = document.getElementById('confidence-after');
+
+        if (confidenceBeforeDisplay && confidenceBefore) {
+            confidenceBeforeDisplay.textContent = confidenceBefore.value;
+        }
+
+        if (confidenceDisplay && confidenceAfter) {
+            confidenceDisplay.textContent = confidenceAfter.value;
+        }
+    });
 </script>
 {% endblock %}
