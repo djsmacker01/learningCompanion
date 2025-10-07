@@ -49,21 +49,27 @@ class PDFProcessor:
     
     def extract_text_from_pdf(self, file_path: str) -> Dict:
         """Extract text content from PDF file"""
+        text_content = ""
+        pages_info = []
+        extraction_method = "none"
+        
         try:
-            text_content = ""
-            pages_info = []
-            extraction_method = "none"
-            
             # First try standard text extraction
             if PDFPLUMBER_AVAILABLE:
+                print("Attempting pdfplumber extraction...")
                 text_content, pages_info = self._extract_with_pdfplumber(file_path)
                 extraction_method = "pdfplumber"
-            elif PyPDF2 and PDF_AVAILABLE:
+                print(f"Pdfplumber extracted {len(text_content)} characters from {len(pages_info)} pages")
+            elif PDF_AVAILABLE:
+                print("Attempting PyPDF2 extraction...")
                 text_content, pages_info = self._extract_with_pypdf2(file_path)
                 extraction_method = "pypdf2"
+                print(f"PyPDF2 extracted {len(text_content)} characters from {len(pages_info)} pages")
             elif PDFMINER_AVAILABLE:
+                print("Attempting pdfminer extraction...")
                 text_content, pages_info = self._extract_with_pdfminer(file_path)
                 extraction_method = "pdfminer"
+                print(f"Pdfminer extracted {len(text_content)} characters from {len(pages_info)} pages")
             
             # If no text extracted, try OCR for image-based PDFs
             if not text_content.strip() and OCR_AVAILABLE:
@@ -100,7 +106,7 @@ class PDFProcessor:
                 }
             
             # Process the extracted text
-            processed_content = self._process_extracted_text(text_content)
+            processed_content = self._process_extracted_text(text_content, extraction_method)
             
             return {
                 'success': True,
@@ -112,52 +118,157 @@ class PDFProcessor:
             }
             
         except Exception as e:
+            print(f"Critical error in PDF extraction: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 'success': False,
-                'error': f'Error extracting PDF content: {str(e)}',
-                'text_content': '',
-                'pages_info': [],
-                'extraction_method': 'error'
+                'error': f'Critical error extracting PDF content: {str(e)}',
+                'text_content': text_content,
+                'pages_info': pages_info,
+                'extraction_method': extraction_method if 'extraction_method' in locals() else 'error'
             }
     
     def _extract_with_pdfplumber(self, file_path: str) -> Tuple[str, List[Dict]]:
         """Extract text using pdfplumber (most reliable)"""
-        text_content = ""
-        pages_info = []
+        try:
+            text_content = ""
+            pages_info = []
+            
+            with pdfplumber.open(file_path) as pdf:
+                for page_num, page in enumerate(pdf.pages, 1):
+                    try:
+                        # Try to extract text with better formatting preservation
+                        page_text = page.extract_text(layout=True)
+                        if not page_text:
+                            # Fallback to regular extraction
+                            page_text = page.extract_text()
+                        
+                        if page_text:
+                            # Clean up the text but preserve structure
+                            page_text = self._clean_pdf_page_text(page_text)
+                            text_content += page_text + "\n\n"
+                            pages_info.append({
+                                'page_number': page_num,
+                                'text_length': len(page_text),
+                                'word_count': len(page_text.split()),
+                                'has_text': True
+                            })
+                        else:
+                            pages_info.append({
+                                'page_number': page_num,
+                                'text_length': 0,
+                                'word_count': 0,
+                                'has_text': False
+                            })
+                    except Exception as page_error:
+                        print(f"Error extracting text from page {page_num}: {page_error}")
+                        pages_info.append({
+                            'page_number': page_num,
+                            'text_length': 0,
+                            'word_count': 0,
+                            'has_text': False,
+                            'error': str(page_error)
+                        })
+            
+            return text_content, pages_info
+            
+        except Exception as e:
+            print(f"Error with pdfplumber extraction: {e}")
+            return "", []
+    
+    def _clean_pdf_page_text(self, text: str) -> str:
+        """Clean PDF page text while preserving structure"""
+        import re
         
-        with pdfplumber.open(file_path) as pdf:
-            for page_num, page in enumerate(pdf.pages, 1):
-                page_text = page.extract_text()
-                if page_text:
-                    text_content += page_text + "\n\n"
-                    pages_info.append({
-                        'page_number': page_num,
-                        'text_length': len(page_text),
-                        'word_count': len(page_text.split()),
-                        'has_text': True
-                    })
-                else:
-                    pages_info.append({
-                        'page_number': page_num,
-                        'text_length': 0,
-                        'word_count': 0,
-                        'has_text': False
-                    })
+        if not text:
+            return ""
         
-        return text_content, pages_info
+        # Split into lines
+        lines = text.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                cleaned_lines.append("")
+                continue
+            
+            # Remove excessive whitespace
+            line = re.sub(r'\s+', ' ', line)
+            
+            # Remove common PDF artifacts
+            line = re.sub(r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\'\"\/\@\#\&\+\=]+', ' ', line)
+            
+            # Clean up multiple spaces again
+            line = re.sub(r'\s+', ' ', line)
+            
+            # Skip lines that are just page numbers or headers
+            if re.match(r'^\d+$', line) or len(line) < 3:
+                continue
+                
+            cleaned_lines.append(line)
+        
+        # Join lines and clean up excessive empty lines
+        result = '\n'.join(cleaned_lines)
+        result = re.sub(r'\n{3,}', '\n\n', result)
+        
+        return result.strip()
     
     def _extract_with_pypdf2(self, file_path: str) -> Tuple[str, List[Dict]]:
         """Extract text using PyPDF2"""
-        text_content = ""
-        pages_info = []
-        
-        with open(file_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
+        try:
+            text_content = ""
+            pages_info = []
             
-            for page_num, page in enumerate(pdf_reader.pages, 1):
-                page_text = page.extract_text()
-                if page_text:
-                    text_content += page_text + "\n\n"
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                
+                for page_num, page in enumerate(pdf_reader.pages, 1):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text_content += page_text + "\n\n"
+                            pages_info.append({
+                                'page_number': page_num,
+                                'text_length': len(page_text),
+                                'word_count': len(page_text.split()),
+                                'has_text': True
+                            })
+                        else:
+                            pages_info.append({
+                                'page_number': page_num,
+                                'text_length': 0,
+                                'word_count': 0,
+                                'has_text': False
+                            })
+                    except Exception as page_error:
+                        print(f"Error extracting text from page {page_num} with PyPDF2: {page_error}")
+                        pages_info.append({
+                            'page_number': page_num,
+                            'text_length': 0,
+                            'word_count': 0,
+                            'has_text': False,
+                            'error': str(page_error)
+                        })
+            
+            return text_content, pages_info
+            
+        except Exception as e:
+            print(f"Error with PyPDF2 extraction: {e}")
+            return "", []
+    
+    def _extract_with_pdfminer(self, file_path: str) -> Tuple[str, List[Dict]]:
+        """Extract text using pdfminer"""
+        try:
+            text_content = extract_text(file_path)
+            
+            # Split by pages (approximate)
+            pages = text_content.split('\f')  # Form feed character
+            pages_info = []
+            
+            for page_num, page_text in enumerate(pages, 1):
+                if page_text.strip():
                     pages_info.append({
                         'page_number': page_num,
                         'text_length': len(page_text),
@@ -171,34 +282,12 @@ class PDFProcessor:
                         'word_count': 0,
                         'has_text': False
                     })
-        
-        return text_content, pages_info
-    
-    def _extract_with_pdfminer(self, file_path: str) -> Tuple[str, List[Dict]]:
-        """Extract text using pdfminer"""
-        text_content = extract_text(file_path)
-        
-        # Split by pages (approximate)
-        pages = text_content.split('\f')  # Form feed character
-        pages_info = []
-        
-        for page_num, page_text in enumerate(pages, 1):
-            if page_text.strip():
-                pages_info.append({
-                    'page_number': page_num,
-                    'text_length': len(page_text),
-                    'word_count': len(page_text.split()),
-                    'has_text': True
-                })
-            else:
-                pages_info.append({
-                    'page_number': page_num,
-                    'text_length': 0,
-                    'word_count': 0,
-                    'has_text': False
-                })
-        
-        return text_content, pages_info
+            
+            return text_content, pages_info
+            
+        except Exception as e:
+            print(f"Error with pdfminer extraction: {e}")
+            return "", []
     
     def _extract_with_ocr(self, file_path: str) -> Dict:
         """Extract text using OCR for image-based PDFs"""
@@ -262,14 +351,14 @@ class PDFProcessor:
                 'error': str(e)
             }
     
-    def _process_extracted_text(self, text_content: str) -> Dict:
+    def _process_extracted_text(self, text_content: str, extraction_method: str = 'unknown') -> Dict:
         """Process and clean extracted text"""
         if not text_content:
             return {
                 'cleaned_text': '',
                 'word_count': 0,
                 'key_sections': [],
-                'extraction_method': 'none'
+                'extraction_method': extraction_method
             }
         
         # Clean the text
@@ -277,9 +366,6 @@ class PDFProcessor:
         
         # Extract key sections
         key_sections = self._extract_key_sections(cleaned_text)
-        
-        # Determine extraction method used (passed from calling function)
-        # This will be overridden by the actual method used
         
         return {
             'cleaned_text': cleaned_text,
@@ -289,27 +375,75 @@ class PDFProcessor:
         }
     
     def _clean_text(self, text: str) -> str:
-        """Clean and normalize extracted text"""
+        """Clean and normalize extracted text while preserving structure"""
         import re
         
-        # Remove excessive whitespace
-        text = re.sub(r'\s+', ' ', text)
+        if not text:
+            return ""
         
-        # Remove page numbers and headers/footers (common patterns)
-        text = re.sub(r'\b\d+\b(?=\s*$)', '', text, flags=re.MULTILINE)  # Page numbers at end of line
-        text = re.sub(r'^.*\b\d+\b\s*$', '', text, flags=re.MULTILINE)   # Lines with only numbers
+        # Split into lines for better processing
+        lines = text.split('\n')
+        cleaned_lines = []
         
-        # Remove common PDF artifacts
-        text = re.sub(r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\'\"]+', ' ', text)  # Keep punctuation but remove special chars
+        for line in lines:
+            line = line.strip()
+            if not line:
+                # Preserve empty lines for structure
+                cleaned_lines.append("")
+                continue
+            
+            # Remove excessive spaces but keep single spaces
+            line = re.sub(r'\s+', ' ', line)
+            
+            # Remove special characters that aren't useful but keep punctuation
+            line = re.sub(r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\'\"]+', ' ', line)
+            
+            # Clean up multiple spaces again
+            line = re.sub(r'\s+', ' ', line)
+            
+            # Skip lines that are just page numbers or very short
+            if re.match(r'^\d+$', line) or len(line) < 3:
+                continue
+                
+            cleaned_lines.append(line)
         
-        # Clean up multiple spaces
-        text = re.sub(r'\s+', ' ', text)
+        # Join lines and clean up excessive empty lines
+        result = '\n'.join(cleaned_lines)
+        result = re.sub(r'\n{3,}', '\n\n', result)
         
-        # Remove empty lines
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
-        text = '\n'.join(lines)
+        # Add better structure detection
+        result = self._add_structure_markers(result)
         
-        return text.strip()
+        return result.strip()
+    
+    def _add_structure_markers(self, text: str) -> str:
+        """Add structure markers to improve formatting"""
+        import re
+        
+        lines = text.split('\n')
+        structured_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                structured_lines.append("")
+                continue
+            
+            # Detect potential headings (short lines, title case, or all caps)
+            if (len(line) < 100 and 
+                (line.isupper() or line.istitle()) and 
+                not line.endswith('.') and 
+                not line.endswith(',') and
+                not re.match(r'^\d+\.?\s', line)):  # Not numbered lists
+                # Likely a heading
+                structured_lines.append("")
+                structured_lines.append(line)
+                structured_lines.append("-" * min(len(line), 50))
+                structured_lines.append("")
+            else:
+                structured_lines.append(line)
+        
+        return '\n'.join(structured_lines)
     
     def _extract_key_sections(self, text: str) -> List[Dict]:
         """Extract key sections from the text"""
