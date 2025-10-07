@@ -84,7 +84,7 @@ def analyze_gcse_past_papers():
         print(f"Error analyzing GCSE past papers: {e}")
         return jsonify({'error': 'Failed to analyze past papers'}), 500
 
-@gcse_ai.route('/api/grade-boundary-predictions')
+@gcse_ai.route('/api/grade-boundary-predictions', methods=['GET', 'POST'])
 @login_required
 def predict_gcse_grade_boundaries():
     """Predict GCSE grade boundaries and student performance"""
@@ -102,16 +102,23 @@ def predict_gcse_grade_boundaries():
         if not all([subject, exam_board]):
             return jsonify({'error': 'Missing required parameters: subject, exam_board'}), 400
         
-        # Get current performance from request body
+        # Get current performance from request body (POST) or default
         current_performance = request.get_json() or {}
         
+        print(f"Predicting grade boundaries for {subject} ({exam_board})")
+        print(f"Current performance: {current_performance}")
+        
         predictions = enhancement.generate_gcse_grade_boundary_predictions(subject, exam_board, current_performance)
+        
+        print(f"Predictions generated: {predictions.keys() if isinstance(predictions, dict) else type(predictions)}")
         
         return jsonify(predictions)
     
     except Exception as e:
         print(f"Error predicting GCSE grade boundaries: {e}")
-        return jsonify({'error': 'Failed to predict grade boundaries'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to predict grade boundaries: {str(e)}'}), 500
 
 @gcse_ai.route('/api/revision-schedule', methods=['POST'])
 @login_required
@@ -189,13 +196,19 @@ def generate_gcse_personalized_content():
         if not all([subject, topic]):
             return jsonify({'error': 'Missing required parameters: subject, topic'}), 400
         
+        print(f"Generating personalized content: {subject}/{topic} ({learning_style}, {difficulty_level})")
+        
         content = enhancement.generate_gcse_personalized_content(subject, topic, learning_style, difficulty_level)
+        
+        print(f"Content generated with keys: {content.keys() if isinstance(content, dict) else type(content)}")
         
         return jsonify(content)
     
     except Exception as e:
         print(f"Error generating GCSE personalized content: {e}")
-        return jsonify({'error': 'Failed to generate personalized content'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to generate personalized content: {str(e)}'}), 500
 
 @gcse_ai.route('/api/performance-gap-analysis', methods=['POST'])
 @login_required
@@ -224,6 +237,206 @@ def analyze_gcse_performance_gaps():
     except Exception as e:
         print(f"Error analyzing GCSE performance gaps: {e}")
         return jsonify({'error': 'Failed to analyze performance gaps'}), 500
+
+@gcse_ai.route('/api/save-to-topics', methods=['POST'])
+@login_required
+def save_gcse_content_to_topics():
+    """Save GCSE personalized content as a topic"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        data = request.get_json()
+        subject = data.get('subject')
+        topic_name = data.get('topic')
+        content = data.get('content')
+        learning_style = data.get('learning_style')
+        difficulty = data.get('difficulty')
+        
+        if not all([subject, topic_name, content]):
+            return jsonify({'error': 'Missing required data'}), 400
+        
+        # Import Topic model
+        from app.models import Topic
+        
+        # Helper function to sanitize Unicode
+        def sanitize_unicode(text):
+            """Replace Unicode math symbols with ASCII equivalents"""
+            if not text:
+                return text
+            return str(text).replace('√', 'sqrt').replace('≠', '!=').replace('±', '+/-').replace('²', '^2').replace('³', '^3').replace('×', '*').replace('÷', '/')
+        
+        # Create topic title (sanitize Unicode)
+        title = sanitize_unicode(f"{subject.title()} - {topic_name}")
+        
+        # Build description from content (sanitize Unicode for ALL text)
+        
+        description = f"Personalized GCSE content for {sanitize_unicode(topic_name)}\n\n"
+        description += f"Learning Style: {learning_style}\n"
+        description += f"Difficulty: {difficulty}\n\n"
+        
+        # Add learning points (clean any problematic Unicode)
+        if content.get('learning_points'):
+            description += "Key Points:\n"
+            for point in content['learning_points'][:5]:
+                clean_point = sanitize_unicode(point)
+                description += f"• {clean_point}\n"
+        
+        # Create the topic
+        topic = Topic.create(
+            title=title,
+            description=description,
+            user_id=user.id,
+            is_gcse=True
+        )
+        
+        if topic:
+            # Save the full content as a note
+            from app.models.content_management import TopicNote
+            
+            # Convert to JSON with ensure_ascii=False to handle Unicode characters
+            note_content = json.dumps(content, indent=2, ensure_ascii=False)
+            note = TopicNote.create_note(
+                topic_id=topic.id,
+                user_id=user.id,
+                title=f"AI-Generated Content",
+                content=note_content,
+                note_type='ai_generated'
+            )
+            
+            return jsonify({
+                'success': True,
+                'topic_id': topic.id,
+                'message': 'Content saved to topics successfully!'
+            })
+        else:
+            return jsonify({'error': 'Failed to create topic'}), 500
+    
+    except Exception as e:
+        # Use safe printing to avoid Unicode errors
+        error_msg = str(e).encode('ascii', 'replace').decode('ascii')
+        print(f"Error saving GCSE content to topics: {error_msg}")
+        try:
+            import traceback
+            traceback.print_exc()
+        except:
+            pass  # Skip traceback if it has Unicode issues
+        return jsonify({'error': f'Failed to save content: {error_msg}'}), 500
+
+@gcse_ai.route('/api/export-content', methods=['POST'])
+@login_required
+def export_gcse_content():
+    """Export GCSE personalized content as formatted document"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        data = request.get_json()
+        subject = data.get('subject', 'GCSE Subject')
+        topic = data.get('topic', 'Topic')
+        content_data = data.get('content', {})
+        learning_style = data.get('learning_style', 'general')
+        difficulty = data.get('difficulty', 'intermediate')
+        
+        # Build HTML export
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{subject} - {topic}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; }}
+        .header h1 {{ margin: 0; }}
+        .section {{ margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }}
+        .section h2 {{ color: #17a2b8; margin-top: 0; }}
+        ul {{ line-height: 1.8; }}
+        .question-box {{ background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #0d6efd; border-radius: 6px; }}
+        .example-box {{ background: white; padding: 15px; margin: 10px 0; border-left: 4px solid #28a745; border-radius: 6px; }}
+        code {{ background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: monospace; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{subject} - {topic}</h1>
+        <p>Learning Style: {learning_style.title()} | Difficulty: {difficulty.title()}</p>
+    </div>
+"""
+        
+        # Learning points
+        if content_data.get('learning_points'):
+            html_content += """
+    <div class="section">
+        <h2>📖 Learning Content</h2>
+        <ul>
+"""
+            for point in content_data['learning_points']:
+                html_content += f"            <li>{point}</li>\n"
+            html_content += "        </ul>\n    </div>\n"
+        
+        # Practice questions
+        if content_data.get('practice_questions'):
+            html_content += """
+    <div class="section">
+        <h2>❓ Practice Questions</h2>
+"""
+            for idx, q in enumerate(content_data['practice_questions'][:3], 1):
+                question_text = q if isinstance(q, str) else q.get('question', q)
+                html_content += f"""        <div class="question-box">
+            <strong>Question {idx}:</strong><br>
+            {question_text}
+        </div>
+"""
+            html_content += "    </div>\n"
+        
+        # Examples
+        if content_data.get('examples'):
+            html_content += """
+    <div class="section">
+        <h2>🧪 Worked Examples</h2>
+"""
+            for idx, ex in enumerate(content_data['examples'][:2], 1):
+                example_text = ex if isinstance(ex, str) else ex.get('description', ex)
+                html_content += f"""        <div class="example-box">
+            <strong>Example {idx}:</strong><br>
+            <pre style="white-space: pre-wrap; font-family: monospace; margin: 10px 0;">{example_text}</pre>
+        </div>
+"""
+            html_content += "    </div>\n"
+        
+        # Study recommendations
+        if content_data.get('study_recommendations'):
+            html_content += """
+    <div class="section">
+        <h2>💡 Study Recommendations</h2>
+        <ul>
+"""
+            for rec in content_data['study_recommendations'][:5]:
+                html_content += f"            <li>{rec}</li>\n"
+            html_content += "        </ul>\n    </div>\n"
+        
+        html_content += f"""
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #dee2e6; color: #6c757d;">
+        <p>Generated by Learning Companion on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        <p><small>To save as PDF: Print this page and select "Save as PDF"</small></p>
+    </div>
+</body>
+</html>
+"""
+        
+        return jsonify({
+            'success': True,
+            'html': html_content,
+            'filename': f"{subject}_{topic.replace(' ', '_')}.html"
+        })
+    
+    except Exception as e:
+        print(f"Error exporting GCSE content: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to export content: {str(e)}'}), 500
 
 @gcse_ai.route('/api/subjects')
 @login_required
