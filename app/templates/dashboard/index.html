@@ -434,9 +434,21 @@
     }
 
     function loadGamificationData() {
-        fetch('/gamification/api/profile')
-            .then(response => response.json())
+        fetch('/gamification/api/profile', {
+            method: 'GET',
+            credentials: 'same-origin',  // Include session cookies
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Gamification data loaded:', data);
                 if (data.total_xp !== undefined) {
                     document.getElementById('user-level').textContent = data.current_level;
                     document.getElementById('user-streak').textContent = data.study_streak;
@@ -448,14 +460,30 @@
                     const xpToNext = document.getElementById('xp-to-next');
                     const totalXp = document.getElementById('total-xp');
 
-                    progressBar.style.width = data.level_progress.progress_percentage + '%';
-                    xpText.textContent = data.total_xp + ' XP';
-                    xpToNext.textContent = data.xp_to_next_level + ' XP to next level';
-                    totalXp.textContent = data.total_xp + ' total XP';
+                    if (progressBar && data.level_progress) {
+                        progressBar.style.width = data.level_progress.progress_percentage + '%';
+                    }
+                    if (xpText) {
+                        xpText.textContent = data.total_xp + ' XP';
+                    }
+                    if (xpToNext) {
+                        xpToNext.textContent = data.xp_to_next_level + ' XP to next level';
+                    }
+                    if (totalXp) {
+                        totalXp.textContent = data.total_xp + ' total XP';
+                    }
+                } else {
+                    console.warn('Gamification data missing total_xp field:', data);
+                    // Set default values
+                    document.getElementById('user-level').textContent = '1';
+                    document.getElementById('user-streak').textContent = '0';
+                    document.getElementById('user-badges').textContent = '0';
+                    document.getElementById('user-achievements').textContent = '0';
                 }
             })
             .catch(error => {
                 console.error('Error loading gamification data:', error);
+                // Set default values on error
                 document.getElementById('user-level').textContent = '1';
                 document.getElementById('user-streak').textContent = '0';
                 document.getElementById('user-badges').textContent = '0';
