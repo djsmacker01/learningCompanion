@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tutor Chat - Learning Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 200px);
+        max-height: 600px;
+    }
+
+    .chat-messages {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        max-width: 80%;
+    }
+
+    .message.user {
+        background-color: #007bff;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .message.assistant {
+        background-color: #e9ecef;
+        color: #212529;
+        margin-right: auto;
+    }
+
+    .message.system {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .typing-indicator {
+        display: none;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .chat-input {
+        border-top: 1px solid #dee2e6;
+        padding: 1rem;
+        background-color: white;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Chat Area -->
+        <div class="col-lg-8">
+            <!-- Chat Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white"
+                    style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-robot fa-2x me-3"></i>
+                        <div>
+                            <h2 class="h4 mb-0">AI Tutor Chat</h2>
+                            <p class="mb-0 opacity-75">Your intelligent study companion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <!-- Chat Messages -->
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message system">
+                            <i class="fas fa-robot me-2"></i>
+                            Welcome! I'm your AI Tutor. Ask me anything about your studies, and I'll help you learn
+                            better.
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator">
+                        <i class="fas fa-circle fa-pulse me-1"></i>
+                        AI Tutor is typing...
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input">
+                        <form id="chatForm">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="messageInput"
+                                    placeholder="Ask me anything about your studies..." autocomplete="off" required>
+                                <button class="btn btn-primary" type="submit" id="sendButton">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Chat Features -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white"
+                    style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-magic me-2"></i>Chat Features
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <button class="list-group-item list-group-item-action"
+                            onclick="askQuestion('Explain photosynthesis')">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <span>Ask for explanations</span>
+                        </button>
+                        <button class="list-group-item list-group-item-action"
+                            onclick="askQuestion('Help me with math problems')">
+                            <i class="fas fa-calculator text-primary me-2"></i>
+                            <span>Get help with problems</span>
+                        </button>
+                        <button class="list-group-item list-group-item-action"
+                            onclick="askQuestion('Create a study plan')">
+                            <i class="fas fa-calendar-alt text-success me-2"></i>
+                            <span>Study planning</span>
+                        </button>
+                        <button class="list-group-item list-group-item-action"
+                            onclick="askQuestion('Quiz me on biology')">
+                            <i class="fas fa-question-circle text-info me-2"></i>
+                            <span>Practice quizzes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-outline-primary w-100 mb-2" onclick="clearChat()">
+                        <i class="fas fa-trash me-2"></i>Clear Chat
+                    </button>
+                    <button class="btn btn-outline-secondary w-100 mb-2" onclick="exportChat()">
+                        <i class="fas fa-download me-2"></i>Export Chat
+                    </button>
+                    <button class="btn btn-outline-info w-100" onclick="loadTopics()">
+                        <i class="fas fa-sync me-2"></i>Refresh Topics
+                    </button>
+                </div>
+            </div>
+
+            <!-- Topic Context -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-book text-secondary me-2"></i>Topic Context
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Topic (Optional)</label>
+                        <select class="form-select" id="topicSelect">
+                            <option value="">No specific topic</option>
+                        </select>
+                    </div>
+                    <small class="text-muted">
+                        Selecting a topic helps the AI provide more relevant answers.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Chat functionality
+    let chatHistory = [];
+
+    // Load topics for context
+    function loadTopics() {
+        fetch('/ai-tutor/api/topics')
+            .then(response => response.json())
+            .then(data => {
+                const topicSelect = document.getElementById('topicSelect');
+                if (data.topics) {
+                    topicSelect.innerHTML = '<option value="">No specific topic</option>';
+                    data.topics.forEach(topic => {
+                        const option = document.createElement('option');
+                        option.value = topic.id;
+                        option.textContent = topic.title;
+                        topicSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading topics:', error);
+            });
+    }
+
+    // Send message
+    function sendMessage(message, topicId = null) {
+        const chatMessages = document.getElementById('chatMessages');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Add user message
+        addMessage(message, 'user');
+
+        // Show typing indicator
+        typingIndicator.style.display = 'block';
+
+        // Send to AI
+        fetch('/ai-tutor/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                topic_id: topicId,
+                context: chatHistory.join(' ')
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                if (data.error) {
+                    addMessage('Sorry, I encountered an error: ' + data.error, 'assistant');
+                } else {
+                    addMessage(data.response, 'assistant');
+                    chatHistory.push(message);
+                    chatHistory.push(data.response);
+                }
+            })
+            .catch(error => {
+                typingIndicator.style.display = 'none';
+                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+                console.error('Error:', error);
+            });
+    }
+
+    // Add message to chat
+    function addMessage(text, sender) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+
+        const time = new Date().toLocaleTimeString();
+        messageDiv.innerHTML = `
+            <div>${text}</div>
+            <div class="message-time">${time}</div>
+        `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Ask predefined question
+    function askQuestion(question) {
+        const messageInput = document.getElementById('messageInput');
+        messageInput.value = question;
+        messageInput.focus();
+    }
+
+    // Clear chat
+    function clearChat() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = `
+            <div class="message system">
+                <i class="fas fa-robot me-2"></i>
+                Chat cleared. How can I help you with your studies?
+            </div>
+        `;
+        chatHistory = [];
+    }
+
+    // Export chat
+    function exportChat() {
+        const messages = document.querySelectorAll('.message:not(.system)');
+        let chatText = 'AI Tutor Chat Export\n';
+        chatText += '====================\n\n';
+
+        messages.forEach(message => {
+            const sender = message.classList.contains('user') ? 'You' : 'AI Tutor';
+            const text = message.querySelector('div').textContent;
+            chatText += `${sender}: ${text}\n\n`;
+        });
+
+        const blob = new Blob([chatText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ai-tutor-chat-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Form submission
+    document.getElementById('chatForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const messageInput = document.getElementById('messageInput');
+        const topicSelect = document.getElementById('topicSelect');
+
+        const message = messageInput.value.trim();
+        if (message) {
+            sendMessage(message, topicSelect.value || null);
+            messageInput.value = '';
+        }
+    });
+
+    // Load topics when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTopics();
+    });
+</script>
+{% endblock %}

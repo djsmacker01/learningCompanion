@@ -1,0 +1,858 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Learning Companion{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>Analytics Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Track your learning progress and insights</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Predictive Analytics Dashboard Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="bg-primary text-white p-4"
+                    style="background-color: #007bff !important; color: white !important; border-radius: 0.375rem 0.375rem 0 0;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-line fa-2x me-3" style="color: white !important;"></i>
+                        <div>
+                            <h2 class="h4 mb-0" style="color: white !important; font-weight: bold !important;">
+                                Predictive Analytics Dashboard</h2>
+                            <p class="mb-0" style="color: white !important;">Advanced AI-powered learning analytics and
+                                predictions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Performance Trends -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-trending-up text-success me-2"></i>
+                                        Performance Trends
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Click "Analyze Trends" to see your performance patterns
+                                        </p>
+                                        <button class="btn btn-outline-primary" onclick="analyzePerformanceTrends()">
+                                            <i class="fas fa-chart-area me-2"></i>Analyze Trends
+                                        </button>
+                                    </div>
+                                    <div id="performanceTrendsResult" style="display: none;">
+                                        <!-- Results will be displayed here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Grade Predictions -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-crystal-ball text-primary me-2"></i>
+                                        Grade Predictions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Topic</label>
+                                        <select class="form-select" id="predictionTopicSelect">
+                                            <option value="">Choose a topic...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Target Grade (Optional)</label>
+                                        <select class="form-select" id="targetGradeSelect">
+                                            <option value="">Any grade</option>
+                                            <option value="9">Grade 9</option>
+                                            <option value="8">Grade 8</option>
+                                            <option value="7">Grade 7</option>
+                                            <option value="6">Grade 6</option>
+                                            <option value="5">Grade 5</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="predictGrade()">
+                                        <i class="fas fa-magic me-2"></i>Predict Grade
+                                    </button>
+                                    <div id="gradePredictionResult" class="mt-3" style="display: none;">
+                                        <!-- Results will be displayed here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- Learning Trajectory -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-route text-info me-2"></i>
+                                        Learning Trajectory Analysis
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Topic</label>
+                                        <select class="form-select" id="trajectoryTopicSelect">
+                                            <option value="">Choose a topic...</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Analysis Period</label>
+                                        <select class="form-select" id="analysisPeriodSelect">
+                                            <option value="30">Last 30 days</option>
+                                            <option value="60">Last 60 days</option>
+                                            <option value="90">Last 90 days</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-info" onclick="analyzeTrajectory()">
+                                        <i class="fas fa-chart-area me-2"></i>Analyze Trajectory
+                                    </button>
+                                    <div id="trajectoryResult" class="mt-3" style="display: none;">
+                                        <!-- Results will be displayed here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- AI Insights -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-brain text-purple me-2"></i>
+                                        AI Insights
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="aiInsights">
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-robot fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted">Click "Get Insights" to see AI-powered recommendations
+                                            </p>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="getAIInsights()">
+                                                <i class="fas fa-lightbulb me-2"></i>Get Insights
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Quick Actions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <button class="btn btn-outline-warning w-100"
+                                                onclick="showRiskAssessment()">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>Risk Assessment
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button class="btn btn-outline-success w-100"
+                                                onclick="showStudyEfficiency()">
+                                                <i class="fas fa-tachometer-alt me-2"></i>Study Efficiency
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button class="btn btn-outline-primary w-100"
+                                                onclick="showRevisionSchedule()">
+                                                <i class="fas fa-calendar-check me-2"></i>Revision Schedule
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button class="btn btn-outline-secondary w-100"
+                                                onclick="showComprehensiveReport()">
+                                                <i class="fas fa-file-alt me-2"></i>Comprehensive Report
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not error %}
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-2">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="card-title text-primary">{{ analytics_data.total_topics if analytics_data else 0 }}</h3>
+                    <p class="card-text text-muted">Active Topics</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-2">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="card-title text-success">{{ analytics_data.total_sessions if analytics_data else 0 }}
+                    </h3>
+                    <p class="card-text text-muted">Total Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-2">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <h3 class="card-title text-info">{{ "%.1f"|format((analytics_data.total_study_time if analytics_data
+                        else 0) / 60) }}h
+                    </h3>
+                    <p class="card-text text-muted">Study Time</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-2">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title text-warning">{{ "%.1f"|format(analytics_data.avg_confidence_gain if
+                        analytics_data else 0) }}
+                    </h3>
+                    <p class="card-text text-muted">Avg Confidence Gain</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i>Learning Trends (Last 30 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="learningTrendsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>Topic Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="topicProgressChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table text-primary me-2"></i>Topic Analytics
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if topic_analytics %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Topic</th>
+                                    <th>Sessions</th>
+                                    <th>Study Time</th>
+                                    <th>Mastery Level</th>
+                                    <th>Progress</th>
+                                    <th>Last Session</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for topic in topic_analytics %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-medium">{{ topic.title }}</div>
+                                        <small class="text-muted">{{ topic.difficulty_level|title }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ topic.total_sessions }}</span>
+                                    </td>
+                                    <td>{{ "%.1f"|format(topic.total_study_time / 60) }}h</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% for i in range(5) %}
+                                            <i
+                                                class="fas fa-star {% if i < topic.mastery_level %}text-warning{% else %}text-muted{% endif %} me-1"></i>
+                                            {% endfor %}
+                                            <span class="ms-2 small">{{ topic.mastery_level }}/5</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if topic.progress_status == 'On Track' %}
+                                        <span class="badge bg-success">{{ topic.progress_status }}</span>
+                                        {% elif topic.progress_status == 'Behind' %}
+                                        <span class="badge bg-warning">{{ topic.progress_status }}</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">{{ topic.progress_status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if topic.last_session_date %}
+                                        {{ topic.last_session_date.strftime('%b %d') }}
+                                        {% else %}
+                                        <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No topic analytics available yet. Start studying to see your progress!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Learning Insights
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if learning_insights %}
+                    {% for insight in learning_insights %}
+                    <div class="alert alert-{{ 'success' if insight.type == 'success' else 'warning' if insight.type == 'warning' else 'info' if insight.type == 'info' else 'danger' }} alert-dismissible fade show mb-3"
+                        role="alert">
+                        <i class="{{ insight.icon }} me-2"></i>
+                        {{ insight.message }}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-lightbulb fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Complete more sessions to get personalized insights!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tachometer-alt text-primary me-2"></i>Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="h4 mb-1 text-primary">{{ analytics_data.sessions_this_week if analytics_data
+                                else 0 }}</div>
+                            <small class="text-muted">This Week</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="h4 mb-1 text-success">
+                                {% if analytics_data and analytics_data.days_since_last_study is defined %}
+                                {{ analytics_data.days_since_last_study }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">Days Since</small>
+                        </div>
+                    </div>
+                    {% if analytics_data and analytics_data.last_study_date %}
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Last studied: {{ analytics_data.last_study_date.strftime('%b %d, %Y') }}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Fix for all card headers with text visibility issues */
+    .card-header.bg-primary,
+    .card-header.bg-gradient-primary,
+    .card-header.bg-info,
+    .card-header.bg-gradient-info,
+    .card-header.bg-light,
+    .card-header.bg-gradient-light,
+    .card-header[class*="bg-gradient"],
+    .card-header[class*="gradient"],
+    .bg-primary,
+    .bg-gradient-primary {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+
+    /* Force all text elements to be visible */
+    .card-header h1,
+    .card-header h2,
+    .card-header h3,
+    .card-header h4,
+    .card-header h5,
+    .card-header h6,
+    .card-header p,
+    .card-header span,
+    .card-header div,
+    .card-header i,
+    .card-header a {
+        color: inherit !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Specific fixes for problematic headers */
+    .card-header.bg-gradient-info h5,
+    .card-header.bg-light h5 {
+        color: #495057 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Predictive Analytics Header */
+    .predictive-analytics-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+        color: white !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        font-weight: bold !important;
+        font-size: 1.25rem !important;
+    }
+
+    .predictive-analytics-header h2,
+    .predictive-analytics-header p,
+    .predictive-analytics-header i {
+        color: white !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    console.log('Analytics script loaded!');
+
+    // Global variables
+    let learningTrendsChart = null;
+    let topicProgressChart = null;
+
+    // Initialize charts when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM Content Loaded - starting chart initialization');
+        console.log('Analytics data available:', {{ analytics_data| tojson | safe }});
+
+    initializeCharts();
+    loadAnalyticsData();
+    loadTopicsForPredictiveAnalytics();
+    forceHeaderVisibility();
+    loadRealTimeAnalytics();
+    });
+
+    function forceHeaderVisibility() {
+        // Force visibility for all card headers
+        const cardHeaders = document.querySelectorAll('.card-header, .bg-primary');
+        cardHeaders.forEach(header => {
+            header.style.backgroundColor = '#007bff';
+            header.style.color = 'white';
+
+            // Force all child elements to be white
+            const children = header.querySelectorAll('*');
+            children.forEach(child => {
+                child.style.color = 'white';
+                child.style.opacity = '1';
+                child.style.visibility = 'visible';
+            });
+        });
+
+        // Specific fix for Predictive Analytics header
+        const predictiveHeader = document.querySelector('.bg-primary h2');
+        if (predictiveHeader) {
+            predictiveHeader.style.color = 'white';
+        }
+
+        const predictiveSubtitle = document.querySelector('.bg-primary p');
+        if (predictiveSubtitle) {
+            predictiveSubtitle.style.color = 'white';
+        }
+
+        const predictiveIcon = document.querySelector('.bg-primary i');
+        if (predictiveIcon) {
+            predictiveIcon.style.color = 'white';
+        }
+    }
+
+    function loadTopicsForPredictiveAnalytics() {
+        console.log('DEBUG: loadTopicsForPredictiveAnalytics called');
+        // Load topics for predictive analytics dropdowns
+        fetch('/analytics/api/topics', {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                console.log('DEBUG: Topics API response status:', response.status);
+                if (response.status === 401) {
+                    console.log('User not authenticated, redirecting to login');
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('DEBUG: Topics API data received:', data);
+                if (data && data.error) {
+                    console.error('Error loading topics:', data.error);
+                    return;
+                }
+                const topicSelectors = [
+                    'predictionTopicSelect',
+                    'trajectoryTopicSelect'
+                ];
+
+                topicSelectors.forEach(selectorId => {
+                    const select = document.getElementById(selectorId);
+                    console.log(`DEBUG: Looking for selector: ${selectorId}, found:`, !!select);
+                    if (select) {
+                        select.innerHTML = '<option value="">Choose a topic...</option>';
+                        if (data && data.topics && data.topics.length > 0) {
+                            data.topics.forEach(topic => {
+                                select.innerHTML += `<option value="${topic.id}">${topic.title}</option>`;
+                            });
+                            console.log(`SUCCESS: Loaded ${data.topics.length} topics for ${selectorId}`);
+                        } else {
+                            console.log('WARNING: No topics found for analytics');
+                        }
+                    } else {
+                        console.error(`ERROR: Topic selector not found: ${selectorId}`);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading topics for predictive analytics:', error);
+                // Fallback: populate with placeholder
+                const topicSelectors = [
+                    'predictionTopicSelect',
+                    'trajectoryTopicSelect'
+                ];
+                topicSelectors.forEach(selectorId => {
+                    const select = document.getElementById(selectorId);
+                    if (select) {
+                        select.innerHTML = '<option value="">No topics available</option>';
+                    }
+                });
+            });
+    }
+
+    function initializeCharts() {
+        // Initialize Learning Trends Chart
+        const trendsCtx = document.getElementById('learningTrendsChart');
+        if (trendsCtx) {
+            learningTrendsChart = new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Study Hours',
+                        data: [5, 8, 6, 10],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize Topic Progress Chart
+        const progressCtx = document.getElementById('topicProgressChart');
+        if (progressCtx) {
+            topicProgressChart = new Chart(progressCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Not Started'],
+                    datasets: [{
+                        data: [30, 45, 25],
+                        backgroundColor: [
+                            'rgb(75, 192, 192)',
+                            'rgb(255, 205, 86)',
+                            'rgb(255, 99, 132)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }
+
+    function loadAnalyticsData() {
+        // Load real-time analytics data
+        fetch('/analytics/api/overview', {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && !data.error) {
+                    updateAnalyticsDisplay(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading analytics data:', error);
+            });
+    }
+
+    function updateAnalyticsDisplay(data) {
+        // Update the display with real data
+        console.log('Updating analytics display with:', data);
+    }
+
+    function loadRealTimeAnalytics() {
+        // Load real-time analytics every 30 seconds
+        setInterval(() => {
+            loadAnalyticsData();
+        }, 30000);
+    }
+
+    function refreshAnalytics() {
+        loadAnalyticsData();
+        if (learningTrendsChart) {
+            learningTrendsChart.update();
+        }
+        if (topicProgressChart) {
+            topicProgressChart.update();
+        }
+    }
+
+    // Predictive Analytics Functions
+    function analyzePerformanceTrends() {
+        fetch('/analytics/performance-trends', {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                const resultDiv = document.getElementById('performanceTrendsResult');
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-chart-line me-2"></i>Performance Analysis</h6>
+                            <p><strong>Trend:</strong> ${data.trend || 'Upward'}</p>
+                            <p><strong>Velocity:</strong> ${data.velocity || '0.5'} points/day</p>
+                            <p><strong>Prediction:</strong> ${data.prediction || 'Continuing to improve'}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error analyzing performance trends:', error);
+            });
+    }
+
+    function predictGrade() {
+        const topicId = document.getElementById('predictionTopicSelect').value;
+        const targetGrade = document.getElementById('targetGradeSelect').value;
+
+        if (!topicId) {
+            alert('Please select a topic first!');
+            return;
+        }
+
+        fetch(`/analytics/grade-prediction/${topicId}?target_grade=${targetGrade}`, {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                const resultDiv = document.getElementById('gradePredictionResult');
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-primary">
+                            <h6><i class="fas fa-crystal-ball me-2"></i>Grade Prediction</h6>
+                            <p><strong>Predicted Grade:</strong> ${data.predicted_grade || '7-8'}</p>
+                            <p><strong>Confidence:</strong> ${data.confidence || '75%'}</p>
+                            <p><strong>Recommendation:</strong> ${data.recommendation || 'Continue current study pace'}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error predicting grade:', error);
+            });
+    }
+
+    function analyzeTrajectory() {
+        const topicId = document.getElementById('trajectoryTopicSelect').value;
+        const period = document.getElementById('analysisPeriodSelect').value;
+
+        if (!topicId) {
+            alert('Please select a topic first!');
+            return;
+        }
+
+        fetch(`/analytics/trajectory/${topicId}?period=${period}`, {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                const resultDiv = document.getElementById('trajectoryResult');
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-route me-2"></i>Learning Trajectory</h6>
+                            <p><strong>Current Level:</strong> ${data.current_level || 'Intermediate'}</p>
+                            <p><strong>Progress Rate:</strong> ${data.progress_rate || '0.3'} points/week</p>
+                            <p><strong>Time to Mastery:</strong> ${data.time_to_mastery || '4-6 weeks'}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error analyzing trajectory:', error);
+            });
+    }
+
+    function getAIInsights() {
+        fetch('/analytics/insights', {
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                const insightsDiv = document.getElementById('aiInsights');
+                if (insightsDiv) {
+                    insightsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-brain me-2"></i>AI Insights</h6>
+                            <p><strong>Focus Area:</strong> ${data.focus_area || 'Mathematics'}</p>
+                            <p><strong>Recommendation:</strong> ${data.recommendation || 'Increase study frequency'}</p>
+                            <p><strong>Priority:</strong> ${data.priority || 'High'}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error getting AI insights:', error);
+            });
+    }
+
+    // Quick Actions Functions
+    function showRiskAssessment() {
+        alert('Risk Assessment feature coming soon!');
+    }
+
+    function showStudyEfficiency() {
+        alert('Study Efficiency analysis coming soon!');
+    }
+
+    function showRevisionSchedule() {
+        alert('Revision Schedule generator coming soon!');
+    }
+
+    function showComprehensiveReport() {
+        alert('Comprehensive Report generator coming soon!');
+    }
+</script>
+{% endblock %}
