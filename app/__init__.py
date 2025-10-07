@@ -35,7 +35,7 @@ def create_app(config_name='default'):
     
     @app.template_filter('format_document')
     def format_document_filter(text):
-        """Format document content with simple, clean HTML structure"""
+        """Format document content with proper bullet points and clean HTML structure"""
         if text is None:
             return ''
         
@@ -63,12 +63,29 @@ def create_app(config_name='default'):
                 not line.startswith('File type:') and
                 not line.startswith('EXTRACTED CONTENT') and
                 not line.startswith('KEY SECTIONS FOUND') and
-                not line.startswith('- ')):
+                not line.startswith('- ') and
+                not line.startswith('•')):
                 formatted_lines.append(f'<h5 class="document-heading">{line}</h5>')
             # If line looks like a separator line (dashes or equals)
             elif re.match(r'^[=\-]{3,}$', line):
                 formatted_lines.append('<hr class="document-separator">')
-            # Regular content - just preserve as paragraph
+            # If line starts with bullet points (•, -, *, or similar)
+            elif re.match(r'^[\•\-\*\+]\s+', line):
+                # Remove the bullet character and add proper HTML bullet
+                clean_line = re.sub(r'^[\•\-\*\+]\s+', '', line)
+                formatted_lines.append(f'<div class="document-bullet">• {clean_line}</div>')
+            # If line looks like a date range or location (for CV formatting)
+            elif re.match(r'^(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)', line, re.IGNORECASE):
+                formatted_lines.append(f'<div class="document-date">{line}</div>')
+            # If line looks like a job title or company (short, no period)
+            elif (len(line) < 80 and 
+                  not line.endswith('.') and 
+                  not line.endswith(',') and
+                  not line.startswith('File:') and
+                  not line.startswith('Size:') and
+                  not line.startswith('Word count:')):
+                formatted_lines.append(f'<div class="document-title">{line}</div>')
+            # Regular content - preserve as paragraph
             else:
                 formatted_lines.append(f'<p class="document-paragraph">{line}</p>')
         

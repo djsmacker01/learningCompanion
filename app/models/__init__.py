@@ -671,3 +671,6 @@ class Topic:
         
         return Topic.get_by_id(topic_id, user_id)
 
+# Import AI Activity model
+from .ai_activity import AIActivity
+

@@ -38,7 +38,13 @@ class UserProfile:
         
         try:
             
-            result = supabase.table('user_profiles').select('*').eq('user_id', user_id).execute()
+            # Select only gamification-related columns
+            result = supabase.table('user_profiles').select(
+                'id, user_id, total_xp, current_level, study_streak, longest_streak, '
+                'total_study_time_minutes, badges_earned, achievements_unlocked, '
+                'quizzes_completed, topics_mastered, last_activity_date, created_at, updated_at'
+            ).eq('user_id', user_id).execute()
+            
             if result.data:
                 profile_data = result.data[0]
                 return cls(**profile_data)
@@ -768,4 +774,41 @@ class GamificationEngine:
             
         except Exception as e:
             print(f"Error updating leaderboards: {e}")
+
+    @staticmethod
+    def _calculate_level_progress(profile: UserProfile) -> Dict:
+        """Calculate level progress for a user profile"""
+        try:
+            current_level_xp = UserProfile.get_xp_for_level(profile.current_level)
+            next_level_xp = UserProfile.get_xp_for_level(profile.current_level + 1)
+            
+            # Calculate progress within current level
+            xp_in_current_level = profile.total_xp - current_level_xp
+            xp_needed_for_next_level = next_level_xp - current_level_xp
+            
+            if xp_needed_for_next_level <= 0:
+                progress_percentage = 100
+            else:
+                progress_percentage = min(100, (xp_in_current_level / xp_needed_for_next_level) * 100)
+            
+            return {
+                'current_level': profile.current_level,
+                'next_level': profile.current_level + 1,
+                'current_level_xp': current_level_xp,
+                'next_level_xp': next_level_xp,
+                'xp_in_current_level': xp_in_current_level,
+                'xp_needed_for_next_level': xp_needed_for_next_level,
+                'progress_percentage': round(progress_percentage, 1)
+            }
+        except Exception as e:
+            print(f"Error calculating level progress: {e}")
+            return {
+                'current_level': 1,
+                'next_level': 2,
+                'current_level_xp': 0,
+                'next_level_xp': 100,
+                'xp_in_current_level': 0,
+                'xp_needed_for_next_level': 100,
+                'progress_percentage': 0
+            }
 

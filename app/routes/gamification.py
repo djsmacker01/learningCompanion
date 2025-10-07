@@ -1,7 +1,7 @@
 
 
-from flask import Blueprint, render_template, request, jsonify, session
-from flask_login import login_required
+from flask import Blueprint, render_template, request, jsonify, session, flash, redirect, url_for
+from flask_login import login_required, current_user
 from datetime import datetime, date, timedelta
 from typing import List, Dict
 from app.models.gamification import (
@@ -9,7 +9,6 @@ from app.models.gamification import (
     Leaderboard, GamificationEngine
 )
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
-from app.routes.topics import get_current_user
 import json
 
 gamification = Blueprint('gamification', __name__, url_prefix='/gamification')
@@ -19,24 +18,21 @@ gamification = Blueprint('gamification', __name__, url_prefix='/gamification')
 @login_required
 def gamification_dashboard():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     
-    profile = UserProfile.get_or_create_profile(user.id)
+    profile = UserProfile.get_or_create_profile(current_user.id)
     if not profile:
         return jsonify({'error': 'Failed to load profile'}), 500
     
     
-    user_badges = UserBadge.get_user_badges(user.id)
-    user_achievements = UserAchievement.get_user_achievements(user.id)
+    user_badges = UserBadge.get_user_badges(current_user.id)
+    user_achievements = UserAchievement.get_user_achievements(current_user.id)
     
     
-    recent_xp = GamificationEngine._get_recent_xp_transactions(user.id, limit=10)
+    recent_xp = GamificationEngine._get_recent_xp_transactions(current_user.id, limit=10)
     
     return render_template('gamification/dashboard.html', 
                          profile=profile,
@@ -48,20 +44,17 @@ def gamification_dashboard():
 @gamification.route('/badges')
 def badges_page():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     
     all_badges = Badge.get_all_badges()
-    user_badges = UserBadge.get_user_badges(user.id)
+    user_badges = UserBadge.get_user_badges(current_user.id)
     user_badge_ids = {badge.badge_id for badge in user_badges}
     
     
-    profile = UserProfile.get_or_create_profile(user.id)
+    profile = UserProfile.get_or_create_profile(current_user.id)
     
     return render_template('gamification/badges.html',
                          all_badges=all_badges,
@@ -72,20 +65,17 @@ def badges_page():
 @gamification.route('/achievements')
 def achievements_page():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     
     all_achievements = Achievement.get_all_achievements()
-    user_achievements = UserAchievement.get_user_achievements(user.id)
+    user_achievements = UserAchievement.get_user_achievements(current_user.id)
     user_achievement_ids = {achievement.achievement_id for achievement in user_achievements}
     
     
-    profile = UserProfile.get_or_create_profile(user.id)
+    profile = UserProfile.get_or_create_profile(current_user.id)
     
     return render_template('gamification/achievements.html',
                          all_achievements=all_achievements,
@@ -96,12 +86,9 @@ def achievements_page():
 @gamification.route('/leaderboard')
 def leaderboard_page():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     
     categories = ['total_xp', 'study_streak', 'quizzes_completed', 'study_time', 'topics_mastered']
@@ -112,7 +99,7 @@ def leaderboard_page():
     
     
     user_ranks = {}
-    profile = UserProfile.get_or_create_profile(user.id)
+    profile = UserProfile.get_or_create_profile(current_user.id)
     
     if profile:
         for category in categories:
@@ -126,45 +113,59 @@ def leaderboard_page():
 
 @gamification.route('/api/profile')
 def api_user_profile():
+    """Get user gamification profile data"""
+    try:
+        # Check authentication manually to return JSON error instead of redirect
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+        
+        profile = UserProfile.get_or_create_profile(current_user.id)
+        if not profile:
+            return jsonify({'error': 'Failed to load profile'}), 500
+        
+        # Calculate level progress safely
+        try:
+            level_progress = GamificationEngine._calculate_level_progress(profile)
+        except Exception as e:
+            print(f"Error calculating level progress: {e}")
+            level_progress = {
+                'current_level': profile.current_level,
+                'next_level': profile.current_level + 1,
+                'progress_percentage': 0
+            }
+        
+        # Calculate XP to next level safely
+        try:
+            xp_to_next = profile.get_xp_to_next_level()
+        except Exception as e:
+            print(f"Error calculating XP to next level: {e}")
+            xp_to_next = 100  # Default fallback
+        
+        return jsonify({
+            'user_id': profile.user_id,
+            'total_xp': profile.total_xp,
+            'current_level': profile.current_level,
+            'study_streak': profile.study_streak,
+            'longest_streak': profile.longest_streak,
+            'total_study_time_minutes': profile.total_study_time_minutes,
+            'badges_earned': profile.badges_earned,
+            'achievements_unlocked': profile.achievements_unlocked,
+            'quizzes_completed': profile.quizzes_completed,
+            'topics_mastered': profile.topics_mastered,
+            'xp_to_next_level': xp_to_next,
+            'level_progress': level_progress
+        })
     
-    user = get_current_user()
-    if not user:
-        flash('User not authenticated.', 'error')
-        return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    profile = UserProfile.get_or_create_profile(user.id)
-    if not profile:
-        return jsonify({'error': 'Failed to load profile'}), 500
-    
-    return jsonify({
-        'user_id': profile.user_id,
-        'total_xp': profile.total_xp,
-        'current_level': profile.current_level,
-        'study_streak': profile.study_streak,
-        'longest_streak': profile.longest_streak,
-        'total_study_time_minutes': profile.total_study_time_minutes,
-        'badges_earned': profile.badges_earned,
-        'achievements_unlocked': profile.achievements_unlocked,
-        'quizzes_completed': profile.quizzes_completed,
-        'topics_mastered': profile.topics_mastered,
-        'xp_to_next_level': profile.get_xp_to_next_level(),
-        'level_progress': GamificationEngine._calculate_level_progress(profile)
-    })
+    except Exception as e:
+        print(f"Error in gamification API: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @gamification.route('/api/badges')
+@login_required
 def api_user_badges():
     
-    user = get_current_user()
-    if not user:
-        flash('User not authenticated.', 'error')
-        return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    user_badges = UserBadge.get_user_badges(user.id)
+    user_badges = UserBadge.get_user_badges(current_user.id)
     
     badges_data = []
     for user_badge in user_badges:
@@ -187,14 +188,11 @@ def api_user_badges():
 @gamification.route('/api/achievements')
 def api_user_achievements():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
-    user_achievements = UserAchievement.get_user_achievements(user.id)
+    user_achievements = UserAchievement.get_user_achievements(current_user.id)
     
     achievements_data = []
     for user_achievement in user_achievements:
@@ -232,12 +230,9 @@ def api_leaderboard(category):
 @gamification.route('/api/xp-history')
 def api_xp_history():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     limit = int(request.args.get('limit', 20))
     recent_xp = GamificationEngine._get_recent_xp_transactions(user.id, limit)
@@ -248,12 +243,9 @@ def api_xp_history():
 @gamification.route('/api/process-study-session', methods=['POST'])
 def api_process_study_session():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     try:
         data = request.get_json()
@@ -278,12 +270,9 @@ def api_process_study_session():
 @gamification.route('/api/process-quiz-completion', methods=['POST'])
 def api_process_quiz_completion():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     try:
         data = request.get_json()
@@ -309,12 +298,9 @@ def api_process_quiz_completion():
 @gamification.route('/api/check-rewards')
 def api_check_rewards():
     
-    user = get_current_user()
-    if not user:
+    if not current_user.is_authenticated:
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
     
     try:
         
