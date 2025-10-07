@@ -501,12 +501,12 @@ def import_materials():
                     enhanced_description += f"Extraction method: {content_info['extraction_method']}\n"
                     enhanced_description += f"File type: {file_type.upper()}\n\n"
                     
-                    if content_info.get('cleaned_text'):
+                    if content_info.get('cleaned_text') or content_info.get('text_content'):
                         enhanced_description += f"EXTRACTED CONTENT FROM {file_type.upper()}:\n"
                         enhanced_description += "=" * 50 + "\n\n"
                         
                         # Add the extracted text (truncate if too long)
-                        extracted_text = content_info['cleaned_text']
+                        extracted_text = content_info.get('cleaned_text') or content_info.get('text_content', '')
                         if len(extracted_text) > 5000:
                             enhanced_description += extracted_text[:5000] + "\n\n... (content truncated - full content available in topic details) ..."
                         else:
@@ -539,9 +539,10 @@ def import_materials():
                         flash('Failed to create topic for material.', 'error')
                 else:
                     # Document processing failed, create topic with detailed error info
-                    error_msg = processing_result.get('error', 'Unknown error')
-                    is_image_based = processing_result.get('is_image_based', False)
-                    suggestions = processing_result.get('suggestions', [])
+                    content_info = processing_result.get('content_info', {})
+                    error_msg = processing_result.get('error', content_info.get('error', 'Unknown error'))
+                    is_image_based = processing_result.get('is_image_based', content_info.get('is_image_based', False))
+                    suggestions = processing_result.get('suggestions', content_info.get('suggestions', []))
                     file_info = processing_result.get('file_info', {})
                     
                     # Create enhanced error description
