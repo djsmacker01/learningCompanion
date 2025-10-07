@@ -209,14 +209,26 @@ class LearningStyleDetector:
             print(f"Error analyzing learning progress: {e}")
             return {'error': 'Failed to analyze learning progress'}
     
-    def create_intelligent_study_schedule(self, user_learning_style: str, available_time: Dict, subjects: List[str], priorities: Dict) -> Dict:
-        """Create intelligent study schedule based on learning style and preferences"""
+    def create_intelligent_study_schedule(self, user_learning_style: str, available_time: Dict, subjects: List[str], priorities: Dict, subject_learning_styles: Dict = None) -> Dict:
+        """Create intelligent study schedule based on learning style and preferences
+        
+        Args:
+            user_learning_style: Global fallback learning style
+            available_time: Available study time per day
+            subjects: List of subjects to study
+            priorities: Priority level for each subject
+            subject_learning_styles: Optional dict mapping subjects to their specific learning styles
+        """
         try:
+            # If no subject-specific styles provided, use global style for all
+            if not subject_learning_styles:
+                subject_learning_styles = {}
+            
             # Analyze optimal study times
             optimal_times = self._analyze_optimal_study_times(user_learning_style, available_time)
             
-            # Create subject-specific schedules
-            subject_schedules = self._create_subject_specific_schedules(subjects, priorities, user_learning_style)
+            # Create subject-specific schedules with subject-specific learning styles
+            subject_schedules = self._create_subject_specific_schedules(subjects, priorities, user_learning_style, subject_learning_styles)
             
             # Optimize session lengths
             optimized_sessions = self._optimize_session_lengths(subject_schedules, user_learning_style)
@@ -253,12 +265,27 @@ class LearningStyleDetector:
             
             # Extract optimization tips
             optimization_tips = optimized_sessions.get('optimization_notes', [])
-            if not optimization_tips:
-                optimization_tips = [
-                    f"Ideal session length: {optimized_sessions.get('ideal_session_length', '45 minutes')}",
-                    f"Take breaks {optimized_sessions.get('break_interval', 'every 45 minutes')}",
-                    f"Daily study limit: {optimized_sessions.get('daily_study_limit', '4-6 hours')}"
-                ]
+            if not optimization_tips or len(optimization_tips) == 0:
+                # Build tips from optimization data
+                optimization_tips = []
+                if optimized_sessions.get('ideal_session_length'):
+                    optimization_tips.append(f"✓ Ideal session length: {optimized_sessions.get('ideal_session_length')} - Perfect for {user_learning_style} learners")
+                if optimized_sessions.get('break_interval'):
+                    optimization_tips.append(f"✓ Take breaks {optimized_sessions.get('break_interval')} to maintain focus and energy")
+                if optimized_sessions.get('daily_study_limit'):
+                    optimization_tips.append(f"✓ Daily study limit: {optimized_sessions.get('daily_study_limit')} - Quality over quantity")
+                if optimized_sessions.get('maximum_session_length'):
+                    optimization_tips.append(f"✓ Maximum session length: {optimized_sessions.get('maximum_session_length')} before taking a longer break")
+                
+                # Add learning style specific tip
+                style_tips = {
+                    'visual': 'Use visual aids like diagrams, charts, and mind maps during study sessions',
+                    'auditory': 'Study in a quiet environment or use noise-cancelling headphones for maximum focus',
+                    'kinesthetic': 'Incorporate movement breaks and hands-on activities to enhance retention',
+                    'reading': 'Alternate between reading, writing, and note-taking to process information deeply'
+                }
+                if user_learning_style.lower() in style_tips:
+                    optimization_tips.append(f"✓ {style_tips[user_learning_style.lower()]}")
             
             return {
                 'user_learning_style': user_learning_style,
@@ -871,28 +898,42 @@ Return as JSON:
                 'energy_tips': ['Study complex subjects during peak hours']
             }
     
-    def _create_subject_specific_schedules(self, subjects: List[str], priorities: Dict, learning_style: str) -> Dict:
-        """Create subject-specific schedules using AI"""
+    def _create_subject_specific_schedules(self, subjects: List[str], priorities: Dict, learning_style: str, subject_learning_styles: Dict = None) -> Dict:
+        """Create subject-specific schedules using AI with subject-specific learning styles"""
         try:
             if not self.client:
-                return self._generate_fallback_schedule(subjects, priorities, learning_style)
+                return self._generate_fallback_schedule(subjects, priorities, learning_style, subject_learning_styles)
             
-            prompt = f"""Create a detailed weekly study schedule for a {learning_style} learner.
+            # Build subject info with their specific learning styles
+            subject_info = []
+            for subject in subjects:
+                style = subject_learning_styles.get(subject, learning_style) if subject_learning_styles else learning_style
+                subject_info.append(f"{subject} (best learned through {style} methods)")
+            
+            prompt = f"""Create a detailed weekly study schedule with subject-specific learning styles.
 
-Subjects: {', '.join(subjects)}
+Subjects and their optimal learning styles:
+{chr(10).join(f'- {info}' for info in subject_info)}
+
 Priorities: {json.dumps(priorities)}
 
 For each day of the week (Monday-Sunday), allocate study sessions considering:
 - Subject priority (high priority subjects get more time slots)
-- Learning style-specific activities
+- EACH subject's SPECIFIC learning style (use visual activities for visual, auditory for auditory, etc.)
 - Variety to prevent burnout
 - Balance across the week
+
+IMPORTANT: Choose activities that match EACH subject's learning style:
+- Visual: Create diagrams, watch videos, draw mind maps, color-code notes
+- Auditory: Listen to podcasts, discuss aloud, record notes, join study groups
+- Kinesthetic: Hands-on practice, build models, role-play, physical demonstrations
+- Reading/Writing: Read textbooks, write summaries, create flashcards, annotate materials
 
 Return as JSON with this structure:
 {{
     "monday": [
-        {{"subject": "Mathematics", "time_slot": "morning", "duration": "60 min", "activity": "Practice problems"}},
-        {{"subject": "English", "time_slot": "evening", "duration": "45 min", "activity": "Reading and analysis"}}
+        {{"subject": "Mathematics", "time_slot": "morning", "duration": "60 min", "activity": "Create diagrams"}},
+        {{"subject": "English", "time_slot": "evening", "duration": "45 min", "activity": "Read textbooks"}}
     ],
     "tuesday": [...],
     ...
@@ -911,13 +952,16 @@ Include all 7 days."""
             
         except Exception as e:
             print(f"Error creating subject schedules: {e}")
-            return self._generate_fallback_schedule(subjects, priorities, learning_style)
+            return self._generate_fallback_schedule(subjects, priorities, learning_style, subject_learning_styles)
     
-    def _generate_fallback_schedule(self, subjects: List[str], priorities: Dict, learning_style: str) -> Dict:
-        """Generate a simple fallback schedule"""
+    def _generate_fallback_schedule(self, subjects: List[str], priorities: Dict, learning_style: str, subject_learning_styles: Dict = None) -> Dict:
+        """Generate a simple fallback schedule with subject-specific learning styles"""
         schedule = {}
         days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
         time_slots = ['morning', 'afternoon', 'evening']
+        
+        if not subject_learning_styles:
+            subject_learning_styles = {}
         
         subject_index = 0
         for day in days:
@@ -928,13 +972,16 @@ Include all 7 days."""
                     priority = priorities.get(subject, 'medium')
                     duration = '60 min' if priority == 'high' else '45 min'
                     
-                    activity = self._get_learning_style_activity(learning_style, subject)
+                    # Get subject-specific learning style or use global fallback
+                    subject_style = subject_learning_styles.get(subject, learning_style)
+                    activity = self._get_learning_style_activity(subject_style, subject)
                     
                     daily_sessions.append({
                         'subject': subject,
                         'time_slot': time_slot,
                         'duration': duration,
-                        'activity': activity
+                        'activity': activity,
+                        'learning_style': subject_style  # Include for reference
                     })
                     
                     subject_index = (subject_index + 1) % len(subjects)
@@ -972,15 +1019,24 @@ Provide optimized recommendations:
 2. Maximum session length before breaks
 3. Break intervals
 4. Total daily study time limit
+5. At least 5 specific optimization tips for {learning_style} learners
 
 Return as JSON:
 {{
     "ideal_session_length": "45 minutes",
     "maximum_session_length": "90 minutes",
-    "break_interval": "Every 45 minutes",
+    "break_interval": "every 45 minutes",
     "daily_study_limit": "4-6 hours",
-    "optimization_notes": ["Shorter sessions for complex topics", "Longer sessions for practice work"]
-}}"""
+    "optimization_notes": [
+        "Start study sessions when energy is highest (typically morning for most learners)",
+        "Shorter 25-30 minute sessions work best for complex new topics",
+        "Longer 60-90 minute sessions are ideal for practice and revision",
+        "Use the Pomodoro Technique: 25 minutes work + 5 minutes break",
+        "Schedule most difficult subjects during your peak productivity hours"
+    ]
+}}
+
+Make sure optimization_notes contains at least 5 specific, actionable tips."""
 
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -994,12 +1050,47 @@ Return as JSON:
             
         except Exception as e:
             print(f"Error optimizing session lengths: {e}")
+            
+            # Learning style specific tips
+            style_specific_tips = {
+                'visual': [
+                    'Use colorful highlighters and visual aids during study sessions',
+                    'Create mind maps at the start of each study session to organize thoughts',
+                    'Take photo notes of diagrams and charts for quick review',
+                    'Use flashcards with images and diagrams for better retention'
+                ],
+                'auditory': [
+                    'Record key concepts and listen back during breaks or commutes',
+                    'Explain concepts out loud to yourself or study partners',
+                    'Use background music (instrumental) to enhance focus',
+                    'Join or create study groups for discussion-based learning'
+                ],
+                'kinesthetic': [
+                    'Take a 2-minute movement break every 25 minutes of studying',
+                    'Use fidget tools or stress balls while reviewing notes',
+                    'Walk around while memorizing or rehearsing concepts',
+                    'Create physical models or use manipulatives for complex topics'
+                ],
+                'reading': [
+                    'Write summaries at the end of each study session',
+                    'Create detailed notes with subheadings and bullet points',
+                    'Use the Cornell note-taking method for active reading',
+                    'Rewrite key concepts in your own words for deeper understanding'
+                ]
+            }
+            
+            tips = style_specific_tips.get(learning_style.lower(), style_specific_tips['reading'])
+            
             return {
                 'ideal_session_length': '45 minutes',
                 'maximum_session_length': '90 minutes',
-                'break_interval': 'Every 45 minutes',
+                'break_interval': 'every 45 minutes',
                 'daily_study_limit': '4-6 hours',
-                'optimization_notes': ['Take regular breaks', 'Stay hydrated'],
+                'optimization_notes': [
+                    'Start with your most challenging subject when energy is highest',
+                    'Use the Pomodoro Technique: 25 minutes focused work, 5 minutes break',
+                    'Schedule 10-15 minute breaks after every 45-60 minutes of study',
+                ] + tips[:2],  # Add 2 learning-style specific tips
                 'optimized_sessions': subject_schedules
             }
     
