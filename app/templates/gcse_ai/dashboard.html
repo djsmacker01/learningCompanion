@@ -7,13 +7,23 @@
     <div class="row">
         <!-- Header -->
         <div class="col-12">
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-gradient-warning text-dark">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-graduation-cap fa-2x me-3"></i>
-                        <div>
-                            <h2 class="h4 mb-0">GCSE AI Enhancement</h2>
-                            <p class="mb-0 opacity-75">Advanced AI features tailored specifically for GCSE success</p>
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-header gcse-ai-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper me-3">
+                                <i class="fas fa-graduation-cap fa-3x"></i>
+                            </div>
+                            <div>
+                                <h2 class="h3 mb-1 fw-bold">GCSE AI Enhancement</h2>
+                                <p class="mb-0 fs-6">Advanced AI features tailored specifically for GCSE success</p>
+                            </div>
+                        </div>
+                        <div class="header-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-book-reader"></i>
+                                <span id="totalSubjects">16</span> Subjects
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,10 +185,37 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Current Grade</label>
+                                    <select class="form-select" id="currentGradeInput">
+                                        <option value="">Select your current grade...</option>
+                                        <option value="9">Grade 9</option>
+                                        <option value="8">Grade 8</option>
+                                        <option value="7">Grade 7</option>
+                                        <option value="6">Grade 6</option>
+                                        <option value="5" selected>Grade 5</option>
+                                        <option value="4">Grade 4</option>
+                                        <option value="3">Grade 3</option>
+                                        <option value="2">Grade 2</option>
+                                        <option value="1">Grade 1</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Average Score (%)</label>
+                                    <input type="number" class="form-control" id="averageScoreInput"
+                                        placeholder="Enter percentage (0-100)" min="0" max="100" value="65">
+                                </div>
+                            </div>
+                        </div>
                         <div class="mb-3">
-                            <label class="form-label">Current Performance (JSON format)</label>
-                            <textarea class="form-control" id="currentPerformance" rows="3"
-                                placeholder='{"current_grade": "5", "average_score": 65, "weak_areas": ["algebra", "geometry"]}'></textarea>
+                            <label class="form-label">Weak Areas (Optional)</label>
+                            <input type="text" class="form-control" id="weakAreasInput"
+                                placeholder="e.g., algebra, geometry, statistics (separate with commas)">
+                            <small class="form-text text-muted">Separate multiple areas with commas</small>
                         </div>
                         <button type="button" class="btn btn-warning" onclick="predictGCSEGradeBoundaries()">
                             <i class="fas fa-calculator me-2"></i>Predict Grade Boundaries
@@ -264,24 +301,62 @@
 
             <!-- GCSE Tips -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light">
+                <div class="card-header bg-gradient-info text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <i class="fas fa-lightbulb me-2"></i>
                         GCSE Success Tips
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6>Study Planning:</h6>
-                        <p class="mb-0">Start revision 12-16 weeks before exams for optimal results.</p>
+                    <div class="tip-item mb-3">
+                        <div class="tip-icon bg-primary">
+                            <i class="fas fa-calendar-alt text-white"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h6 class="mb-1">Study Planning</h6>
+                            <p class="mb-0 small">Start revision 12-16 weeks before exams for optimal results.</p>
+                        </div>
                     </div>
-                    <div class="alert alert-success">
-                        <h6>Past Papers:</h6>
-                        <p class="mb-0">Practice with at least 5 past papers per subject for familiarity.</p>
+
+                    <div class="tip-item mb-3">
+                        <div class="tip-icon bg-success">
+                            <i class="fas fa-file-alt text-white"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h6 class="mb-1">Past Papers</h6>
+                            <p class="mb-0 small">Practice with at least 5 past papers per subject for familiarity.</p>
+                        </div>
                     </div>
-                    <div class="alert alert-warning">
-                        <h6>Grade Boundaries:</h6>
-                        <p class="mb-0">Grade boundaries vary each year - aim for 10% above target grade.</p>
+
+                    <div class="tip-item mb-3">
+                        <div class="tip-icon bg-warning">
+                            <i class="fas fa-chart-line text-white"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h6 class="mb-1">Grade Boundaries</h6>
+                            <p class="mb-0 small">Grade boundaries vary each year - aim for 10% above target grade.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item mb-3">
+                        <div class="tip-icon bg-danger">
+                            <i class="fas fa-clock text-white"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h6 class="mb-1">Time Management</h6>
+                            <p class="mb-0 small">Allocate study time based on marks per question during exams.</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon bg-secondary">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <div class="tip-content">
+                            <h6 class="mb-1">Revision Breaks</h6>
+                            <p class="mb-0 small">Take 10-15 minute breaks every hour to maintain focus and retention.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -299,22 +374,35 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>How to use:</strong> Check subjects below, then exam dates and target grade inputs will
+                    appear automatically!
+                </div>
                 <form id="revisionScheduleForm">
                     <div class="mb-3">
-                        <label class="form-label">Select Subjects</label>
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-check-square me-2"></i>Step 1: Select Subjects
+                        </label>
                         <div id="revisionSubjects">
                             <!-- Subjects will be loaded here -->
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Exam Dates</label>
-                        <div id="examDatesInput">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-calendar me-2"></i>Step 2: Set Exam Dates
+                            <small class="text-muted ms-2">(Will appear when subjects are selected)</small>
+                        </label>
+                        <div id="examDatesInput" class="border rounded p-2 bg-light">
                             <!-- Exam date inputs will be generated here -->
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Target Grades</label>
-                        <div id="targetGradesInput">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-trophy me-2"></i>Step 3: Set Target Grades
+                            <small class="text-muted ms-2">(Will appear when subjects are selected)</small>
+                        </label>
+                        <div id="targetGradesInput" class="border rounded p-2 bg-light">
                             <!-- Target grade inputs will be generated here -->
                         </div>
                     </div>
@@ -379,6 +467,324 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    /* GCSE AI Header */
+    .gcse-ai-header {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: #212529;
+        padding: 25px;
+        border: none;
+    }
+
+    .gcse-ai-header .icon-wrapper {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .gcse-ai-header .icon-wrapper i {
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-stats {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-item {
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .stat-item i {
+        color: #ff9800;
+        font-size: 20px;
+        margin-right: 8px;
+    }
+
+    .stat-item span {
+        color: #ffc107;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    /* Card Improvements */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .card-header.bg-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+    }
+
+    .form-select,
+    .form-control {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.15);
+    }
+
+    /* Button Improvements */
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #084298 100%);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #146c43 0%, #0f5132 100%);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        border: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        color: #212529;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #ffb300 0%, #f57c00 100%);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* List Group */
+    .list-group-item-action:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 4px solid #ffc107;
+        padding-left: 16px;
+    }
+
+    .list-group-item h6 {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    /* Alert Improvements */
+    .alert {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+    }
+
+    /* Result Display */
+    .result-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid #e9ecef;
+        margin-top: 15px;
+    }
+
+    .result-header {
+        border-bottom: 2px solid #ffc107;
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+    }
+
+    .result-header h6 {
+        color: #ffc107;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .result-section {
+        margin: 15px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .result-section h6 {
+        color: #0d6efd;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    /* GCSE Tips Styling */
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .tip-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tip-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .tip-icon i {
+        font-size: 18px;
+    }
+
+    .tip-content h6 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 4px;
+    }
+
+    .tip-content p {
+        font-size: 13px;
+        color: #6c757d;
+        line-height: 1.5;
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    /* Personalized Content Styling */
+    .learning-content-box {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .learning-content-box ul {
+        list-style-type: disc;
+        margin-left: 20px;
+    }
+
+    .learning-content-box li {
+        color: #212529;
+        line-height: 1.8;
+    }
+
+    .question-box {
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .question-box:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .example-box {
+        background: #f0f8f5;
+        transition: all 0.3s ease;
+    }
+
+    .example-box:hover {
+        background: #e6f4ee;
+    }
+
+    .example-content {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        overflow-x: auto;
+    }
+
+    .recommendation-item {
+        background: #fff9e6;
+        border-left: 3px solid #ffc107;
+        transition: all 0.3s ease;
+    }
+
+    .recommendation-item:hover {
+        background: #fff3cd;
+        transform: translateX(5px);
+    }
+
+    .math-block {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        margin: 10px 0;
+        border-left: 3px solid #0d6efd;
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
     let availableSubjects = [];
@@ -398,6 +804,10 @@
                 }
 
                 availableSubjects = data.subjects;
+
+                // Update subject count in header
+                document.getElementById('totalSubjects').textContent = data.subjects.length;
+
                 populateSubjectDropdowns();
                 displaySubjectsList();
             })
@@ -459,23 +869,163 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>GCSE Study Plan Generated!</h6>
-                            <p>Subject: ${data.subject}</p>
-                            <p>Exam Board: ${data.exam_board}</p>
-                            <p>Target Grade: ${data.target_grade}</p>
-                            <p>Days until exam: ${data.days_until_exam}</p>
-                            <pre>${JSON.stringify(data.study_plan, null, 2)}</pre>
+                    // Save data for download/calendar functions
+                    currentStudyPlanData = data;
+
+                    let html = `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h6><i class="fas fa-calendar-alt me-2"></i>GCSE Study Plan Generated!</h6>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <strong>Subject:</strong><br>
+                                    <span class="text-primary">${data.subject}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Exam Board:</strong><br>
+                                    <span class="text-info">${data.exam_board}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Target Grade:</strong><br>
+                                    <span class="text-success">Grade ${data.target_grade}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Days to Exam:</strong><br>
+                                    <span class="text-warning">${data.days_until_exam} days</span>
+                                </div>
+                            </div>
+                    `;
+
+                    // Display study plan details - handle nested structure
+                    if (data.study_plan && typeof data.study_plan === 'object') {
+                        let plan = data.study_plan;
+
+                        // Check if plan is wrapped in a subject-specific key like "GCSE_Maths_Study_Plan"
+                        const wrapperKeys = Object.keys(plan).filter(key => key.includes('GCSE') || key.includes('Study_Plan'));
+                        if (wrapperKeys.length === 1 && typeof plan[wrapperKeys[0]] === 'object') {
+                            plan = plan[wrapperKeys[0]];
+                        }
+
+                        // Weekly Study Schedule
+                        if (plan.Weekly_Study_Schedule || plan.weekly_schedule) {
+                            const scheduleData = plan.Weekly_Study_Schedule || plan.weekly_schedule;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-calendar-week me-2"></i>Weekly Study Schedule</h6>
+                                    <div class="row">
+                            `;
+                            Object.keys(scheduleData).forEach(day => {
+                                html += `
+                                    <div class="col-md-6 mb-2">
+                                        <strong class="text-primary">${day}:</strong> ${scheduleData[day]}
+                                    </div>
+                                `;
+                            });
+                            html += '</div></div>';
+                        }
+
+                        // Exam Preparation Timeline
+                        if (plan.Exam_Preparation_Timeline || plan.timeline) {
+                            const timelineData = plan.Exam_Preparation_Timeline || plan.timeline;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-clock me-2"></i>Exam Preparation Timeline</h6>
+                                    <ul class="list-unstyled mb-0">
+                            `;
+                            Object.keys(timelineData).forEach(period => {
+                                html += `<li class="mb-2"><i class="fas fa-calendar-alt text-info me-2"></i><strong>${period.replace(/_/g, ' ')}:</strong> ${timelineData[period]}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+
+                        // Topic Prioritization
+                        if (plan.Topic_Prioritization || plan.topics_to_cover) {
+                            const topicsData = plan.Topic_Prioritization || plan.topics_to_cover;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-list-ol me-2"></i>Topic Prioritization</h6>
+                                    <ul class="list-unstyled mb-0">
+                            `;
+                            if (Array.isArray(topicsData)) {
+                                topicsData.forEach((topic, index) => {
+                                    html += `<li class="mb-2"><span class="badge bg-primary me-2">${index + 1}</span>${topic}</li>`;
+                                });
+                            } else {
+                                Object.keys(topicsData).forEach(priority => {
+                                    html += `<li class="mb-2"><span class="badge bg-primary me-2">${priority.replace('Priority_', '')}</span>${topicsData[priority]}</li>`;
+                                });
+                            }
+                            html += '</ul></div>';
+                        }
+
+                        // Practice Exam Schedule
+                        if (plan.Practice_Exam_Schedule || plan.practice_schedule) {
+                            const practiceData = plan.Practice_Exam_Schedule || plan.practice_schedule;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-file-alt me-2"></i>Practice Exam Schedule</h6>
+                                    <ul class="list-unstyled mb-0">
+                            `;
+                            Object.keys(practiceData).forEach(month => {
+                                html += `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><strong>${month.replace(/_/g, ' ')}:</strong> ${practiceData[month]}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+
+                        // Revision Techniques
+                        if (plan.Revision_Techniques || plan.revision_techniques) {
+                            const techniquesData = plan.Revision_Techniques || plan.revision_techniques;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-brain me-2"></i>Revision Techniques</h6>
+                                    <ul class="list-unstyled mb-0">
+                            `;
+                            Object.keys(techniquesData).forEach(technique => {
+                                html += `<li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i><strong>${technique.replace(/^\d+\.\s*/, '')}:</strong> ${techniquesData[technique]}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+
+                        // Recommendations
+                        if (plan.recommendations || plan.tips) {
+                            const recsData = plan.recommendations || plan.tips;
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-star me-2"></i>Additional Recommendations</h6>
+                                    <p class="mb-0">${recsData}</p>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // No study plan data
+                        html += `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No study plan content available. The AI may not have generated detailed content.
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="downloadStudyPlan()">
+                                    <i class="fas fa-download me-2"></i>Download Plan
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="addToCalendar()">
+                                    <i class="fas fa-calendar-plus me-2"></i>Add to Calendar
+                                </button>
+                            </div>
                         </div>
                     `;
+                    resultDiv.innerHTML = html;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                resultDiv.innerHTML = '<div class="alert alert-danger">Error generating study plan</div>';
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error generating study plan</div>';
             });
     }
 
@@ -499,42 +1049,144 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>Past Paper Analysis Complete!</h6>
-                            <p>Subject: ${data.subject}</p>
-                            <p>Exam Board: ${data.exam_board}</p>
-                            <p>Paper Type: ${data.paper_type}</p>
-                            <pre>${JSON.stringify(data, null, 2)}</pre>
-                        </div>
+                    let html = `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h6><i class="fas fa-file-alt me-2"></i>Past Paper Analysis Complete!</h6>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Subject:</strong><br>
+                                    <span class="text-primary">${data.subject}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Exam Board:</strong><br>
+                                    <span class="text-info">${data.exam_board}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Paper Type:</strong><br>
+                                    <span class="text-secondary">${data.paper_type}</span>
+                                </div>
+                            </div>
                     `;
+
+                    // Question Analysis
+                    if (data.question_analysis) {
+                        const qa = data.question_analysis;
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-question-circle me-2"></i>Question Pattern Analysis</h6>
+                        `;
+
+                        // Show patterns
+                        if (qa.patterns && Array.isArray(qa.patterns) && qa.patterns.length > 0) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            qa.patterns.forEach(pattern => {
+                                html += `<li class="mb-2"><i class="fas fa-angle-right text-success me-2"></i>${pattern}</li>`;
+                            });
+                            html += '</ul>';
+                        } else if (qa.frequency && Object.keys(qa.frequency).length > 0) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            Object.keys(qa.frequency).forEach(type => {
+                                html += `<li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>${type}: ${qa.frequency[type]} times</li>`;
+                            });
+                            html += '</ul>';
+                        } else {
+                            html += `<p class="mb-0">Question patterns analyzed from past papers</p>`;
+                        }
+                        html += '</div>';
+                    }
+
+                    // Topic Importance
+                    if (data.topic_importance) {
+                        const ti = data.topic_importance;
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-chart-bar me-2"></i>Topic Importance Rankings</h6>
+                        `;
+
+                        if (ti.topics && Array.isArray(ti.topics) && ti.topics.length > 0) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            ti.topics.forEach((topic, index) => {
+                                const score = ti.importance_scores ? ti.importance_scores[topic] || 'N/A' : '';
+                                html += `<li class="mb-2"><span class="badge bg-primary me-2">${index + 1}</span>${topic} ${score ? `<small class="text-muted">(Score: ${score})</small>` : ''}</li>`;
+                            });
+                            html += '</ul>';
+                        } else if (ti.importance_scores && Object.keys(ti.importance_scores).length > 0) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            Object.keys(ti.importance_scores).forEach((topic, index) => {
+                                html += `<li class="mb-2"><span class="badge bg-primary me-2">${index + 1}</span>${topic} <small class="text-muted">(${ti.importance_scores[topic]})</small></li>`;
+                            });
+                            html += '</ul>';
+                        } else {
+                            html += `<p class="mb-0">Topic importance calculated from past paper frequency</p>`;
+                        }
+                        html += '</div>';
+                    }
+
+                    // Exam Strategies
+                    if (data.exam_strategies) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Exam Strategies</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        (Array.isArray(data.exam_strategies) ? data.exam_strategies : [data.exam_strategies]).forEach(strategy => {
+                            html += `<li class="mb-2"><i class="fas fa-star text-warning me-2"></i>${strategy}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Practice Recommendations
+                    if (data.practice_recommendations) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-tasks me-2"></i>Practice Recommendations</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        (Array.isArray(data.practice_recommendations) ? data.practice_recommendations : [data.practice_recommendations]).forEach(rec => {
+                            html += `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${rec}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                resultDiv.innerHTML = '<div class="alert alert-danger">Error analyzing past papers</div>';
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error analyzing past papers</div>';
             });
     }
 
     function predictGCSEGradeBoundaries() {
         const subject = document.getElementById('boundarySubject').value;
         const examBoard = document.getElementById('boundaryExamBoard').value;
-        const currentPerformance = document.getElementById('currentPerformance').value;
+        const currentGrade = document.getElementById('currentGradeInput').value;
+        const averageScore = document.getElementById('averageScoreInput').value;
+        const weakAreasInput = document.getElementById('weakAreasInput').value;
 
         if (!subject || !examBoard) {
-            alert('Please select a subject and exam board');
+            showAlert('Please select a subject and exam board', 'warning');
             return;
         }
 
-        let performanceData = {};
-        try {
-            performanceData = JSON.parse(currentPerformance || '{}');
-        } catch (e) {
-            alert('Invalid JSON format for current performance');
+        if (!currentGrade || !averageScore) {
+            showAlert('Please enter your current grade and average score', 'warning');
             return;
         }
+
+        // Build performance data object from form fields
+        const performanceData = {
+            current_grade: currentGrade,
+            average_score: parseInt(averageScore),
+            weak_areas: weakAreasInput ? weakAreasInput.split(',').map(area => area.trim()).filter(area => area) : []
+        };
+
+        console.log('Performance data:', performanceData);
 
         const resultDiv = document.getElementById('gradeBoundaryResult');
         resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Predicting grade boundaries...</div>';
@@ -550,29 +1202,202 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-warning">
-                            <h6>Grade Boundary Predictions!</h6>
-                            <p>Subject: ${data.subject}</p>
-                            <p>Exam Board: ${data.exam_board}</p>
-                            <p>Predicted Grade: ${data.predicted_grade}</p>
-                            <p>Confidence: ${data.prediction_confidence}%</p>
-                            <pre>${JSON.stringify(data, null, 2)}</pre>
-                        </div>
+                    let html = `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h6><i class="fas fa-crystal-ball me-2"></i>Grade Boundary Predictions</h6>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Subject:</strong><br>
+                                    <span class="text-primary">${data.subject}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Exam Board:</strong><br>
+                                    <span class="text-info">${data.exam_board}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Confidence:</strong><br>
+                                    <span class="text-success">${data.prediction_confidence}%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="result-section">
+                                <h6><i class="fas fa-trophy me-2"></i>Predicted Grade: Grade ${data.predicted_grade}</h6>
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Based on current performance, you're on track for Grade ${data.predicted_grade}
+                                </div>
+                            </div>
                     `;
+
+                    // Grade boundaries table
+                    if (data.predicted_boundaries) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-table me-2"></i>Predicted Grade Boundaries</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Grade</th>
+                                                <th>Boundary (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        `;
+                        if (typeof data.predicted_boundaries === 'object') {
+                            Object.keys(data.predicted_boundaries).forEach(grade => {
+                                html += `<tr><td>Grade ${grade}</td><td>${data.predicted_boundaries[grade]}%</td></tr>`;
+                            });
+                        }
+                        html += '</tbody></table></div></div>';
+                    }
+
+                    // Improvement Plan
+                    if (data.improvement_plan) {
+                        const plan = data.improvement_plan;
+
+                        // Action steps
+                        if (plan.plan && Array.isArray(plan.plan) && plan.plan.length > 0) {
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-tasks me-2"></i>Action Steps to Improve</h6>
+                                    <ol class="mb-0">
+                            `;
+                            plan.plan.forEach(step => {
+                                html += `<li class="mb-2">${step}</li>`;
+                            });
+                            html += '</ol></div>';
+                        }
+
+                        // Recommendations
+                        if (plan.recommendations && Array.isArray(plan.recommendations) && plan.recommendations.length > 0) {
+                            html += `
+                                <div class="result-section">
+                                    <h6><i class="fas fa-lightbulb me-2"></i>Study Recommendations</h6>
+                                    <ul class="list-unstyled mb-0">
+                            `;
+                            plan.recommendations.forEach(rec => {
+                                html += `<li class="mb-2"><i class="fas fa-star text-warning me-2"></i>${rec}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+                    } else if (data.recommendations) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Recommendations</h6>
+                                <p class="mb-0">${data.recommendations}</p>
+                            </div>
+                        `;
+                    }
+
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                resultDiv.innerHTML = '<div class="alert alert-danger">Error predicting grade boundaries</div>';
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error predicting grade boundaries</div>';
             });
     }
 
     function showRevisionScheduleGenerator() {
         const modal = new bootstrap.Modal(document.getElementById('revisionScheduleModal'));
         modal.show();
+
+        // Load subjects for multi-select
+        loadRevisionSubjects();
+
+        // Initialize empty states for exam dates and target grades
+        updateRevisionInputs();
+    }
+
+    function loadRevisionSubjects() {
+        const subjectsDiv = document.getElementById('revisionSubjects');
+
+        let html = '<div class="row">';
+        availableSubjects.forEach(subject => {
+            html += `
+                <div class="col-md-6 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input revision-subject-checkbox" type="checkbox" 
+                               id="rev_${subject.code}" value="${subject.code}" 
+                               data-name="${subject.name}" onchange="updateRevisionInputs()">
+                        <label class="form-check-label" for="rev_${subject.code}">
+                            ${subject.name}
+                        </label>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        subjectsDiv.innerHTML = html;
+    }
+
+    function updateRevisionInputs() {
+        // Get selected subjects
+        const selectedSubjects = [];
+        document.querySelectorAll('.revision-subject-checkbox:checked').forEach(checkbox => {
+            selectedSubjects.push({
+                code: checkbox.value,
+                name: checkbox.getAttribute('data-name')
+            });
+        });
+
+        // Update exam dates inputs
+        const examDatesDiv = document.getElementById('examDatesInput');
+        if (selectedSubjects.length > 0) {
+            let datesHtml = '';
+            selectedSubjects.forEach(subject => {
+                datesHtml += `
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-md-5">
+                            <strong class="small">${subject.name}</strong>
+                        </div>
+                        <div class="col-md-7">
+                            <input type="date" class="form-control form-control-sm" 
+                                   id="exam_date_${subject.code}" 
+                                   placeholder="Exam date">
+                        </div>
+                    </div>
+                `;
+            });
+            examDatesDiv.innerHTML = datesHtml;
+        } else {
+            examDatesDiv.innerHTML = '<p class="text-muted small mb-0">Select subjects to set exam dates</p>';
+        }
+
+        // Update target grades inputs
+        const targetGradesDiv = document.getElementById('targetGradesInput');
+        if (selectedSubjects.length > 0) {
+            let gradesHtml = '';
+            selectedSubjects.forEach(subject => {
+                gradesHtml += `
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-md-5">
+                            <strong class="small">${subject.name}</strong>
+                        </div>
+                        <div class="col-md-7">
+                            <select class="form-select form-select-sm" id="target_grade_${subject.code}">
+                                <option value="">Select target...</option>
+                                <option value="9">Grade 9</option>
+                                <option value="8">Grade 8</option>
+                                <option value="7">Grade 7</option>
+                                <option value="6">Grade 6</option>
+                                <option value="5">Grade 5</option>
+                                <option value="4">Grade 4</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+            targetGradesDiv.innerHTML = gradesHtml;
+        } else {
+            targetGradesDiv.innerHTML = '<p class="text-muted small mb-0">Select subjects to set target grades</p>';
+        }
     }
 
     function showExamTechniques() {
@@ -581,15 +1406,1249 @@
     }
 
     function showPerformanceGapAnalysis() {
-        alert('Performance gap analysis feature coming soon!');
+        // Create and show a performance gap analysis modal
+        const modalHTML = `
+            <div class="modal fade" id="performanceGapModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title">
+                                <i class="fas fa-chart-line me-2"></i>Performance Gap Analysis
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="performanceGapForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Subject</label>
+                                    <select class="form-select" id="gapAnalysisSubject" required>
+                                        <option value="">Choose a subject...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Current Grade/Score</label>
+                                    <input type="number" class="form-control" id="currentGrade" 
+                                           placeholder="Enter current grade (1-9) or percentage" min="1" max="100">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Target Grade</label>
+                                    <select class="form-select" id="gapTargetGrade" required>
+                                        <option value="">Choose target grade...</option>
+                                        <option value="9">Grade 9</option>
+                                        <option value="8">Grade 8</option>
+                                        <option value="7">Grade 7</option>
+                                        <option value="6">Grade 6</option>
+                                        <option value="5">Grade 5</option>
+                                        <option value="4">Grade 4</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="button" class="btn btn-warning w-100" onclick="analyzePerformanceGap()">
+                                    <i class="fas fa-search me-2"></i>Analyze Performance Gap
+                                </button>
+                            </form>
+                            
+                            <div id="performanceGapResult" class="mt-3" style="display: none;">
+                                <!-- Results will be displayed here -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove old modal if exists
+        const oldModal = document.getElementById('performanceGapModal');
+        if (oldModal) {
+            oldModal.remove();
+        }
+
+        // Add new modal
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('performanceGapModal'));
+        modal.show();
+
+        // Populate subjects
+        const select = document.getElementById('gapAnalysisSubject');
+        select.innerHTML = '<option value="">Choose a subject...</option>';
+        availableSubjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.code;
+            option.textContent = subject.name;
+            select.appendChild(option);
+        });
+    }
+
+    function analyzePerformanceGap() {
+        const subject = document.getElementById('gapAnalysisSubject').value;
+        const currentGrade = document.getElementById('currentGrade').value;
+        const targetGrade = document.getElementById('gapTargetGrade').value;
+
+        if (!subject || !currentGrade || !targetGrade) {
+            showAlert('Please fill in all fields!', 'warning');
+            return;
+        }
+
+        const resultDiv = document.getElementById('performanceGapResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Analyzing performance gap...</div>';
+        resultDiv.style.display = 'block';
+
+        // Call backend API
+        const performanceData = {
+            subject: subject,
+            user_performance: {
+                current_grade: parseInt(currentGrade),
+                target_grade: parseInt(targetGrade)
+            }
+        };
+
+        fetch('/gcse-ai/api/performance-gap-analysis', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(performanceData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Performance Gap Analysis Data:', data);
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
+                    return;
+                }
+
+                const gap = targetGrade - currentGrade;
+                const subjectName = availableSubjects.find(s => s.code === subject)?.name || subject;
+
+                let html = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <h6><i class="fas fa-chart-line me-2"></i>Performance Gap Analysis</h6>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Subject:</strong><br>
+                            <span class="text-primary">${subjectName}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Current Grade:</strong><br>
+                            <span class="text-info">Grade ${currentGrade}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Target Grade:</strong><br>
+                            <span class="text-success">Grade ${targetGrade}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert ${gap > 0 ? 'alert-warning' : 'alert-success'} mb-3">
+                        <strong><i class="fas fa-chart-bar me-2"></i>Gap Analysis:</strong><br>
+                        ${gap > 0 ? `You need to improve by ${gap} grade${gap > 1 ? 's' : ''} to reach your target.` : 'You are already at or above your target grade!'}
+                    </div>
+            `;
+
+                if (gap > 0) {
+                    // Performance Gaps
+                    if (data.prioritized_gaps && Array.isArray(data.prioritized_gaps) && data.prioritized_gaps.length > 0) {
+                        html += `
+                        <div class="result-section">
+                            <h6><i class="fas fa-target me-2"></i>Key Performance Gaps</h6>
+                            <ul class="list-unstyled mb-0">
+                    `;
+                        data.prioritized_gaps.forEach(gap => {
+                            html += `<li class="mb-2"><i class="fas fa-exclamation-circle text-danger me-2"></i>${gap}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Improvement Strategies
+                    if (data.improvement_strategies && Array.isArray(data.improvement_strategies) && data.improvement_strategies.length > 0) {
+                        html += `
+                        <div class="result-section">
+                            <h6><i class="fas fa-lightbulb me-2"></i>Improvement Strategies</h6>
+                            <ul class="list-unstyled mb-0">
+                    `;
+                        data.improvement_strategies.forEach(strategy => {
+                            html += `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${strategy}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Study Time Recommendation
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-clock me-2"></i>Recommended Study Time</h6>
+                        <p class="mb-0">
+                            To improve ${gap} grade${gap > 1 ? 's' : ''}, dedicate approximately 
+                            <strong class="text-primary">${gap * 3}-${gap * 5} hours per week</strong> to this subject.
+                        </p>
+                    </div>
+                `;
+
+                    // Practice Recommendations
+                    if (data.practice_recommendations && Array.isArray(data.practice_recommendations) && data.practice_recommendations.length > 0) {
+                        html += `
+                        <div class="result-section">
+                            <h6><i class="fas fa-tasks me-2"></i>Practice Recommendations</h6>
+                            <ol class="mb-0">
+                    `;
+                        data.practice_recommendations.forEach(rec => {
+                            html += `<li class="mb-2">${rec}</li>`;
+                        });
+                        html += '</ol></div>';
+                    }
+
+                    // Progress Tracking
+                    if (data.progress_tracking && Array.isArray(data.progress_tracking) && data.progress_tracking.length > 0) {
+                        html += `
+                        <div class="result-section">
+                            <h6><i class="fas fa-chart-line me-2"></i>Progress Tracking Plan</h6>
+                            <ul class="list-unstyled mb-0">
+                    `;
+                        data.progress_tracking.forEach(track => {
+                            html += `<li class="mb-2"><i class="fas fa-calendar-check text-info me-2"></i>${track}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+                } else {
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-trophy me-2"></i>Keep Up the Good Work!</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Maintain consistent study routine</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Continue practicing past papers</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Challenge yourself with harder questions</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Help others to reinforce your knowledge</li>
+                        </ul>
+                    </div>
+                `;
+                }
+
+                html += '</div>';
+                resultDiv.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error analyzing performance gap</div>';
+            });
     }
 
     function showPersonalizedContent() {
-        alert('Personalized content feature coming soon!');
+        // Create and show personalized content modal
+        const modalHTML = `
+            <div class="modal fade" id="personalizedGCSEModal" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-user-cog me-2"></i>Personalized GCSE Content Generator
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-magic me-2"></i>
+                                Generate AI-powered, personalized learning materials tailored to your learning style and GCSE requirements!
+                            </div>
+                            
+                            <form id="personalizedGCSEForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Subject</label>
+                                            <select class="form-select" id="personalizedSubject" required>
+                                                <option value="">Choose a subject...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Topic</label>
+                                            <input type="text" class="form-control" id="personalizedTopic" 
+                                                   placeholder="e.g., Quadratic Equations, Photosynthesis">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Learning Style</label>
+                                            <select class="form-select" id="personalizedLearningStyle">
+                                                <option value="visual">👁️ Visual</option>
+                                                <option value="auditory">👂 Auditory</option>
+                                                <option value="kinesthetic">🤸 Kinesthetic</option>
+                                                <option value="reading" selected>📖 Reading/Writing</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Difficulty Level</label>
+                                            <select class="form-select" id="personalizedDifficulty">
+                                                <option value="foundation">Foundation Tier</option>
+                                                <option value="intermediate" selected>Higher Tier (Standard)</option>
+                                                <option value="advanced">Higher Tier (Advanced)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn btn-info w-100" onclick="generatePersonalizedGCSEContent()">
+                                    <i class="fas fa-magic me-2"></i>Generate Personalized Content
+                                </button>
+                            </form>
+                            
+                            <div id="personalizedGCSEResult" class="mt-3" style="display: none;">
+                                <!-- Results will be displayed here -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove old modal if exists
+        const oldModal = document.getElementById('personalizedGCSEModal');
+        if (oldModal) {
+            oldModal.remove();
+        }
+
+        // Add new modal
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('personalizedGCSEModal'));
+        modal.show();
+
+        // Populate subjects
+        const select = document.getElementById('personalizedSubject');
+        select.innerHTML = '<option value="">Choose a subject...</option>';
+        availableSubjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.code;
+            option.textContent = subject.name;
+            select.appendChild(option);
+        });
+    }
+
+    function generatePersonalizedGCSEContent() {
+        const subject = document.getElementById('personalizedSubject').value;
+        const topic = document.getElementById('personalizedTopic').value;
+        const learningStyle = document.getElementById('personalizedLearningStyle').value;
+        const difficulty = document.getElementById('personalizedDifficulty').value;
+
+        if (!subject || !topic) {
+            showAlert('Please select a subject and enter a topic!', 'warning');
+            return;
+        }
+
+        const resultDiv = document.getElementById('personalizedGCSEResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Generating personalized GCSE content...</div>';
+        resultDiv.style.display = 'block';
+
+        // Call backend API
+        const url = `/gcse-ai/api/personalized-content?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&learning_style=${learningStyle}&difficulty_level=${difficulty}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Personalized Content Data:', data);
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
+                    return;
+                }
+
+                const subjectName = availableSubjects.find(s => s.code === subject)?.name || subject;
+                const styleIcons = {
+                    'visual': '👁️',
+                    'auditory': '👂',
+                    'kinesthetic': '🤸',
+                    'reading': '📖'
+                };
+
+                let html = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <h6><i class="fas fa-user-cog me-2"></i>Personalized GCSE Content</h6>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Subject:</strong><br>
+                            <span class="text-primary">${subjectName}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Topic:</strong><br>
+                            <span class="text-info">${topic}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Learning Style:</strong><br>
+                            <span class="text-secondary">${styleIcons[learningStyle]} ${learningStyle}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Difficulty:</strong><br>
+                            <span class="text-warning">${difficulty}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h6><i class="fas fa-book-open me-2"></i>Learning Content</h6>
+                        <p><strong>Understanding ${topic}</strong></p>
+                        <p class="text-muted small mb-3">
+                            This personalized content has been adapted for ${learningStyle} learners at the ${difficulty} level.
+                        </p>
+            `;
+
+                // Main content (AI-generated) - Format properly
+                if (data.learning_points && Array.isArray(data.learning_points) && data.learning_points.length > 0) {
+                    html += '<div class="learning-content-box p-3 bg-white border rounded mb-3">';
+                    html += '<ul class="mb-0" style="list-style-type: disc; padding-left: 25px;">';
+                    data.learning_points.forEach(point => {
+                        // Clean up the point text - remove numbering and letter prefixes
+                        let cleanPoint = point
+                            .replace(/^\d+\.\s*/, '')           // Remove "1. "
+                            .replace(/^[a-z]\.\s*/i, '')        // Remove "a. "
+                            .replace(/^\*\*.*?\*\*:\s*/i, '')   // Remove "**Title**: "
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Convert bold
+                            .replace(/\\\((.*?)\\\)/g, '<code>$1</code>')      // Convert inline LaTeX
+                            .trim();
+
+                        if (cleanPoint && cleanPoint.length > 10) {  // Skip very short lines
+                            html += `<li class="mb-2" style="color: #212529; line-height: 1.6;">${cleanPoint}</li>`;
+                        }
+                    });
+                    html += '</ul></div>';
+                } else if (data.content && typeof data.content === 'string') {
+                    // Parse the content into structured sections
+                    let contentText = data.content;
+
+                    // Convert markdown formatting
+                    contentText = contentText
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')     // Bold
+                        .replace(/\\\((.*?)\\\)/g, '<code>$1</code>')          // Inline math
+                        .replace(/\\\[(.*?)\\\]/g, '<div class="math-block">$1</div>')  // Block math
+                        .replace(/^#{1,3}\s+(.+)$/gm, '<h6 class="text-primary mt-3 mb-2">$1</h6>')  // Headers
+                        .replace(/^\d+\.\s+(.+)$/gm, '<div class="ms-3 mb-2">• $1</div>')  // Numbered lists
+                        .replace(/^-\s+(.+)$/gm, '<div class="ms-3 mb-2">• $1</div>');     // Bullet lists
+
+                    html += `<div class="learning-content-box p-3 bg-white border rounded mb-3" style="line-height: 1.8;">${contentText}</div>`;
+                }
+
+                html += '</div>';
+
+                // GCSE Specification
+                if (data.curriculum_requirements) {
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-clipboard-list me-2"></i>GCSE Specification Coverage</h6>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            This content aligns with the GCSE curriculum requirements for ${subjectName}.
+                        </div>
+                `;
+                    if (Array.isArray(data.curriculum_requirements)) {
+                        html += '<ul class="small mb-0">';
+                        data.curriculum_requirements.forEach(req => {
+                            html += `<li>${req}</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    html += '</div>';
+                }
+
+                // Practice Questions (AI-generated)
+                if (data.practice_questions && Array.isArray(data.practice_questions) && data.practice_questions.length > 0) {
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-question-circle me-2"></i>Practice Questions</h6>
+                        <div class="practice-questions-box">
+                `;
+                    data.practice_questions.forEach((q, idx) => {
+                        let questionText = '';
+                        let marks = '';
+                        let tip = '';
+
+                        if (typeof q === 'string') {
+                            // Parse string format and clean thoroughly
+                            let cleanQ = q;
+
+                            // Extract marks
+                            const marksMatch = cleanQ.match(/\[(\d+)\s*marks?\]/i);
+                            if (marksMatch) {
+                                marks = marksMatch[1];
+                                cleanQ = cleanQ.replace(/\[(\d+)\s*marks?\]/i, '').trim();
+                            }
+
+                            // Extract tip (multiple patterns)
+                            const tipMatch = cleanQ.match(/(?:tip:|helpful tip:)(.+)$/i);
+                            if (tipMatch) {
+                                tip = tipMatch[1].trim();
+                                cleanQ = cleanQ.replace(/(?:tip:|helpful tip:).+$/i, '').trim();
+                            }
+
+                            // Remove common prefixes
+                            cleanQ = cleanQ
+                                .replace(/^Question\s*\d+:\s*/i, '')           // "Question 1: "
+                                .replace(/^\*\*Question\s*\d+:\*\*\s*/i, '')   // "**Question 1:** "
+                                .replace(/^Question:\s*/i, '')                  // "Question: "
+                                .replace(/^\*\*.*?\*\*:\s*/i, '')              // "**Any**: "
+                                .trim();
+
+                            questionText = cleanQ;
+                        } else if (typeof q === 'object') {
+                            questionText = q.question || '';
+                            marks = q.marks || '';
+                            tip = q.tip || '';
+                        }
+
+                        // Only display if we have actual question text
+                        if (questionText && questionText.length > 5) {
+                            // Format the question text
+                            let formattedQuestion = questionText
+                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')     // Bold
+                                .replace(/\\\((.*?)\\\)/g, '<code>$1</code>')          // LaTeX inline
+                                .replace(/`(.*?)`/g, '<code>$1</code>');               // Code
+
+                            html += `
+                            <div class="question-box mb-3 p-3 bg-light border-start border-primary border-4 rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-primary">Question ${idx + 1}</span>
+                                    ${marks ? `<span class="badge bg-info">${marks} marks</span>` : ''}
+                                </div>
+                                <p class="mb-2">${formattedQuestion}</p>
+                                ${tip ? `<small class="text-muted"><i class="fas fa-lightbulb me-1"></i><strong>Tip:</strong> ${tip}</small>` : ''}
+                            </div>
+                        `;
+                        }
+                    });
+                    html += '</div></div>';
+                }
+
+                // Worked Examples (AI-generated) - Display BEFORE recommendations
+                if (data.examples && Array.isArray(data.examples) && data.examples.length > 0) {
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-flask me-2"></i>Worked Examples</h6>
+                `;
+                    data.examples.forEach((example, idx) => {
+                        let exampleText = typeof example === 'string' ? example : (example.description || example.text || '');
+
+                        // Clean up example text
+                        exampleText = exampleText
+                            .replace(/^Example\s*\d+:\s*/i, '')
+                            .replace(/\\\((.*?)\\\)/g, '<code>$1</code>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .trim();
+
+                        if (exampleText) {
+                            html += `
+                            <div class="example-box mb-3 p-3 bg-light border-start border-success border-4 rounded">
+                                <div class="mb-2">
+                                    <span class="badge bg-success"><i class="fas fa-flask me-1"></i>Example ${idx + 1}</span>
+                                </div>
+                                <div class="example-content" style="white-space: pre-line; font-family: 'Courier New', monospace; font-size: 14px;">
+                                    ${exampleText}
+                                </div>
+                            </div>
+                        `;
+                        }
+                    });
+                    html += '</div>';
+                }
+
+                // Study Recommendations (AI-generated)
+                if (data.study_recommendations && Array.isArray(data.study_recommendations) && data.study_recommendations.length > 0) {
+                    html += `
+                    <div class="result-section">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Study Recommendations</h6>
+                        <div class="recommendations-box">
+                `;
+                    data.study_recommendations.forEach((rec, idx) => {
+                        // Clean up recommendation text
+                        let cleanRec = rec.replace(/^\d+\.\s*/, '').trim();
+                        if (cleanRec) {
+                            html += `
+                            <div class="recommendation-item mb-2 p-2 bg-light rounded">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <span>${cleanRec}</span>
+                            </div>
+                        `;
+                        }
+                    });
+                    html += '</div></div>';
+                }
+
+                html += `
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-primary" onclick="saveGCSEContent(event)">
+                            <i class="fas fa-save me-2"></i>Save to Topics
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="exportGCSEContent(event)">
+                            <i class="fas fa-file-export me-2"></i>Export Content
+                        </button>
+                    </div>
+                </div>
+            `;
+
+                resultDiv.innerHTML = html;
+
+                // Store the content for save/export
+                currentPersonalizedContent = {
+                    subject: subject,
+                    topic: topic,
+                    learning_style: learningStyle,
+                    difficulty: difficulty,
+                    content: data
+                };
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error generating personalized content</div>';
+            });
+    }
+
+    function saveGCSEContent(event) {
+        if (!currentPersonalizedContent) {
+            showAlert('No content to save. Please generate content first.', 'warning');
+            return;
+        }
+
+        // Prevent default and get button
+        event.preventDefault();
+        const button = event.target.closest('button');
+
+        // Show loading
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        button.disabled = true;
+
+        // Send to backend
+        fetch('/gcse-ai/api/save-to-topics', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(currentPersonalizedContent)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message || 'Content saved to topics successfully!', 'success');
+
+                    // Show professional confirmation modal
+                    if (data.topic_id) {
+                        showSaveSuccessModal(data.topic_id);
+                    }
+                } else {
+                    showAlert(data.error || 'Failed to save content', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving content:', error);
+                showAlert('Error saving content to topics', 'danger');
+            })
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+    }
+
+    function showSaveSuccessModal(topicId) {
+        // Create professional success modal
+        const modalHTML = `
+            <div class="modal fade" id="saveSuccessModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-check-circle me-2"></i>Content Saved Successfully!
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <div class="mb-4">
+                                <i class="fas fa-folder-open text-success" style="font-size: 64px;"></i>
+                            </div>
+                            <h6 class="mb-3">Your personalized GCSE content has been saved to your Topics!</h6>
+                            <p class="text-muted mb-0">You can access it anytime from the Topics page.</p>
+                        </div>
+                        <div class="modal-footer justify-content-center border-0 pt-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Stay Here
+                            </button>
+                            <a href="/topics/${topicId}" class="btn btn-success">
+                                <i class="fas fa-eye me-2"></i>View in Topics
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove old modal if exists
+        const oldModal = document.getElementById('saveSuccessModal');
+        if (oldModal) {
+            oldModal.remove();
+        }
+
+        // Add new modal
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('saveSuccessModal'));
+        modal.show();
+    }
+
+    function exportGCSEContent(event) {
+        if (!currentPersonalizedContent) {
+            showAlert('No content to export. Please generate content first.', 'warning');
+            return;
+        }
+
+        // Prevent default and get button
+        event.preventDefault();
+        const button = event.target.closest('button');
+
+        // Show loading
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+        button.disabled = true;
+
+        // Send to backend for HTML generation
+        fetch('/gcse-ai/api/export-content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(currentPersonalizedContent)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.html) {
+                    // Create blob and download
+                    const blob = new Blob([data.html], { type: 'text/html' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.filename || 'GCSE_Content.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showAlert('Content exported! Open the HTML file and print/save as PDF.', 'success');
+                } else {
+                    showAlert(data.error || 'Failed to export content', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error exporting content:', error);
+                showAlert('Error exporting content', 'danger');
+            })
+            .finally(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
     }
 
     function generateGCSERevisionSchedule() {
-        alert('Revision schedule generation feature coming soon!');
+        // Get selected subjects with their exam dates and target grades
+        const selectedSubjects = [];
+        const examDates = {};
+        const targetGrades = {};
+
+        document.querySelectorAll('.revision-subject-checkbox:checked').forEach(checkbox => {
+            const subjectCode = checkbox.value;
+            const subject = availableSubjects.find(s => s.code === subjectCode);
+            if (subject) {
+                // Get exam date for this subject
+                const examDateInput = document.getElementById(`exam_date_${subjectCode}`);
+                const examDate = examDateInput ? examDateInput.value : null;
+
+                // Get target grade for this subject
+                const targetGradeInput = document.getElementById(`target_grade_${subjectCode}`);
+                const targetGrade = targetGradeInput ? targetGradeInput.value : null;
+
+                selectedSubjects.push({
+                    name: subject.name,
+                    code: subjectCode,
+                    examDate: examDate,
+                    targetGrade: targetGrade
+                });
+
+                if (examDate) examDates[subject.name] = examDate;
+                if (targetGrade) targetGrades[subject.name] = targetGrade;
+            }
+        });
+
+        if (selectedSubjects.length === 0) {
+            showAlert('Please select at least one subject!', 'warning');
+            return;
+        }
+
+        const resultDiv = document.getElementById('revisionScheduleResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Generating revision schedule...</div>';
+        resultDiv.style.display = 'block';
+
+        // Calculate weeks until earliest exam
+        let earliestExamDate = null;
+        selectedSubjects.forEach(subject => {
+            if (subject.examDate) {
+                const examDate = new Date(subject.examDate);
+                if (!earliestExamDate || examDate < earliestExamDate) {
+                    earliestExamDate = examDate;
+                }
+            }
+        });
+
+        // Calculate weeks available for revision
+        let weeks = 12; // Default
+        let daysUntilExam = null;
+
+        if (earliestExamDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to start of day
+            earliestExamDate.setHours(0, 0, 0, 0);
+
+            const timeDiff = earliestExamDate - today;
+            daysUntilExam = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            weeks = Math.ceil(daysUntilExam / 7);
+
+            // Ensure reasonable bounds
+            if (weeks < 1) weeks = 1; // At least 1 week
+            if (weeks > 16) weeks = 16; // Cap at 16 weeks
+        }
+
+        // Simulate AI generation (since we're creating this without backend)
+        setTimeout(() => {
+            const hoursPerWeek = 20;
+            const hoursPerSubject = Math.floor(hoursPerWeek / selectedSubjects.length);
+
+            let html = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <h6><i class="fas fa-calendar-check me-2"></i>Multi-Subject Revision Schedule</h6>
+                    </div>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>📊 Schedule Overview:</strong><br>
+                        ${selectedSubjects.length} subjects • ${weeks} week${weeks !== 1 ? 's' : ''} ${daysUntilExam !== null ? `(${daysUntilExam} days)` : ''} • ${hoursPerWeek} hours/week
+                    </div>
+                    
+                    ${daysUntilExam !== null && daysUntilExam < 7 ? `
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Urgent!</strong> Your earliest exam is in ${daysUntilExam} day${daysUntilExam !== 1 ? 's' : ''}. 
+                        This schedule is intensive - focus on high-priority topics and past papers.
+                    </div>
+                    ` : ''}
+                    
+                    ${daysUntilExam !== null && daysUntilExam < 0 ? `
+                    <div class="alert alert-danger mb-3">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Note:</strong> One or more exam dates have passed. Please update your exam dates.
+                    </div>
+                    ` : ''}
+                    
+                    <div class="result-section">
+                        <h6><i class="fas fa-book me-2"></i>Selected Subjects</h6>
+                        <div class="row">
+            `;
+
+            selectedSubjects.forEach((subject, index) => {
+                const examDateText = subject.examDate ? new Date(subject.examDate).toLocaleDateString() : 'Not set';
+                const targetText = subject.targetGrade ? `Grade ${subject.targetGrade}` : 'Not set';
+                html += `
+                    <div class="col-md-12 mb-3">
+                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary me-2">${index + 1}</span>
+                                <strong>${subject.name}</strong>
+                            </div>
+                            <div class="text-end small">
+                                <div><i class="fas fa-calendar me-1 text-primary"></i>${examDateText}</div>
+                                <div><i class="fas fa-trophy me-1 text-success"></i>Target: ${targetText}</div>
+                            </div>
+                        </div>
+                        <div class="small text-muted ms-4">${hoursPerSubject} hours/week allocated</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                        </div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <h6><i class="fas fa-calendar-alt me-2"></i>Weekly Breakdown</h6>
+            `;
+
+            // Generate weekly schedule - dynamic based on weeks available
+            let phases = [];
+
+            if (weeks <= 2) {
+                // Very short timeline - intensive cramming
+                phases = [
+                    { name: 'Intensive Cramming', weeks: `1-${weeks}`, focus: 'Focus on high-yield topics, key formulas, and past paper practice' }
+                ];
+            } else if (weeks <= 4) {
+                // Short timeline - condensed phases
+                const midPoint = Math.ceil(weeks / 2);
+                phases = [
+                    { name: 'Core Concepts', weeks: `1-${midPoint}`, focus: 'Essential topics and fundamentals' },
+                    { name: 'Exam Preparation', weeks: `${midPoint + 1}-${weeks}`, focus: 'Past papers and exam techniques' }
+                ];
+            } else if (weeks <= 8) {
+                // Medium timeline - 3 phases
+                const phase1End = Math.ceil(weeks * 0.4);
+                const phase2End = Math.ceil(weeks * 0.7);
+                phases = [
+                    { name: 'Foundation Phase', weeks: `1-${phase1End}`, focus: 'Core concepts and fundamentals' },
+                    { name: 'Practice Phase', weeks: `${phase1End + 1}-${phase2End}`, focus: 'Problem solving and practice questions' },
+                    { name: 'Final Review', weeks: `${phase2End + 1}-${weeks}`, focus: 'Past papers and final revision' }
+                ];
+            } else {
+                // Full timeline - 4 phases
+                const phase1End = Math.ceil(weeks * 0.33);
+                const phase2End = Math.ceil(weeks * 0.67);
+                const phase3End = Math.ceil(weeks * 0.83);
+                phases = [
+                    { name: 'Foundation Phase', weeks: `1-${phase1End}`, focus: 'Core concepts and fundamentals' },
+                    { name: 'Development Phase', weeks: `${phase1End + 1}-${phase2End}`, focus: 'Intermediate topics and practice' },
+                    { name: 'Advanced Phase', weeks: `${phase2End + 1}-${phase3End}`, focus: 'Complex topics and exam techniques' },
+                    { name: 'Final Review', weeks: `${phase3End + 1}-${weeks}`, focus: 'Past papers and final revision' }
+                ];
+            }
+
+            phases.forEach(phase => {
+                html += `
+                    <div class="mb-3">
+                        <strong class="text-primary">📅 ${phase.name} (Weeks ${phase.weeks})</strong>
+                        <p class="mb-1"><small class="text-muted">Focus: ${phase.focus}</small></p>
+                        <ul class="list-unstyled ms-3">
+                `;
+                selectedSubjects.forEach(subject => {
+                    const targetInfo = subject.targetGrade ? ` (Target: Grade ${subject.targetGrade})` : '';
+                    html += `<li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>${subject.name}: ${hoursPerSubject} hours/week${targetInfo}</li>`;
+                });
+                html += '</ul></div>';
+            });
+
+            html += `
+                    </div>
+                    
+                    <div class="result-section">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Study Tips</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Take regular 10-minute breaks every hour</li>
+                            <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Mix subjects throughout the week for variety</li>
+                            <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Practice past papers in the final phase</li>
+                            <li class="mb-2"><i class="fas fa-star text-warning me-2"></i>Review mistakes from practice questions</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-primary" onclick="downloadRevisionSchedule()">
+                            <i class="fas fa-download me-2"></i>Download Schedule
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="printRevisionSchedule()">
+                            <i class="fas fa-print me-2"></i>Print Schedule
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            resultDiv.innerHTML = html;
+
+            // Store the schedule data for download/print
+            currentRevisionScheduleData = {
+                subjects: selectedSubjects,
+                weeks: weeks,
+                hoursPerWeek: hoursPerWeek,
+                hoursPerSubject: hoursPerSubject,
+                phases: phases,
+                generatedAt: new Date()
+            };
+        }, 1500);
+    }
+
+    let currentRevisionScheduleData = null;
+
+    function downloadRevisionSchedule() {
+        if (!currentRevisionScheduleData) {
+            showAlert('No revision schedule data available. Please generate a schedule first.', 'warning');
+            return;
+        }
+
+        const data = currentRevisionScheduleData;
+
+        // Create formatted HTML for download
+        let htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GCSE Revision Schedule</title>
+    <style>
+        @media print {
+            @page { margin: 2cm; }
+            body { margin: 0; }
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+        }
+        .overview {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #0d6efd;
+        }
+        .section {
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-left: 4px solid #0d6efd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #0d6efd;
+            font-size: 20px;
+            margin: 0 0 15px 0;
+        }
+        .subject-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #0d6efd;
+        }
+        .subject-card .subject-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+        .subject-card .subject-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .subject-card .hours {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        .phase {
+            background: #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .phase-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0d6efd;
+            margin-bottom: 8px;
+        }
+        .phase-focus {
+            font-size: 13px;
+            color: #6c757d;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+        .phase ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .phase ul li {
+            padding: 6px 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        .phase ul li:last-child {
+            border-bottom: none;
+        }
+        .tips {
+            background: #fff9e6;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+        .tips h2 {
+            color: #ff9800;
+        }
+        .tips ul {
+            list-style: none;
+            padding: 0;
+        }
+        .tips ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        .tips ul li:before {
+            content: "⭐";
+            position: absolute;
+            left: 0;
+        }
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+        .badge {
+            display: inline-block;
+            background: #0d6efd;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📅 GCSE Revision Schedule</h1>
+        <p>Multi-Subject Study Plan</p>
+    </div>
+    
+    <div class="overview">
+        <strong>📊 Schedule Overview:</strong><br>
+        ${data.subjects.length} subjects • ${data.weeks} weeks • ${data.hoursPerWeek} hours/week
+    </div>
+    
+    <div class="section">
+        <h2>📚 Selected Subjects</h2>
+`;
+
+        // Add subjects
+        data.subjects.forEach((subject, index) => {
+            const examDateText = subject.examDate ? new Date(subject.examDate).toLocaleDateString() : 'Not set';
+            const targetText = subject.targetGrade ? `Grade ${subject.targetGrade}` : 'Not set';
+            htmlContent += `
+        <div class="subject-card">
+            <div class="subject-name">
+                <span class="badge">${index + 1}</span> ${subject.name}
+            </div>
+            <div class="subject-details">
+                <span>📅 Exam Date: ${examDateText}</span>
+                <span>🏆 Target: ${targetText}</span>
+                <span class="hours">${data.hoursPerSubject} hours/week</span>
+            </div>
+        </div>
+`;
+        });
+
+        htmlContent += `
+    </div>
+    
+    <div class="section">
+        <h2>📅 Weekly Breakdown by Phase</h2>
+`;
+
+        // Add phases
+        data.phases.forEach(phase => {
+            htmlContent += `
+        <div class="phase">
+            <div class="phase-title">📅 ${phase.name} (Weeks ${phase.weeks})</div>
+            <div class="phase-focus">Focus: ${phase.focus}</div>
+            <ul>
+`;
+            data.subjects.forEach(subject => {
+                const targetInfo = subject.targetGrade ? ` (Target: Grade ${subject.targetGrade})` : '';
+                htmlContent += `                <li>✓ ${subject.name}: ${data.hoursPerSubject} hours/week${targetInfo}</li>\n`;
+            });
+            htmlContent += `
+            </ul>
+        </div>
+`;
+        });
+
+        htmlContent += `
+    </div>
+    
+    <div class="tips">
+        <h2>💡 Study Tips</h2>
+        <ul>
+            <li>Take regular 10-minute breaks every hour</li>
+            <li>Mix subjects throughout the week for variety</li>
+            <li>Practice past papers in the final phase</li>
+            <li>Review mistakes from practice questions</li>
+            <li>Use active recall and spaced repetition techniques</li>
+            <li>Create a comfortable study environment</li>
+        </ul>
+    </div>
+    
+    <div class="footer">
+        <p>Generated on ${data.generatedAt.toLocaleDateString()} at ${data.generatedAt.toLocaleTimeString()}</p>
+        <p>Learning Companion - Your GCSE Success Partner</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            <strong>How to save as PDF:</strong> Open this file in your browser and use "Print" → "Save as PDF"
+        </p>
+    </div>
+</body>
+</html>
+`;
+
+        // Create blob and download as HTML
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GCSE_Revision_Schedule_${data.generatedAt.toISOString().split('T')[0]}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert('Revision schedule downloaded! Open the HTML file and print/save as PDF.', 'success');
+    }
+
+    function printRevisionSchedule() {
+        window.print();
     }
 
     function generateGCSEExamTechniques() {
@@ -608,23 +2667,501 @@
         fetch(`/gcse-ai/api/exam-techniques?subject=${subject}&exam_board=${examBoard}`)
             .then(response => response.json())
             .then(data => {
+                console.log('Exam Techniques Data:', data);
+
                 if (data.error) {
-                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>Exam Techniques Generated!</h6>
-                            <p>Subject: ${data.subject}</p>
-                            <p>Exam Board: ${data.exam_board}</p>
-                            <pre>${JSON.stringify(data, null, 2)}</pre>
-                        </div>
+                    let html = `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h6><i class="fas fa-clipboard-list me-2"></i>Exam Techniques Generated!</h6>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Subject:</strong><br>
+                                    <span class="text-primary">${data.subject}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Exam Board:</strong><br>
+                                    <span class="text-info">${data.exam_board}</span>
+                                </div>
+                            </div>
                     `;
+
+                    // General techniques
+                    if (data.general_techniques) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-book-reader me-2"></i>General Exam Techniques</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        const generalTechniques = Array.isArray(data.general_techniques)
+                            ? data.general_techniques
+                            : (typeof data.general_techniques === 'object' ? Object.values(data.general_techniques) : [data.general_techniques]);
+
+                        generalTechniques.forEach(technique => {
+                            if (technique && typeof technique === 'string') {
+                                html += `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${technique}</li>`;
+                            }
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Question-specific techniques
+                    if (data.question_techniques) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-question me-2"></i>Question-Specific Techniques</h6>
+                        `;
+
+                        // Handle different data structures
+                        if (typeof data.question_techniques === 'string') {
+                            html += `<p class="mb-0">${data.question_techniques}</p>`;
+                        } else if (Array.isArray(data.question_techniques)) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            data.question_techniques.forEach(technique => {
+                                html += `<li class="mb-2"><i class="fas fa-angle-right text-primary me-2"></i>${technique}</li>`;
+                            });
+                            html += '</ul>';
+                        } else if (typeof data.question_techniques === 'object') {
+                            html += '<ul class="list-unstyled mb-0">';
+                            Object.entries(data.question_techniques).forEach(([key, value]) => {
+                                if (typeof value === 'string') {
+                                    html += `<li class="mb-2"><i class="fas fa-angle-right text-primary me-2"></i><strong>${key}:</strong> ${value}</li>`;
+                                } else if (Array.isArray(value)) {
+                                    html += `<li class="mb-2"><strong class="text-primary">${key}:</strong><ul class="ms-3 mt-1">`;
+                                    value.forEach(item => {
+                                        html += `<li class="mb-1"><i class="fas fa-check text-success me-2"></i>${item}</li>`;
+                                    });
+                                    html += '</ul></li>';
+                                }
+                            });
+                            html += '</ul>';
+                        }
+                        html += '</div>';
+                    }
+
+                    // Time management
+                    if (data.time_management) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-clock me-2"></i>Time Management Tips</h6>
+                        `;
+
+                        if (typeof data.time_management === 'string') {
+                            html += `<p class="mb-0">${data.time_management}</p>`;
+                        } else if (Array.isArray(data.time_management)) {
+                            html += '<ul class="list-unstyled mb-0">';
+                            data.time_management.forEach(tip => {
+                                html += `<li class="mb-2"><i class="fas fa-clock text-info me-2"></i>${tip}</li>`;
+                            });
+                            html += '</ul>';
+                        } else if (typeof data.time_management === 'object') {
+                            html += '<ul class="list-unstyled mb-0">';
+                            Object.entries(data.time_management).forEach(([key, value]) => {
+                                html += `<li class="mb-2"><i class="fas fa-clock text-info me-2"></i><strong>${key}:</strong> ${value}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        html += '</div>';
+                    }
+
+                    // Subject-specific tips
+                    if (data.subject_specific_tips) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-star me-2"></i>Subject-Specific Tips</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        const tips = Array.isArray(data.subject_specific_tips)
+                            ? data.subject_specific_tips
+                            : (typeof data.subject_specific_tips === 'object' ? Object.values(data.subject_specific_tips) : [data.subject_specific_tips]);
+
+                        tips.forEach(tip => {
+                            if (tip && typeof tip === 'string') {
+                                html += `<li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>${tip}</li>`;
+                            }
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Marking insights
+                    if (data.marking_insights && Array.isArray(data.marking_insights) && data.marking_insights.length > 0) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-clipboard-check me-2"></i>Marking Scheme Insights</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        data.marking_insights.forEach(insight => {
+                            html += `<li class="mb-2"><i class="fas fa-award text-info me-2"></i>${insight}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    // Mistake avoidance
+                    if (data.mistake_avoidance && Array.isArray(data.mistake_avoidance) && data.mistake_avoidance.length > 0) {
+                        html += `
+                            <div class="result-section">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Common Mistakes to Avoid</h6>
+                                <ul class="list-unstyled mb-0">
+                        `;
+                        data.mistake_avoidance.forEach(mistake => {
+                            html += `<li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i>${mistake}</li>`;
+                        });
+                        html += '</ul></div>';
+                    }
+
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                resultDiv.innerHTML = '<div class="alert alert-danger">Error generating exam techniques</div>';
+                resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error generating exam techniques</div>';
             });
+    }
+
+    // Placeholder functions with proper implementations
+    let currentStudyPlanData = null;
+    let currentPersonalizedContent = null;
+
+    function downloadStudyPlan() {
+        if (!currentStudyPlanData) {
+            showAlert('No study plan data available. Please generate a plan first.', 'warning');
+            return;
+        }
+
+        // Extract and format the study plan
+        let plan = currentStudyPlanData.study_plan;
+
+        // Unwrap if nested
+        const wrapperKeys = Object.keys(plan).filter(key => key.includes('GCSE') || key.includes('Study_Plan'));
+        if (wrapperKeys.length === 1 && typeof plan[wrapperKeys[0]] === 'object') {
+            plan = plan[wrapperKeys[0]];
+        }
+
+        // Create formatted HTML for PDF
+        let htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GCSE Study Plan - ${currentStudyPlanData.subject}</title>
+    <style>
+        @media print {
+            @page { margin: 2cm; }
+            body { margin: 0; }
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #212529;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .info-item {
+            padding: 10px;
+        }
+        .info-item strong {
+            display: block;
+            color: #0d6efd;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .info-item span {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .section {
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-left: 4px solid #0d6efd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #0d6efd;
+            font-size: 20px;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+        }
+        .section h2 i {
+            margin-right: 10px;
+        }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .schedule-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .schedule-item strong {
+            color: #0d6efd;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        ul li:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            display: inline-block;
+            background: #0d6efd;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 GCSE Study Plan</h1>
+        <p>${currentStudyPlanData.subject.toUpperCase()} • ${currentStudyPlanData.exam_board}</p>
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <strong>Subject</strong>
+            <span>${currentStudyPlanData.subject}</span>
+        </div>
+        <div class="info-item">
+            <strong>Exam Board</strong>
+            <span>${currentStudyPlanData.exam_board}</span>
+        </div>
+        <div class="info-item">
+            <strong>Target Grade</strong>
+            <span>Grade ${currentStudyPlanData.target_grade}</span>
+        </div>
+        <div class="info-item">
+            <strong>Days to Exam</strong>
+            <span>${currentStudyPlanData.days_until_exam} days</span>
+        </div>
+    </div>
+`;
+
+        // Weekly Study Schedule
+        if (plan.Weekly_Study_Schedule || plan.weekly_schedule) {
+            const schedule = plan.Weekly_Study_Schedule || plan.weekly_schedule;
+            htmlContent += `
+    <div class="section">
+        <h2>📅 Weekly Study Schedule</h2>
+        <div class="schedule-grid">
+`;
+            Object.keys(schedule).forEach(day => {
+                htmlContent += `
+            <div class="schedule-item">
+                <strong>${day}:</strong> ${schedule[day]}
+            </div>
+`;
+            });
+            htmlContent += `
+        </div>
+    </div>
+`;
+        }
+
+        // Exam Preparation Timeline
+        if (plan.Exam_Preparation_Timeline || plan.timeline) {
+            const timeline = plan.Exam_Preparation_Timeline || plan.timeline;
+            htmlContent += `
+    <div class="section">
+        <h2>⏰ Exam Preparation Timeline</h2>
+        <ul>
+`;
+            Object.keys(timeline).forEach(period => {
+                htmlContent += `
+            <li><strong>${period.replace(/_/g, ' ')}:</strong> ${timeline[period]}</li>
+`;
+            });
+            htmlContent += `
+        </ul>
+    </div>
+`;
+        }
+
+        // Topic Prioritization
+        if (plan.Topic_Prioritization || plan.topics_to_cover) {
+            const topics = plan.Topic_Prioritization || plan.topics_to_cover;
+            htmlContent += `
+    <div class="section">
+        <h2>🔢 Topic Prioritization</h2>
+        <ul>
+`;
+            Object.keys(topics).forEach(priority => {
+                htmlContent += `
+            <li><span class="badge">${priority.replace('Priority_', '')}</span>${topics[priority]}</li>
+`;
+            });
+            htmlContent += `
+        </ul>
+    </div>
+`;
+        }
+
+        // Practice Exam Schedule
+        if (plan.Practice_Exam_Schedule || plan.practice_schedule) {
+            const practice = plan.Practice_Exam_Schedule || plan.practice_schedule;
+            htmlContent += `
+    <div class="section">
+        <h2>📄 Practice Exam Schedule</h2>
+        <ul>
+`;
+            Object.keys(practice).forEach(month => {
+                htmlContent += `
+            <li><strong>${month.replace(/_/g, ' ')}:</strong> ${practice[month]}</li>
+`;
+            });
+            htmlContent += `
+        </ul>
+    </div>
+`;
+        }
+
+        // Revision Techniques
+        if (plan.Revision_Techniques || plan.revision_techniques) {
+            const techniques = plan.Revision_Techniques || plan.revision_techniques;
+            htmlContent += `
+    <div class="section">
+        <h2>🧠 Revision Techniques</h2>
+        <ul>
+`;
+            Object.keys(techniques).forEach(technique => {
+                htmlContent += `
+            <li><strong>${technique.replace(/^\d+\.\s*/, '')}:</strong> ${techniques[technique]}</li>
+`;
+            });
+            htmlContent += `
+        </ul>
+    </div>
+`;
+        }
+
+        htmlContent += `
+    <div class="footer">
+        <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+        <p>Learning Companion - Your GCSE Success Partner</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            <strong>How to save as PDF:</strong> Open this file in your browser and use "Print" → "Save as PDF"
+        </p>
+    </div>
+</body>
+</html>
+`;
+
+        // Create blob and download as HTML
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GCSE_Study_Plan_${currentStudyPlanData.subject}_${new Date().toISOString().split('T')[0]}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert('Study plan downloaded! Open the HTML file and print/save as PDF.', 'success');
+    }
+
+    function addToCalendar() {
+        if (!currentStudyPlanData) {
+            showAlert('No study plan data available. Please generate a plan first.', 'warning');
+            return;
+        }
+
+        // Create iCal format
+        const examDate = new Date(currentStudyPlanData.exam_date);
+        const icalContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Learning Companion//GCSE Study Plan//EN
+BEGIN:VEVENT
+UID:${Date.now()}@learningcompanion.com
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${examDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:GCSE ${currentStudyPlanData.subject} Exam (${currentStudyPlanData.exam_board})
+DESCRIPTION:Target Grade: ${currentStudyPlanData.target_grade}
+LOCATION:Exam Hall
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
+
+        // Create blob and download
+        const blob = new Blob([icalContent], { type: 'text/calendar' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `GCSE_${currentStudyPlanData.subject}_Exam.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showAlert('Calendar event created! Import the downloaded .ics file to your calendar.', 'success');
+    }
+
+    function showAlert(message, type = 'info') {
+        // Create alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
     }
 </script>
 {% endblock %}
