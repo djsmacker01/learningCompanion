@@ -320,17 +320,48 @@
         padding-bottom: 0.25rem;
         border-bottom: 1px solid #3498db;
     }
-    
+
     .document-separator {
         border: none;
         border-top: 1px solid #e0e0e0;
         margin: 0.5rem 0;
     }
-    
+
     .document-paragraph {
         margin: 0.25rem 0;
         line-height: 1.5;
         color: #333;
+    }
+
+    .document-bullet {
+        margin: 0.25rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        line-height: 1.5;
+        color: #333;
+    }
+
+    .document-bullet:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #3498db;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .document-date {
+        color: #7f8c8d;
+        font-style: italic;
+        margin: 0.25rem 0;
+        font-size: 0.95em;
+    }
+
+    .document-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0.5rem 0 0.25rem 0;
+        font-size: 1.05em;
     }
 
     .stat-item {

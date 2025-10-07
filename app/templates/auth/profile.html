@@ -132,28 +132,80 @@
                     <h5 class="mb-0">🔔 Notification Preferences</h5>
                 </div>
                 <div class="card-body">
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
-                            user.profile.email_notifications else '' }} disabled>
-                        <label class="form-check-label">
-                            Email Notifications
-                        </label>
+                    <!-- Email Notifications -->
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 rounded"
+                        style="background-color: #f8f9fa; border-left: 4px solid #007bff;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-envelope text-primary me-3" style="font-size: 1.2rem;"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold">Email Notifications</h6>
+                                <small class="text-muted">Receive updates via email</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            {% if user.profile and user.profile.email_notifications %}
+                            <span class="badge bg-success me-2">
+                                <i class="fas fa-check"></i> Enabled
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary me-2">
+                                <i class="fas fa-times"></i> Disabled
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
-                            user.profile.sms_notifications else '' }} disabled>
-                        <label class="form-check-label">
-                            SMS Notifications
-                        </label>
+                    <!-- SMS Notifications -->
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 rounded"
+                        style="background-color: #f8f9fa; border-left: 4px solid #28a745;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-sms text-success me-3" style="font-size: 1.2rem;"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold">SMS Notifications</h6>
+                                <small class="text-muted">Receive updates via text message</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            {% if user.profile and user.profile.sms_notifications %}
+                            <span class="badge bg-success me-2">
+                                <i class="fas fa-check"></i> Enabled
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary me-2">
+                                <i class="fas fa-times"></i> Disabled
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" {{ 'checked' if user.profile and
-                            user.profile.study_reminders else '' }} disabled>
-                        <label class="form-check-label">
-                            Study Reminders
-                        </label>
+                    <!-- Study Reminders -->
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 rounded"
+                        style="background-color: #f8f9fa; border-left: 4px solid #ffc107;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-bell text-warning me-3" style="font-size: 1.2rem;"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold">Study Reminders</h6>
+                                <small class="text-muted">Get reminded about study sessions</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            {% if user.profile and user.profile.study_reminders %}
+                            <span class="badge bg-success me-2">
+                                <i class="fas fa-check"></i> Enabled
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary me-2">
+                                <i class="fas fa-times"></i> Disabled
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Edit Link -->
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit Notification Settings
+                        </a>
                     </div>
                 </div>
             </div>
@@ -196,6 +248,50 @@
 
     <div class="row">
         <div class="col-12">
+            <!-- Learning Style Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">🧠 Learning Style</h5>
+                </div>
+                <div class="card-body">
+                    {% set learning_style = user.profile.get_learning_style() if user.profile else None %}
+                    {% if learning_style %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Detected Style</label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-primary">{{ learning_style.learning_style.title() }}</span>
+                            <small class="text-muted ms-2">{{ learning_style.confidence_score }}% confidence</small>
+                        </p>
+                    </div>
+                    {% if learning_style.recommendations %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Recommendations</label>
+                        <ul class="list-unstyled">
+                            {% for rec in learning_style.recommendations[:3] %}
+                            <li class="mb-1">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>{{ rec }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="text-center">
+                        <a href="{{ url_for('ai_tutor.tutor_dashboard') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-brain"></i> AI Tutor Dashboard
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <p class="text-muted mb-3">No learning style detected yet</p>
+                        <a href="{{ url_for('ai_tutor.tutor_dashboard') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-brain"></i> Detect Learning Style
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Quick Actions</h5>
@@ -213,8 +309,8 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('auth.user_sessions') }}" class="btn btn-outline-info w-100">
-                                <i class="fas fa-desktop"></i> Active Sessions
+                            <a href="{{ url_for('sessions.session_history') }}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-history"></i> Session History
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
