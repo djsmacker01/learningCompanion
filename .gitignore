@@ -1,29 +1,117 @@
-# Environment variables
+# Environment variables - CRITICAL!
 .env
+.env.local
+.env.*.local
+*.env
 
 # Virtual environment
 venv/
 env/
+ENV/
+.venv/
 
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
 
 # Flask instance folder
 instance/
 
+# User uploaded files - IMPORTANT!
+uploads/
+*.pdf
+*.docx
+*.doc
+*.txt
+*.csv
+!requirements.txt
+!README.txt
+
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
 
 # OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
 # Logs
 *.log
+logs/
+*.log.*
 
 # Database files
 *.db
 *.sqlite
+*.sqlite3
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Flask
+instance/
+.webassets-cache
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Sensitive data files
+secrets/
+credentials/
+*.key
+*.pem
+*.cert
+
+# Node modules (if you add frontend build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
