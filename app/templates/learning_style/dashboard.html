@@ -63,11 +63,7 @@
                                     <label class="form-label">Subject</label>
                                     <select class="form-select" id="pathSubject" required>
                                         <option value="">Choose a subject...</option>
-                                        <option value="Mathematics">Mathematics</option>
-                                        <option value="English">English</option>
-                                        <option value="Science">Science</option>
-                                        <option value="History">History</option>
-                                        <option value="Geography">Geography</option>
+                                        <!-- Subjects will be loaded dynamically -->
                                     </select>
                                 </div>
                             </div>
@@ -353,7 +349,34 @@
     // Load data on page load
     document.addEventListener('DOMContentLoaded', function () {
         loadLearningStyles();
+        loadSubjects();
     });
+
+    function loadSubjects() {
+        fetch('/gcse-ai/api/subjects')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error loading subjects:', data.error);
+                    return;
+                }
+
+                // Populate subject dropdown
+                const subjectSelect = document.getElementById('pathSubject');
+                if (subjectSelect) {
+                    subjectSelect.innerHTML = '<option value="">Choose a subject...</option>';
+                    data.subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.name;
+                        option.textContent = subject.name;
+                        subjectSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading subjects:', error);
+            });
+    }
 
     function loadLearningStyles() {
         fetch('/learning-style/api/learning-styles')
@@ -708,27 +731,27 @@
                     if (data.learning_modules && Array.isArray(data.learning_modules) && data.learning_modules.length > 0) {
                         html += `
                             <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
-                                <h6 style="color: #28a745; font-weight: 600; margin-bottom: 10px;">
+                                <h6 style="color: #28a745; font-weight: 600; margin-bottom: 15px;">
                                     <i class="fas fa-book me-2"></i>Learning Modules
                                 </h6>
-                                <div class="list-group">
                         `;
                         data.learning_modules.forEach((module, idx) => {
                             const moduleName = typeof module === 'string' ? module : (module.name || module.title || `Module ${idx + 1}`);
                             const moduleDesc = typeof module === 'object' ? (module.description || '') : '';
+
                             html += `
-                                <div class="list-group-item">
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-success me-2">${idx + 1}</span>
-                                        <div>
-                                            <strong>${moduleName}</strong>
-                                            ${moduleDesc ? `<br><small class="text-muted">${moduleDesc}</small>` : ''}
+                                <div class="module-card mb-3 p-3 bg-white border rounded" style="border-left: 4px solid #28a745;">
+                                    <div class="d-flex align-items-start">
+                                        <span class="badge bg-success me-3" style="font-size: 16px; padding: 8px 12px;">${idx + 1}</span>
+                                        <div style="flex: 1;">
+                                            <h6 class="mb-2" style="color: #212529; font-weight: 600;">${moduleName}</h6>
+                                            ${moduleDesc ? `<p class="mb-0 text-muted" style="line-height: 1.6;">${moduleDesc}</p>` : ''}
                                         </div>
                                     </div>
                                 </div>
                             `;
                         });
-                        html += '</div></div>';
+                        html += '</div>';
                     }
 
                     // Adaptive Progression
@@ -747,16 +770,28 @@
                     if (data.learning_milestones && Array.isArray(data.learning_milestones) && data.learning_milestones.length > 0) {
                         html += `
                             <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ffc107;">
-                                <h6 style="color: #ffc107; font-weight: 600; margin-bottom: 10px;">
-                                    <i class="fas fa-trophy me-2"></i>Milestones
+                                <h6 style="color: #ffc107; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-trophy me-2"></i>Learning Milestones
                                 </h6>
-                                <ul class="mb-0">
                         `;
-                        data.learning_milestones.forEach(milestone => {
-                            const milestoneName = typeof milestone === 'string' ? milestone : (milestone.name || milestone.title || 'Milestone');
-                            html += `<li class="mb-2"><i class="fas fa-flag text-warning me-2"></i>${milestoneName}</li>`;
+                        data.learning_milestones.forEach((milestone, idx) => {
+                            let milestoneName = typeof milestone === 'string' ? milestone : (milestone.name || milestone.title || 'Milestone');
+
+                            // Clean up milestone text - remove "Module X Milestone:" prefix
+                            milestoneName = milestoneName.replace(/^Module\s*\d+\s*Milestone:\s*/i, '').trim();
+
+                            html += `
+                                <div class="milestone-card mb-3 p-3 bg-white border rounded" style="border-left: 4px solid #ffc107;">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-flag-checkered text-warning me-3" style="font-size: 20px; margin-top: 2px;"></i>
+                                        <div style="flex: 1;">
+                                            <p class="mb-0" style="line-height: 1.6; color: #495057;">${milestoneName}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         });
-                        html += '</ul></div>';
+                        html += '</div>';
                     }
 
                     // Recommendations
@@ -853,57 +888,252 @@
                             </div>
                     `;
 
-                    // Weekly Schedule
+                    // Weekly Schedule - Beautiful Calendar View
                     if (data.weekly_schedule && typeof data.weekly_schedule === 'object') {
                         html += `
                             <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ffc107;">
-                                <h6 style="color: #ffc107; font-weight: 600; margin-bottom: 10px;">
-                                    <i class="fas fa-calendar-week me-2"></i>Weekly Schedule
+                                <h6 style="color: #ffc107; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-calendar-week me-2"></i>Weekly Study Schedule
                                 </h6>
-                                <div class="row">
+                                <div class="weekly-calendar">
                         `;
-                        Object.entries(data.weekly_schedule).forEach(([day, schedule]) => {
-                            html += `
-                                <div class="col-md-6 mb-3">
-                                    <div class="p-2 bg-white rounded border">
-                                        <strong class="text-primary">${day.charAt(0).toUpperCase() + day.slice(1)}:</strong><br>
-                                        <small class="text-muted">${typeof schedule === 'string' ? schedule : JSON.stringify(schedule)}</small>
+                        
+                        const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                        const dayIcons = {
+                            'monday': '🌅',
+                            'tuesday': '💪',
+                            'wednesday': '⚡',
+                            'thursday': '🎯',
+                            'friday': '🌟',
+                            'saturday': '📚',
+                            'sunday': '🧘'
+                        };
+                        
+                        dayOrder.forEach(day => {
+                            const sessions = data.weekly_schedule[day];
+                            if (sessions && Array.isArray(sessions)) {
+                                html += `
+                                    <div class="day-card mb-3 p-3 bg-white border rounded shadow-sm">
+                                        <div class="day-header mb-3" style="border-bottom: 2px solid #ffc107; padding-bottom: 8px;">
+                                            <h6 class="mb-0" style="color: #212529; font-weight: 700;">
+                                                ${dayIcons[day]} ${day.charAt(0).toUpperCase() + day.slice(1)}
+                                            </h6>
+                                        </div>
+                                        <div class="day-sessions">
+                                `;
+                                
+                                sessions.forEach((session, idx) => {
+                                    const timeSlotColors = {
+                                        'morning': '#28a745',
+                                        'afternoon': '#ffc107',
+                                        'evening': '#17a2b8'
+                                    };
+                                    const timeSlotIcons = {
+                                        'morning': '🌅',
+                                        'afternoon': '☀️',
+                                        'evening': '🌙'
+                                    };
+                                    
+                                    const color = timeSlotColors[session.time_slot] || '#6c757d';
+                                    const icon = timeSlotIcons[session.time_slot] || '📖';
+                                    
+                                    html += `
+                                        <div class="session-block mb-2 p-2 rounded" style="border-left: 4px solid ${color}; background: #f8f9fa;">
+                                            <div class="d-flex align-items-start">
+                                                <span class="me-2" style="font-size: 18px;">${icon}</span>
+                                                <div style="flex: 1;">
+                                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                                        <strong style="color: ${color}; font-size: 14px;">${session.subject || 'Study'}</strong>
+                                                        <span class="badge" style="background-color: ${color}; font-size: 11px;">${session.duration || '45 min'}</span>
+                                                    </div>
+                                                    <div style="font-size: 12px; color: #6c757d;">
+                                                        <i class="fas fa-tasks me-1"></i>${session.activity || 'Study session'}
+                                                    </div>
+                                                    <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
+                                                        <i class="far fa-clock me-1"></i>${session.time_slot.charAt(0).toUpperCase() + session.time_slot.slice(1)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                
+                                html += `
+                                        </div>
                                     </div>
-                                </div>
-                            `;
+                                `;
+                            }
                         });
+                        
                         html += '</div></div>';
-                    }
-
-                    // Study Blocks
-                    if (data.study_blocks && Array.isArray(data.study_blocks) && data.study_blocks.length > 0) {
-                        html += `
-                            <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
-                                <h6 style="color: #17a2b8; font-weight: 600; margin-bottom: 10px;">
-                                    <i class="fas fa-clock me-2"></i>Study Blocks
-                                </h6>
-                                <ul class="list-unstyled mb-0">
-                        `;
-                        data.study_blocks.forEach(block => {
-                            const blockText = typeof block === 'string' ? block : (block.description || `${block.subject || 'Study'}: ${block.duration || '30 min'}`);
-                            html += `<li class="mb-2"><i class="fas fa-check-circle text-info me-2"></i>${blockText}</li>`;
-                        });
-                        html += '</ul></div>';
                     }
 
                     // Optimization Tips
                     if (data.optimization_tips && Array.isArray(data.optimization_tips) && data.optimization_tips.length > 0) {
                         html += `
                             <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
-                                <h6 style="color: #28a745; font-weight: 600; margin-bottom: 10px;">
-                                    <i class="fas fa-lightbulb me-2"></i>Optimization Tips
+                                <h6 style="color: #28a745; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-lightbulb me-2"></i>Session Optimization Tips
                                 </h6>
-                                <ul class="list-unstyled mb-0">
                         `;
-                        data.optimization_tips.forEach(tip => {
-                            html += `<li class="mb-2"><i class="fas fa-star text-success me-2"></i>${tip}</li>`;
+                        data.optimization_tips.forEach((tip, idx) => {
+                            html += `
+                                <div class="tip-card mb-2 p-3 bg-white border-start border-4 border-success rounded" style="border-left-color: #28a745 !important;">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-2" style="margin-top: 2px;"></i>
+                                        <p class="mb-0" style="line-height: 1.6; color: #495057;">${tip}</p>
+                                    </div>
+                                </div>
+                            `;
                         });
-                        html += '</ul></div>';
+                        html += '</div>';
+                    }
+                    
+                    // Break Recommendations
+                    if (data.break_recommendations && Array.isArray(data.break_recommendations) && data.break_recommendations.length > 0) {
+                        html += `
+                            <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                                <h6 style="color: #17a2b8; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-coffee me-2"></i>Break Recommendations
+                                </h6>
+                        `;
+                        data.break_recommendations.forEach((breakRec, idx) => {
+                            const activity = typeof breakRec === 'string' ? breakRec : (breakRec.activity || 'Take a break');
+                            const duration = typeof breakRec === 'object' ? breakRec.duration : '';
+                            const benefit = typeof breakRec === 'object' ? breakRec.benefit : '';
+                            
+                            html += `
+                                <div class="break-card mb-3 p-3 bg-white border rounded shadow-sm">
+                                    <div class="d-flex align-items-start">
+                                        <span class="badge bg-info me-3" style="font-size: 14px; padding: 8px 10px; height: fit-content;">${duration || '10m'}</span>
+                                        <div style="flex: 1;">
+                                            <h6 class="mb-1" style="color: #212529; font-weight: 600; font-size: 14px;">${activity}</h6>
+                                            ${benefit ? `<p class="mb-0 text-muted" style="font-size: 12px; line-height: 1.5;"><i class="fas fa-info-circle me-1"></i>${benefit}</p>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Motivation Triggers
+                    if (data.motivation_triggers && Array.isArray(data.motivation_triggers) && data.motivation_triggers.length > 0) {
+                        html += `
+                            <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                <h6 style="color: #dc3545; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-fire me-2"></i>Motivation Strategies
+                                </h6>
+                        `;
+                        data.motivation_triggers.forEach((trigger, idx) => {
+                            const triggerText = typeof trigger === 'string' ? trigger : (trigger.trigger || 'Motivation strategy');
+                            const timing = typeof trigger === 'object' ? trigger.timing : '';
+                            const benefit = typeof trigger === 'object' ? trigger.benefit : '';
+                            
+                            html += `
+                                <div class="motivation-card mb-3 p-3 bg-white border rounded shadow-sm" style="border-left: 4px solid #dc3545;">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-bolt text-danger me-2" style="font-size: 20px; margin-top: 2px;"></i>
+                                        <div style="flex: 1;">
+                                            <h6 class="mb-1" style="color: #212529; font-weight: 600; font-size: 14px;">${triggerText}</h6>
+                                            ${timing ? `<p class="mb-1 text-muted" style="font-size: 12px;"><i class="far fa-clock me-1"></i><strong>When:</strong> ${timing}</p>` : ''}
+                                            ${benefit ? `<p class="mb-0 text-muted" style="font-size: 12px;"><i class="fas fa-arrow-up me-1"></i><strong>Why:</strong> ${benefit}</p>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Revision Schedule
+                    if (data.revision_schedule && typeof data.revision_schedule === 'object') {
+                        html += `
+                            <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #6f42c1;">
+                                <h6 style="color: #6f42c1; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-redo me-2"></i>Revision Strategy (Spaced Repetition)
+                                </h6>
+                                <div class="revision-content p-3 bg-white rounded">
+                        `;
+                        
+                        if (data.revision_schedule.revision_intervals) {
+                            html += `
+                                <div class="mb-3">
+                                    <strong style="color: #6f42c1;"><i class="fas fa-calendar-alt me-2"></i>Review Intervals:</strong>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                            `;
+                            data.revision_schedule.revision_intervals.forEach(interval => {
+                                html += `<span class="badge bg-light text-dark border" style="font-size: 12px; padding: 6px 12px;">${interval}</span>`;
+                            });
+                            html += '</div></div>';
+                        }
+                        
+                        if (data.revision_schedule.revision_methods) {
+                            html += `
+                                <div class="mb-3">
+                                    <strong style="color: #6f42c1;"><i class="fas fa-brain me-2"></i>Revision Methods:</strong>
+                                    <ul class="mb-0 mt-2" style="list-style: none; padding-left: 0;">
+                            `;
+                            data.revision_schedule.revision_methods.forEach(method => {
+                                html += `<li class="mb-1"><i class="fas fa-check text-success me-2"></i>${method}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+                        
+                        if (data.revision_schedule.tips) {
+                            html += `
+                                <div>
+                                    <strong style="color: #6f42c1;"><i class="fas fa-star me-2"></i>Pro Tips:</strong>
+                                    <ul class="mb-0 mt-2" style="list-style: none; padding-left: 0;">
+                            `;
+                            data.revision_schedule.tips.forEach(tip => {
+                                html += `<li class="mb-1"><i class="fas fa-lightbulb text-warning me-2"></i>${tip}</li>`;
+                            });
+                            html += '</ul></div>';
+                        }
+                        
+                        html += '</div></div>';
+                    }
+                    
+                    // Intensity Patterns
+                    if (data.intensity_patterns && typeof data.intensity_patterns === 'object') {
+                        html += `
+                            <div class="result-section" style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #fd7e14;">
+                                <h6 style="color: #fd7e14; font-weight: 600; margin-bottom: 15px;">
+                                    <i class="fas fa-chart-line me-2"></i>Weekly Intensity Guide
+                                </h6>
+                                <div class="intensity-grid">
+                        `;
+                        
+                        const intensityColors = {
+                            'high': '#dc3545',
+                            'medium': '#ffc107',
+                            'low': '#28a745'
+                        };
+                        
+                        const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                        dayOrder.forEach(day => {
+                            const dayData = data.intensity_patterns[day];
+                            if (dayData && typeof dayData === 'object') {
+                                const intensity = dayData.intensity || 'medium';
+                                const focus = dayData.focus || 'Study';
+                                const color = intensityColors[intensity.toLowerCase()] || '#6c757d';
+                                
+                                html += `
+                                    <div class="intensity-day mb-2 p-3 bg-white border-start border-4 rounded" style="border-left-color: ${color} !important;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong style="color: #212529;">${day.charAt(0).toUpperCase() + day.slice(1)}</strong>
+                                                <span class="badge ms-2" style="background-color: ${color}; font-size: 11px;">${intensity}</span>
+                                            </div>
+                                            <small class="text-muted">${focus}</small>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+                        
+                        html += '</div></div>';
                     }
 
                     html += '</div>';

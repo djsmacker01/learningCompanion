@@ -93,7 +93,13 @@ def create_adaptive_learning_path():
         if not subject:
             return jsonify({'error': 'Subject is required'}), 400
         
+        print(f"Creating learning path: {subject}, {current_level} -> {target_level}, style: {learning_style}")
+        
         learning_path = detector.create_adaptive_learning_path(subject, current_level, target_level, learning_style)
+        
+        print(f"Learning path keys: {learning_path.keys() if isinstance(learning_path, dict) else 'error'}")
+        if learning_path.get('learning_modules'):
+            print(f"First module: {learning_path['learning_modules'][0]}")
         
         return jsonify(learning_path)
     
