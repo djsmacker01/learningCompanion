@@ -148,7 +148,12 @@ class DocumentProcessor:
             for paragraph in doc.paragraphs:
                 paragraph_text = paragraph.text.strip()
                 if paragraph_text:
-                    text_content += paragraph_text + "\n"
+                    # Check if paragraph has bullet formatting
+                    if paragraph.style.name.startswith('List') or any(run.bold for run in paragraph.runs):
+                        # This might be a bullet point or heading
+                        text_content += paragraph_text + "\n"
+                    else:
+                        text_content += paragraph_text + "\n"
             
             # Add separator before tables
             if doc.tables:
@@ -391,9 +396,6 @@ class DocumentProcessor:
         
         # Remove more than 2 consecutive empty lines
         result = re.sub(r'\n{3,}', '\n\n', result)
-        
-        # Add extra formatting for better readability
-        result = self._format_for_display(result)
         
         return result.strip()
     
