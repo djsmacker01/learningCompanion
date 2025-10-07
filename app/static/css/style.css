@@ -196,3 +196,86 @@ footer {
 .opacity-50 {
     opacity: 0.5 !important;
 }
+
+/* Bootstrap Gradient Background Utilities */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.bg-gradient-light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #212529 0%, #1a1e21 100%) !important;
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+}
+
+/* Enhanced gradient effects for better visual appeal */
+.card-header.bg-gradient-primary,
+.card-header.bg-gradient-success,
+.card-header.bg-gradient-info,
+.card-header.bg-gradient-warning,
+.card-header.bg-gradient-danger,
+.card-header.bg-gradient-light,
+.card-header.bg-gradient-dark,
+.card-header[class*="bg-gradient"] {
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header.bg-gradient-success {
+    background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+}
+
+.card-header.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+.card-header.bg-gradient-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
+}
+
+.card-header.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+}
+
+.card-header.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+/* Smart Content Generator specific styling */
+.smart-content-header {
+    background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.2) !important;
+}
+
+.smart-content-header h2 {
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.smart-content-header p {
+    opacity: 0.9 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}

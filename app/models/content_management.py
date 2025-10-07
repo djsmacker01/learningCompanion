@@ -393,7 +393,7 @@ class TopicTag:
                 tag = cls(
                     id=data['id'],
                     name=data['name'],
-                    color=data.get('color', '
+                    color=data.get('color', '#6c757d'),
                     description=data.get('description'),
                     usage_count=data.get('usage_count', 0),
                     created_at=datetime.fromisoformat(data['created_at'])
@@ -406,7 +406,7 @@ class TopicTag:
             return []
     
     @classmethod
-    def create_tag(cls, name: str, color: str = '
+    def create_tag(cls, name: str, color: str = '#6c757d', description: str = None):
         
         if not SUPABASE_AVAILABLE:
             return None
@@ -450,7 +450,7 @@ class TopicTag:
                 tag = cls(
                     id=data['id'],
                     name=data['name'],
-                    color=data.get('color', '
+                    color=data.get('color', '#6c757d'),
                     description=data.get('description'),
                     usage_count=data.get('usage_count', 0),
                     created_at=datetime.fromisoformat(data['created_at'])

@@ -2,6 +2,64 @@
 
 {% block title %}AI Tutor - Learning Companion{% endblock %}
 
+{% block extra_css %}
+<style>
+    .explanation-content {
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    .quiz-recommendations .card {
+        border-left: 4px solid #007bff;
+    }
+
+    .quiz-recommendations .card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-lg {
+        max-width: 800px;
+    }
+
+    #studyPlanResult,
+    #conceptExplanationResult,
+    #adaptiveQuizResult,
+    #gradePredictionResult {
+        margin-top: 1rem;
+    }
+
+    .alert pre {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .study-plan-content {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .study-plan-content .list-group-item {
+        border: none;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .study-plan-content .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .study-plan-text {
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="row">
@@ -9,7 +67,8 @@
         <div class="col-lg-8">
             <!-- AI Tutor Header -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-gradient-primary text-white">
+                <div class="card-header bg-primary text-white"
+                    style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-robot fa-2x me-3"></i>
                         <div>
@@ -161,7 +220,8 @@
         <div class="col-lg-4">
             <!-- AI Features -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-gradient-info text-white">
+                <div class="card-header bg-info text-white"
+                    style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-magic me-2"></i>AI Features
                     </h5>
@@ -216,11 +276,12 @@
                         Recent AI Activity
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="text-center py-4">
-                        <i class="fas fa-robot fa-2x text-muted mb-3"></i>
-                        <p class="text-muted">No recent AI activity</p>
-                        <small class="text-muted">Start using AI features to see your activity here</small>
+                <div class="card-body" id="aiActivityContainer">
+                    <div class="text-center py-4" id="aiActivityLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading AI activity...</p>
                     </div>
                 </div>
             </div>
@@ -249,6 +310,11 @@
                         <label class="form-label">Exam Date (Optional)</label>
                         <input type="date" class="form-control" id="examDate">
                     </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="predictGrade()">
+                            <i class="fas fa-crystal-ball me-2"></i>Predict Grade
+                        </button>
+                    </div>
                 </form>
                 <div id="gradePredictionResult" class="mt-3" style="display: none;">
                     <!-- Results will be displayed here -->
@@ -256,7 +322,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="predictGrade()">Predict Grade</button>
             </div>
         </div>
     </div>
@@ -296,20 +361,132 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Time Available (minutes per day)</label>
-                        <input type="number" class="form-control" id="timeAvailable" placeholder="e.g., 60">
+                        <label class="form-label">Time Available (hours per week)</label>
+                        <input type="number" class="form-control" id="timeAvailable" min="1" max="40"
+                            placeholder="e.g., 10">
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="generateStudyPlan()">
+                            <i class="fas fa-magic me-2"></i>Generate Study Plan
+                        </button>
                     </div>
                 </form>
-                <div id="studyPlanResult" class="mt-3" style="display: none;">
+                <div id="studyPlanResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Concept Explainer Modal -->
+<div class="modal fade" id="conceptExplainerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">AI Concept Explainer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="conceptExplainerForm">
+                    <div class="mb-3">
+                        <label class="form-label">What concept would you like explained?</label>
+                        <input type="text" class="form-control" id="conceptInput"
+                            placeholder="e.g., Photosynthesis, Quadratic Equations, The Water Cycle..." required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Select Topic (optional)</label>
+                                <select class="form-select" id="conceptTopicSelect">
+                                    <option value="">Choose a topic...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Explanation Level</label>
+                                <select class="form-select" id="explanationLevel">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate" selected>Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="explainConcept()">
+                            <i class="fas fa-lightbulb me-2"></i>Explain Concept
+                        </button>
+                    </div>
+                </form>
+                <div id="conceptExplanationResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Adaptive Quiz Modal -->
+<div class="modal fade" id="adaptiveQuizModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adaptive Quiz Recommendations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="adaptiveQuizForm">
+                    <div class="mb-3">
+                        <label class="form-label">Select Topic for Quiz Recommendations</label>
+                        <select class="form-select" id="adaptiveQuizTopicSelect" required>
+                            <option value="">Choose a topic...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-primary" onclick="getAdaptiveQuizRecommendations()">
+                            <i class="fas fa-question-circle me-2"></i>Get Quiz Recommendations
+                        </button>
+                    </div>
+                </form>
+                <div id="adaptiveQuizResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Learning Style Detection Modal -->
+<div class="modal fade" id="learningStyleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-brain me-2"></i>Learning Style Detection
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="learningStyleContent">
+                    <!-- Loading state -->
+                    <div id="learningStyleLoading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Analyzing your learning patterns...</p>
+                    </div>
+
                     <!-- Results will be displayed here -->
+                    <div id="learningStyleResults" style="display: none;"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="generateStudyPlan()">Generate Plan</button>
+                <button type="button" class="btn btn-primary" onclick="saveLearningStyle()">
+                    <i class="fas fa-save me-2"></i>Save Learning Style
+                </button>
             </div>
         </div>
     </div>
+</div>
+<!-- Results will be displayed here -->
+</div>
 </div>
 {% endblock %}
 
@@ -321,39 +498,389 @@
     });
 
     function loadTopics() {
-        // This would load topics from your API
-        // For now, we'll use placeholder data
-        const topicSelects = document.querySelectorAll('#gradeTopicSelect, #studyPlanTopicSelect');
-        topicSelects.forEach(select => {
-            select.innerHTML = '<option value="">Choose a topic...</option>';
-            // Add your topics here
-        });
+        fetch('/ai-tutor/api/topics')
+            .then(response => response.json())
+            .then(data => {
+                const topicSelectors = [
+                    'gradeTopicSelect',
+                    'studyPlanTopicSelect',
+                    'conceptTopicSelect',
+                    'adaptiveQuizTopicSelect'
+                ];
+
+                topicSelectors.forEach(selectorId => {
+                    const select = document.getElementById(selectorId);
+                    if (select) {
+                        select.innerHTML = '<option value="">Choose a topic...</option>';
+                        if (data.topics && data.topics.length > 0) {
+                            data.topics.forEach(topic => {
+                                select.innerHTML += `<option value="${topic.id}">${topic.title}</option>`;
+                            });
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading topics:', error);
+                // Fallback: populate with placeholder
+                const topicSelectors = [
+                    'gradeTopicSelect',
+                    'studyPlanTopicSelect',
+                    'conceptTopicSelect',
+                    'adaptiveQuizTopicSelect'
+                ];
+                topicSelectors.forEach(selectorId => {
+                    const select = document.getElementById(selectorId);
+                    if (select) {
+                        select.innerHTML = '<option value="">Choose a topic...</option>';
+                    }
+                });
+            });
     }
 
     function detectLearningStyle() {
-        // Show loading
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Detecting...';
-        btn.disabled = true;
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('learningStyleModal'));
+        modal.show();
+
+        // Start detection
+        performLearningStyleDetection();
+    }
+
+    function performLearningStyleDetection() {
+        // Reset save state for new detection
+        isSaving = false;
+        hasBeenSaved = false;
+
+        // Reset save button state
+        const saveBtn = document.querySelector('#learningStyleModal .btn-primary');
+        if (saveBtn) {
+            saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Learning Style';
+            saveBtn.classList.remove('btn-success');
+            saveBtn.classList.add('btn-primary');
+            saveBtn.disabled = false;
+        }
+
+        // Show loading state
+        document.getElementById('learningStyleLoading').style.display = 'block';
+        document.getElementById('learningStyleResults').style.display = 'none';
 
         fetch('/ai-tutor/api/learning-style')
             .then(response => response.json())
             .then(data => {
+                // Hide loading
+                document.getElementById('learningStyleLoading').style.display = 'none';
+
                 if (data.error) {
-                    alert('Error: ' + data.error);
+                    showLearningStyleError(data.error);
                 } else {
-                    alert(`Your learning style: ${data.learning_style.style} (${data.learning_style.confidence}% confidence)`);
+                    showLearningStyleResults(data);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error detecting learning style');
+                document.getElementById('learningStyleLoading').style.display = 'none';
+                showLearningStyleError('Error detecting learning style: ' + error.message);
+            });
+    }
+
+    function showLearningStyleResults(data) {
+        const resultsDiv = document.getElementById('learningStyleResults');
+
+        // Extract learning style information
+        const learningStyle = data.learning_style || data;
+        const style = learningStyle.style || learningStyle.primary_learning_style || 'visual';
+        const confidence = learningStyle.confidence || learningStyle.confidence_score || 80;
+        const recommendations = learningStyle.recommendations || [];
+        const studyPatterns = data.study_patterns || {};
+
+        // Style information mapping
+        const styleInfo = {
+            'visual': {
+                name: 'Visual Learner',
+                icon: 'fas fa-eye',
+                color: 'primary',
+                description: 'You learn best through visual aids, diagrams, charts, and spatial representations.',
+                characteristics: [
+                    'Prefers visual aids and diagrams',
+                    'Benefits from color coding and highlighting',
+                    'Likes mind maps and flowcharts',
+                    'Remembers information through spatial relationships'
+                ]
+            },
+            'auditory': {
+                name: 'Auditory Learner',
+                icon: 'fas fa-volume-up',
+                color: 'success',
+                description: 'You learn best through listening, discussions, and verbal explanations.',
+                characteristics: [
+                    'Prefers verbal instructions and explanations',
+                    'Benefits from group discussions',
+                    'Likes to read aloud and hear information',
+                    'Remembers information through sound and rhythm'
+                ]
+            },
+            'kinesthetic': {
+                name: 'Kinesthetic Learner',
+                icon: 'fas fa-hands',
+                color: 'warning',
+                description: 'You learn best through hands-on activities, movement, and physical interaction.',
+                characteristics: [
+                    'Prefers hands-on activities and experiments',
+                    'Benefits from movement and physical interaction',
+                    'Likes to build and create things',
+                    'Remembers information through doing'
+                ]
+            },
+            'reading_writing': {
+                name: 'Reading/Writing Learner',
+                icon: 'fas fa-book',
+                color: 'info',
+                description: 'You learn best through reading, writing, and text-based materials.',
+                characteristics: [
+                    'Prefers written materials and text',
+                    'Benefits from note-taking and writing',
+                    'Likes lists and written instructions',
+                    'Remembers information through reading and writing'
+                ]
+            }
+        };
+
+        const currentStyle = styleInfo[style] || styleInfo['visual'];
+
+        resultsDiv.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-${currentStyle.color}">
+                        <div class="card-header bg-${currentStyle.color} text-white">
+                            <h5 class="mb-0">
+                                <i class="${currentStyle.icon} me-2"></i>
+                                ${currentStyle.name}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">Confidence Level:</span>
+                                    <span class="badge bg-${currentStyle.color}">${confidence}%</span>
+                                </div>
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar bg-${currentStyle.color}" role="progressbar" 
+                                         style="width: ${confidence}%" aria-valuenow="${confidence}" 
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <p class="text-muted">${currentStyle.description}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Your Learning Characteristics</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                ${currentStyle.characteristics.map(char =>
+            `<li class="mb-2"><i class="fas fa-check text-${currentStyle.color} me-2"></i>${char}</li>`
+        ).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            ${recommendations.length > 0 ? `
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Personalized Recommendations
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                ${recommendations.map(rec =>
+            `<li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>${rec}</li>`
+        ).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+            
+            ${Object.keys(studyPatterns).length > 0 ? `
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Study Pattern Analysis
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                ${Object.entries(studyPatterns).map(([key, value]) =>
+            `<div class="col-md-6 mb-2">
+                                        <strong>${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                                        <span class="text-muted">${value}</span>
+                                    </div>`
+        ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+        `;
+
+        resultsDiv.style.display = 'block';
+    }
+
+    function showLearningStyleError(errorMessage) {
+        const resultsDiv = document.getElementById('learningStyleResults');
+        resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error:</strong> ${errorMessage}
+            </div>
+        `;
+        resultsDiv.style.display = 'block';
+    }
+
+    // Track save state to prevent duplicate saves
+    let isSaving = false;
+    let hasBeenSaved = false;
+
+    function saveLearningStyle() {
+        // Prevent duplicate saves
+        if (isSaving) {
+            showNotification('Learning style is already being saved. Please wait...', 'info');
+            return;
+        }
+
+        // Check if already saved
+        if (hasBeenSaved) {
+            showNotification('Learning style has already been saved to your profile!', 'info');
+            return;
+        }
+
+        // Get the current learning style data from the modal
+        const resultsDiv = document.getElementById('learningStyleResults');
+        if (!resultsDiv || resultsDiv.style.display === 'none') {
+            showNotification('No learning style data to save. Please run the detection first.', 'warning');
+            return;
+        }
+
+        // Set saving state
+        isSaving = true;
+        hasBeenSaved = false;
+
+        // Show loading state
+        const saveBtn = event.target;
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        saveBtn.disabled = true;
+
+        // Extract learning style data from the displayed results
+        const learningStyleData = extractLearningStyleData();
+
+        // Send to backend to save
+        fetch('/ai-tutor/api/save-learning-style', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(learningStyleData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showNotification('Error saving learning style: ' + data.error, 'error');
+                    hasBeenSaved = false; // Reset on error
+                } else {
+                    showNotification('Learning style saved to your profile successfully!', 'success');
+                    hasBeenSaved = true; // Mark as saved
+                    // Update the save button to show it's been saved
+                    saveBtn.innerHTML = '<i class="fas fa-check me-2"></i>Saved';
+                    saveBtn.classList.remove('btn-primary');
+                    saveBtn.classList.add('btn-success');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving learning style:', error);
+                showNotification('Error saving learning style. Please try again.', 'error');
+                hasBeenSaved = false; // Reset on error
             })
             .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                isSaving = false; // Reset saving state
+                // Re-enable button after a delay
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                    if (!hasBeenSaved) {
+                        saveBtn.classList.remove('btn-success');
+                        saveBtn.classList.add('btn-primary');
+                    }
+                }, 2000);
             });
+    }
+
+    function extractLearningStyleData() {
+        // Extract learning style data from the displayed results
+        const resultsDiv = document.getElementById('learningStyleResults');
+        const styleCard = resultsDiv.querySelector('.card');
+
+        if (!styleCard) {
+            return null;
+        }
+
+        // Extract style name from the card header
+        const styleName = styleCard.querySelector('.card-header h5').textContent.trim();
+        const confidenceBadge = styleCard.querySelector('.badge');
+        const confidence = confidenceBadge ? parseInt(confidenceBadge.textContent.replace('%', '')) : 75;
+
+        // Extract recommendations
+        const recommendations = [];
+        const recList = resultsDiv.querySelectorAll('.card .list-unstyled li');
+        recList.forEach(item => {
+            const text = item.textContent.trim();
+            if (text && !text.includes('Your Learning Characteristics')) {
+                recommendations.push(text);
+            }
+        });
+
+        return {
+            learning_style: styleName.toLowerCase().replace(' learner', '').replace(' ', '_'),
+            confidence: confidence,
+            recommendations: recommendations,
+            saved_at: new Date().toISOString()
+        };
+    }
+
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
     }
 
     function refreshRecommendations() {
@@ -362,12 +889,27 @@
     }
 
     function showGradePrediction() {
+        // Ensure topics are loaded when modal opens
+        loadTopics();
         const modal = new bootstrap.Modal(document.getElementById('gradePredictionModal'));
         modal.show();
     }
 
     function showStudyPlan() {
+        loadTopics();
         const modal = new bootstrap.Modal(document.getElementById('studyPlanModal'));
+        modal.show();
+    }
+
+    function showConceptExplainer() {
+        loadTopics();
+        const modal = new bootstrap.Modal(document.getElementById('conceptExplainerModal'));
+        modal.show();
+    }
+
+    function showAdaptiveQuiz() {
+        loadTopics();
+        const modal = new bootstrap.Modal(document.getElementById('adaptiveQuizModal'));
         modal.show();
     }
 
@@ -432,12 +974,124 @@
                 if (data.error) {
                     resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h6>Study Plan Generated!</h6>
-                            <pre>${JSON.stringify(data.study_plan, null, 2)}</pre>
+                    const studyPlan = data.study_plan;
+                    let html = `
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-calendar-alt me-2"></i>Study Plan Generated!</h6>
+                        <div class="study-plan-content">
+                `;
+
+                    // Display overview
+                    if (studyPlan.overview) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Overview</h6>
+                            <p>${studyPlan.overview}</p>
                         </div>
                     `;
+                    }
+
+                    // Display weekly schedule
+                    if (studyPlan.weekly_schedule && studyPlan.weekly_schedule.length > 0) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Weekly Schedule</h6>
+                            <ul class="list-group list-group-flush">
+                    `;
+                        studyPlan.weekly_schedule.forEach(item => {
+                            if (item.trim()) {
+                                html += `<li class="list-group-item">${item}</li>`;
+                            }
+                        });
+                        html += `</ul></div>`;
+                    }
+
+                    // Display learning objectives
+                    if (studyPlan.learning_objectives && studyPlan.learning_objectives.length > 0) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Learning Objectives</h6>
+                            <ul class="list-group list-group-flush">
+                    `;
+                        studyPlan.learning_objectives.forEach(item => {
+                            if (item.trim()) {
+                                html += `<li class="list-group-item">${item}</li>`;
+                            }
+                        });
+                        html += `</ul></div>`;
+                    }
+
+                    // Display study methods
+                    if (studyPlan.study_methods && studyPlan.study_methods.length > 0) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Study Methods</h6>
+                            <ul class="list-group list-group-flush">
+                    `;
+                        studyPlan.study_methods.forEach(item => {
+                            if (item.trim()) {
+                                html += `<li class="list-group-item">${item}</li>`;
+                            }
+                        });
+                        html += `</ul></div>`;
+                    }
+
+                    // Display practice activities
+                    if (studyPlan.practice_activities && studyPlan.practice_activities.length > 0) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Practice Activities</h6>
+                            <ul class="list-group list-group-flush">
+                    `;
+                        studyPlan.practice_activities.forEach(item => {
+                            if (item.trim()) {
+                                html += `<li class="list-group-item">${item}</li>`;
+                            }
+                        });
+                        html += `</ul></div>`;
+                    }
+
+                    // Display assessment strategies
+                    if (studyPlan.assessment_strategies && studyPlan.assessment_strategies.length > 0) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Assessment Strategies</h6>
+                            <ul class="list-group list-group-flush">
+                    `;
+                        studyPlan.assessment_strategies.forEach(item => {
+                            if (item.trim()) {
+                                html += `<li class="list-group-item">${item}</li>`;
+                            }
+                        });
+                        html += `</ul></div>`;
+                    }
+
+                    // Display timeline
+                    if (studyPlan.timeline) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Timeline</h6>
+                            <p>${studyPlan.timeline}</p>
+                        </div>
+                    `;
+                    }
+
+                    // If no structured data, show full text
+                    if (!studyPlan.overview && !studyPlan.weekly_schedule && studyPlan.full_text) {
+                        html += `
+                        <div class="mb-3">
+                            <h6 class="text-primary">Complete Study Plan</h6>
+                            <div class="study-plan-text">${studyPlan.full_text.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    `;
+                    }
+
+                    html += `
+                        </div>
+                    </div>
+                `;
+
+                    resultDiv.innerHTML = html;
                 }
                 resultDiv.style.display = 'block';
             })
@@ -447,5 +1101,198 @@
                 document.getElementById('studyPlanResult').style.display = 'block';
             });
     }
+
+    function explainConcept() {
+        const concept = document.getElementById('conceptInput').value.trim();
+        const topicId = document.getElementById('conceptTopicSelect').value;
+        const level = document.getElementById('explanationLevel').value;
+
+        if (!concept) {
+            alert('Please enter a concept to explain');
+            return;
+        }
+
+        const requestData = {
+            concept: concept,
+            topic_id: topicId || null,
+            level: level
+        };
+
+        console.log('Concept Explainer Debug - Sending request:', requestData);
+
+        fetch('/ai-tutor/api/explain', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => {
+                console.log('Concept Explainer Debug - Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Concept Explainer Debug - Response data:', data);
+                const resultDiv = document.getElementById('conceptExplanationResult');
+                if (data.error) {
+                    console.log('Concept Explainer Debug - Error in response:', data.error);
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    console.log('Concept Explainer Debug - Success, displaying explanation');
+                    resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <h6>AI Explanation</h6>
+                        <div class="explanation-content">
+                            ${data.explanation.replace(/\n/g, '<br>')}
+                        </div>
+                        ${data.examples ? `<div class="mt-3"><strong>Examples:</strong><br>${data.examples.replace(/\n/g, '<br>')}</div>` : ''}
+                        ${data.related_concepts ? `<div class="mt-3"><strong>Related Concepts:</strong><br>${data.related_concepts.join(', ')}</div>` : ''}
+                    </div>
+                `;
+                }
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('conceptExplanationResult').innerHTML = '<div class="alert alert-danger">Error explaining concept</div>';
+                document.getElementById('conceptExplanationResult').style.display = 'block';
+            });
+    }
+
+    function getAdaptiveQuizRecommendations() {
+        const topicId = document.getElementById('adaptiveQuizTopicSelect').value;
+
+        if (!topicId) {
+            alert('Please select a topic');
+            return;
+        }
+
+        console.log('Adaptive Quiz Debug - Fetching recommendations for topic:', topicId);
+
+        fetch(`/ai-tutor/api/adaptive-quiz/${topicId}`)
+            .then(response => {
+                console.log('Adaptive Quiz Debug - Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Adaptive Quiz Debug - Response data:', data);
+                const resultDiv = document.getElementById('adaptiveQuizResult');
+                if (data.error) {
+                    console.log('Adaptive Quiz Debug - Error in response:', data.error);
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    let recommendationsHtml = `
+                    <div class="alert alert-success">
+                        <h6>Adaptive Quiz Recommendations</h6>
+                        <div class="quiz-recommendations">
+                `;
+
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        data.recommendations.forEach((rec, index) => {
+                            recommendationsHtml += `
+                            <div class="card mb-2">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title">${rec.quiz_type || 'Recommended Quiz'}</h6>
+                                    <p class="card-text">${rec.recommendation}</p>
+                                    <small class="text-muted">Difficulty: ${rec.difficulty || 'Adaptive'}</small>
+                                    ${rec.estimated_time ? `<br><small class="text-muted">Time: ${rec.estimated_time} minutes</small>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        });
+                    } else {
+                        recommendationsHtml += '<p>No specific recommendations available. Try creating some quizzes for this topic first!</p>';
+                    }
+
+                    recommendationsHtml += `
+                        </div>
+                    </div>
+                `;
+
+                    resultDiv.innerHTML = recommendationsHtml;
+                }
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('adaptiveQuizResult').innerHTML = '<div class="alert alert-danger">Error getting quiz recommendations</div>';
+                document.getElementById('adaptiveQuizResult').style.display = 'block';
+            });
+    }
+
+    // Load AI activity
+    function loadAIActivity() {
+        fetch('/ai-tutor/api/activity')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('aiActivityContainer');
+                const loading = document.getElementById('aiActivityLoading');
+
+                if (data.error) {
+                    container.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                            <p class="text-muted">Error loading AI activity</p>
+                            <small class="text-muted">${data.error}</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (data.activities && data.activities.length > 0) {
+                    let activityHtml = '';
+                    data.activities.forEach(activity => {
+                        activityHtml += `
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <i class="${activity.icon} ${activity.color} fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${activity.title}</h6>
+                                    <p class="text-muted mb-1 small">${activity.result_summary}</p>
+                                    <small class="text-muted">${activity.time_ago}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = activityHtml;
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-robot fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No recent AI activity</p>
+                            <small class="text-muted">Start using AI features to see your activity here</small>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="loadAIActivity()">
+                                    <i class="fas fa-sync me-1"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading AI activity:', error);
+                const container = document.getElementById('aiActivityContainer');
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                        <p class="text-muted">Error loading AI activity</p>
+                        <small class="text-muted">Please try refreshing the page</small>
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadAIActivity()">
+                                <i class="fas fa-sync me-1"></i>Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+    }
+
+    // Load AI activity when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        loadAIActivity();
+    });
 </script>
 {% endblock %}
