@@ -16,6 +16,15 @@
     <h1 class="mb-4"><i class="fas fa-calculator me-2"></i>GCSE Grade Calculator</h1>
     <p class="lead">Calculate your GCSE grade based on your marks and official grade boundaries.</p>
 
+    <!-- Disclaimer -->
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Important:</strong> Grade boundaries shown are examples from 2023 and may not reflect current year
+        boundaries.
+        Actual grade boundaries vary by exam board, year, and paper. Always check official exam board websites for
+        accurate, current boundaries.
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
@@ -49,7 +58,7 @@
                                     {% for subject in subjects %}
                                     <option value="{{ subject.specification_code }}"
                                         data-exam-board="{{ subject.exam_board }}">
-                                        {{ subject.name }} ({{ subject.exam_board }})
+                                        {{ subject.subject_name }} ({{ subject.exam_board }})
                                     </option>
                                     {% endfor %}
                                 </select>
@@ -106,7 +115,7 @@
                 </div>
                 <div class="card-body text-center">
                     <div id="gradeDisplay">
-                        
+
                     </div>
                 </div>
             </div>
@@ -214,6 +223,13 @@
     document.getElementById('gradeCalculatorForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Calculating...';
+
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
 
@@ -236,12 +252,25 @@
         } catch (error) {
             console.error('Error:', error);
             alert('An error occurred while calculating the grade.');
+        } finally {
+            // Reset button state - multiple attempts to ensure it works
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-calculator me-2"></i>Calculate Grade';
+            }, 100);
         }
     });
 
     function displayGradeResult(gradeResult) {
         const resultCard = document.getElementById('resultCard');
         const gradeDisplay = document.getElementById('gradeDisplay');
+
+        // Force reset submit button (backup)
+        const submitBtn = document.querySelector('#gradeCalculatorForm button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-calculator me-2"></i>Calculate Grade';
+        }
 
         const gradeClass = `grade-${gradeResult.grade}`;
 

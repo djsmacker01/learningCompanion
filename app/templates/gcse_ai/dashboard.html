@@ -4,6 +4,15 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Data Accuracy Notice -->
+    <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>AI-Generated Content:</strong> The study plans, analysis, and recommendations are AI-generated based on
+        general GCSE curriculum.
+        Always verify information with your teacher and official exam board materials.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div class="row">
         <!-- Header -->
         <div class="col-12">
@@ -896,7 +905,7 @@
                                     <strong>Days to Exam:</strong><br>
                                     <span class="text-warning">${data.days_until_exam} days</span>
                                 </div>
-                            </div>
+                        </div>
                     `;
 
                     // Display study plan details - handle nested structure
@@ -1069,7 +1078,7 @@
                                     <strong>Paper Type:</strong><br>
                                     <span class="text-secondary">${data.paper_type}</span>
                                 </div>
-                            </div>
+                        </div>
                     `;
 
                     // Question Analysis
@@ -1230,7 +1239,7 @@
                                     <i class="fas fa-info-circle me-2"></i>
                                     Based on current performance, you're on track for Grade ${data.predicted_grade}
                                 </div>
-                            </div>
+                        </div>
                     `;
 
                     // Grade boundaries table
@@ -2686,7 +2695,7 @@
                                     <strong>Exam Board:</strong><br>
                                     <span class="text-info">${data.exam_board}</span>
                                 </div>
-                            </div>
+                        </div>
                     `;
 
                     // General techniques

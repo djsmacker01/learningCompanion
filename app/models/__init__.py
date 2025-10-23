@@ -60,6 +60,19 @@ class User(UserMixin):
         except Exception as e:
             print(f"Error loading user: {e}")
             return None
+    
+    @staticmethod
+    def get_user_by_email(email):
+        """Get user by email address"""
+        try:
+            response = supabase.table('users').select('*').eq('email', email.lower().strip()).execute()
+            if response.data:
+                user_data = response.data[0]
+                return User(user_data['id'], user_data['email'], user_data.get('name'))
+            return None
+        except Exception as e:
+            print(f"Error loading user by email: {e}")
+            return None
 
 class Topic:
     def __init__(self, id, title, description, user_id, created_at=None, is_active=True, 

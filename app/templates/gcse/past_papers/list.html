@@ -89,11 +89,46 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Platform Information Banner (Permanent - Always Visible) -->
+    <div class="alert alert-primary mb-4" role="alert">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-users fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-2"><i class="fas fa-lightbulb me-1"></i>Community Practice Questions</h5>
+                <p class="mb-2">
+                    <strong>Welcome to the Practice Questions Platform!</strong> This section allows teachers and
+                    students to create, share, and practice with community-generated questions.
+                    <strong class="text-danger">These are NOT official exam board past papers.</strong>
+                </p>
+                <p class="mb-2">
+                    <strong>For official GCSE past papers, visit:</strong>
+                </p>
+                <div class="mt-2">
+                    <a href="https://www.aqa.org.uk/find-past-papers-and-mark-schemes" target="_blank"
+                        class="btn btn-sm btn-dark me-2">AQA <i class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://qualifications.pearson.com/en/support/support-topics/exams/past-papers.html"
+                        target="_blank" class="btn btn-sm btn-dark me-2">Edexcel <i
+                            class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://www.ocr.org.uk/qualifications/past-paper-finder/" target="_blank"
+                        class="btn btn-sm btn-dark me-2">OCR <i class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://www.wjec.co.uk/qualifications/past-papers/" target="_blank"
+                        class="btn btn-sm btn-dark">WJEC <i class="fas fa-external-link-alt ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><i class="fas fa-file-alt me-2"></i>GCSE Past Papers</h1>
                 <div>
+                    <h1><i class="fas fa-users me-2"></i>GCSE Practice Questions</h1>
+                    <p class="text-muted mb-0">Community-generated practice questions for GCSE revision</p>
+                </div>
+                <div>
+                    <button class="btn btn-success me-2" onclick="showCreateQuestionModal()">
+                        <i class="fas fa-plus me-1"></i>Create Question
+                    </button>
                     <a href="{{ url_for('gcse.gcse_dashboard') }}" class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                     </a>
@@ -105,7 +140,7 @@
         </div>
     </div>
 
-    
+
     <div class="filter-section">
         <div class="row">
             <div class="col-md-3 mb-3">
@@ -161,9 +196,16 @@
     </div>
 
     <div class="row">
-        
+
         <div class="col-lg-8">
             {% if past_papers %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Community Practice Sets
+                    <span class="badge bg-primary">{{ past_papers|length }}</span>
+                </h5>
+                <small class="text-muted">User-generated practice questions - NOT official past papers</small>
+            </div>
             <div class="row">
                 {% for paper in past_papers %}
                 <div class="col-md-6 mb-4">
@@ -175,6 +217,9 @@
                             </div>
 
                             <div class="mb-3">
+                                <span class="badge bg-info text-white me-2">
+                                    <i class="fas fa-users me-1"></i>Community
+                                </span>
                                 <span class="difficulty-badge difficulty-{{ paper.difficulty_level|lower }}">
                                     {{ paper.difficulty_level }}
                                 </span>
@@ -226,12 +271,23 @@
             <div class="text-center py-5">
                 <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
                 <h4>No Past Papers Found</h4>
-                <p class="text-muted">Select a subject and apply filters to view available past papers.</p>
+                <p class="text-muted">
+                    {% if selected_subject_id or selected_exam_board or selected_exam_year or selected_difficulty_level
+                    %}
+                    No papers match your current filters. Try adjusting the filters above.
+                    {% else %}
+                    No example past papers are currently available. Past papers are available for subjects like
+                    Mathematics, English, Sciences, and more.
+                    {% endif %}
+                </p>
+                <button type="button" class="btn btn-primary mt-3" onclick="clearFilters()">
+                    <i class="fas fa-sync me-1"></i>Clear Filters & Show All
+                </button>
             </div>
             {% endif %}
         </div>
 
-        
+
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">

@@ -6,10 +6,13 @@ import os
 
 load_dotenv()
 
-print(f"=== FLASK APP INITIALIZATION ===")
-print(f"SUPABASE_URL: {os.getenv('SUPABASE_URL')}")
-print(f"SUPABASE_SERVICE_ROLE_KEY: {os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20]}...")
-print(f"OPENAI_API_KEY: {os.getenv('OPENAI_API_KEY', 'Not set')[:20]}...")
+# Secure logging - no credential exposure
+if os.getenv('SUPABASE_URL'):
+    print("✓ Supabase configured")
+if os.getenv('SUPABASE_SERVICE_ROLE_KEY'):
+    print("✓ Supabase credentials loaded")
+if os.getenv('OPENAI_API_KEY'):
+    print("✓ OpenAI API configured")
 
 login_manager = LoginManager()
 
@@ -119,9 +122,6 @@ def create_app(config_name='default'):
     from app.routes.analytics import analytics as analytics_blueprint
     app.register_blueprint(analytics_blueprint)
     
-    from app.routes.ai_recommendations import ai_recommendations as ai_blueprint
-    app.register_blueprint(ai_blueprint)
-    
     from app.routes.quizzes import quizzes as quizzes_blueprint
     app.register_blueprint(quizzes_blueprint)
     
@@ -133,18 +133,9 @@ def create_app(config_name='default'):
     
     from app.routes.social import social as social_blueprint
     app.register_blueprint(social_blueprint)
-    
-    from app.routes.mobile_accessibility import mobile_accessibility as mobile_accessibility_blueprint
-    app.register_blueprint(mobile_accessibility_blueprint)
 
     from app.routes.support import support as support_blueprint
     app.register_blueprint(support_blueprint)
-
-    from app.routes.ai_chat import ai_chat as ai_chat_blueprint
-    app.register_blueprint(ai_chat_blueprint)
-
-    from app.routes.advanced_analytics import advanced_analytics_bp as advanced_analytics_blueprint
-    app.register_blueprint(advanced_analytics_blueprint)
 
     from app.routes.gcse import gcse as gcse_blueprint
     app.register_blueprint(gcse_blueprint)
@@ -169,18 +160,6 @@ def create_app(config_name='default'):
 
     from app.routes.ai_tutor import ai_tutor as ai_tutor_blueprint
     app.register_blueprint(ai_tutor_blueprint)
-
-    from app.routes.predictive_analytics import predictive_analytics as predictive_analytics_blueprint
-    app.register_blueprint(predictive_analytics_blueprint)
-
-    from app.routes.smart_content import smart_content as smart_content_blueprint
-    app.register_blueprint(smart_content_blueprint)
-
-    from app.routes.gcse_ai import gcse_ai as gcse_ai_blueprint
-    app.register_blueprint(gcse_ai_blueprint)
-
-    from app.routes.learning_style import learning_style as learning_style_blueprint
-    app.register_blueprint(learning_style_blueprint)
 
     return app
 

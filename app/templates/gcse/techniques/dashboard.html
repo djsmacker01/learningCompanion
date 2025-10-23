@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}GCSE Study Techniques - Learning Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .techniques-hero {
+        background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+
+    .technique-card {
+        transition: transform 0.2s ease-in-out;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+
+    .technique-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .strategy-item {
+        border-left: 4px solid #6f42c1;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+
+    .category-badge {
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE Dashboard</a></li>
+            <li class="breadcrumb-item active">Study Techniques</li>
+        </ol>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="techniques-hero">
+        <div class="container">
+            <h1><i class="fas fa-brain me-2"></i>GCSE Study Techniques</h1>
+            <p class="lead mb-0">Proven strategies and methods for GCSE exam success</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Popular Study Techniques -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3"><i class="fas fa-star me-2"></i>Popular Study Techniques</h4>
+                <div class="row">
+                    {% if popular_techniques %}
+                    {% for technique in popular_techniques %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i
+                                        class="fas fa-{{ technique.icon if technique.icon else 'lightbulb' }} me-2 text-primary"></i>
+                                    {{ technique.name if technique.name else 'Study Technique' }}
+                                </h5>
+                                <p class="card-text">{{ technique.description if technique.description else 'Effective
+                                    study method for GCSE preparation' }}</p>
+                                {% if technique.category %}
+                                <span class="category-badge bg-info text-white">{{ technique.category }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <!-- Default Techniques -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-sticky-note me-2 text-primary"></i>
+                                    Active Recall
+                                </h5>
+                                <p class="card-text">Test yourself regularly without looking at notes. Proven to improve
+                                    long-term retention by 50%+.</p>
+                                <span class="category-badge bg-info text-white">Memory</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-calendar-week me-2 text-success"></i>
+                                    Spaced Repetition
+                                </h5>
+                                <p class="card-text">Review material at increasing intervals (1 day, 3 days, 1 week, 1
+                                    month) for optimal retention.</p>
+                                <span class="category-badge bg-success text-white">Planning</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-stopwatch me-2 text-warning"></i>
+                                    Pomodoro Technique
+                                </h5>
+                                <p class="card-text">Study for 25 minutes, then take a 5-minute break. Repeat 4 times,
+                                    then take a longer break.</p>
+                                <span class="category-badge bg-warning text-dark">Focus</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-project-diagram me-2 text-danger"></i>
+                                    Mind Mapping
+                                </h5>
+                                <p class="card-text">Create visual diagrams connecting concepts. Great for understanding
+                                    relationships between topics.</p>
+                                <span class="category-badge bg-danger text-white">Visual</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-users me-2 text-info"></i>
+                                    Teaching Others
+                                </h5>
+                                <p class="card-text">Explain concepts to friends or family. If you can teach it, you
+                                    understand it.</p>
+                                <span class="category-badge bg-info text-white">Social</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card technique-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-file-alt me-2 text-success"></i>
+                                    Past Paper Practice
+                                </h5>
+                                <p class="card-text">Regular practice with exam-style questions builds familiarity and
+                                    confidence.</p>
+                                <span class="category-badge bg-success text-white">Practice</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Management Strategies -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Time Management Strategies</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if time_management_strategies %}
+                        {% for strategy in time_management_strategies %}
+                        <div class="strategy-item">
+                            <h6>{{ strategy.strategy_name if strategy.strategy_name else 'Time Management' }}</h6>
+                            <p class="mb-0 small">{{ strategy.description if strategy.description else 'Effective time
+                                management technique' }}</p>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="strategy-item">
+                            <h6>Prioritize High-Weighted Topics</h6>
+                            <p class="mb-0 small">Focus on topics worth more marks first. Check specification for exam
+                                weights.</p>
+                        </div>
+                        <div class="strategy-item">
+                            <h6>Create a Study Timetable</h6>
+                            <p class="mb-0 small">Block out specific times for each subject. Consistency is key to
+                                success.</p>
+                        </div>
+                        <div class="strategy-item">
+                            <h6>Use the 2-Minute Rule</h6>
+                            <p class="mb-0 small">If a task takes less than 2 minutes, do it immediately. Prevents
+                                procrastination.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Approach Strategies -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Question Approach Strategies</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if question_approach_strategies %}
+                        {% for strategy in question_approach_strategies %}
+                        <div class="strategy-item">
+                            <h6>{{ strategy.strategy_name if strategy.strategy_name else 'Question Strategy' }}</h6>
+                            <p class="mb-0 small">{{ strategy.description if strategy.description else 'Effective
+                                approach for exam questions' }}</p>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="strategy-item">
+                            <h6>Read All Questions First</h6>
+                            <p class="mb-0 small">Scan the entire paper before starting. Answer easier questions first
+                                to build confidence.</p>
+                        </div>
+                        <div class="strategy-item">
+                            <h6>Highlight Command Words</h6>
+                            <p class="mb-0 small">Underline "describe," "explain," "evaluate" - these tell you exactly
+                                what to do.</p>
+                        </div>
+                        <div class="strategy-item">
+                            <h6>Show All Working</h6>
+                            <p class="mb-0 small">Even if final answer is wrong, you can get method marks. Never skip
+                                steps.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5><i class="fas fa-rocket me-2"></i>Ready to Apply These Techniques?</h5>
+                        <div class="d-flex gap-3 mt-3">
+                            <a href="{{ url_for('sessions.session_history') }}" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Start Study Session
+                            </a>
+                            <a href="{{ url_for('ai_tutor.tutor_dashboard') }}" class="btn btn-success">
+                                <i class="fas fa-robot me-2"></i>Get AI Study Plan
+                            </a>
+                            <a href="{{ url_for('gcse.gcse_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

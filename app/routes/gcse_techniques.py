@@ -40,7 +40,10 @@ def techniques_dashboard():
                              question_approach_strategies=question_approach_strategies)
     
     except Exception as e:
-        flash('Error loading techniques dashboard.', 'error')
+        print(f"Error loading techniques dashboard: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error loading techniques dashboard: {str(e)}', 'error')
         return redirect(url_for('gcse.gcse_dashboard'))
 
 @gcse_techniques.route('/study-techniques')

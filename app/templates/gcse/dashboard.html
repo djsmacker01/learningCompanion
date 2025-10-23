@@ -67,10 +67,41 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Important Disclaimer Banner -->
+    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading mb-2"><i class="fas fa-info-circle me-1"></i>Important Notice</h5>
+                <p class="mb-1">
+                    <strong>Data Accuracy:</strong> While specification codes are accurate, grade boundaries and some
+                    details are examples only.
+                    Always verify current specifications, grade boundaries, and exam dates with your official exam
+                    board:
+                </p>
+                <div class="mt-2">
+                    <a href="https://www.aqa.org.uk" target="_blank" class="btn btn-sm btn-outline-dark me-2">AQA <i
+                            class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://qualifications.pearson.com" target="_blank"
+                        class="btn btn-sm btn-outline-dark me-2">Edexcel <i
+                            class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://www.ocr.org.uk" target="_blank" class="btn btn-sm btn-outline-dark me-2">OCR <i
+                            class="fas fa-external-link-alt ms-1"></i></a>
+                    <a href="https://www.wjec.co.uk" target="_blank" class="btn btn-sm btn-outline-dark">WJEC <i
+                            class="fas fa-external-link-alt ms-1"></i></a>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><i class="fas fa-graduation-cap me-2"></i>GCSE Dashboard</h1>
+                <div>
+                    <h1><i class="fas fa-graduation-cap me-2"></i>GCSE Dashboard</h1>
+                    <p class="text-muted mb-0">Track your progress, manage exams, and achieve your target grades</p>
+                </div>
                 <div>
                     <a href="{{ url_for('gcse.subjects_list') }}" class="btn btn-outline-primary me-2">
                         <i class="fas fa-book me-1"></i>Browse Subjects
@@ -83,7 +114,71 @@
         </div>
     </div>
 
-    
+    <!-- GCSE Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ subjects|length }}</h4>
+                            <p class="card-text">Available Subjects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ user_gcse_topics|length }}</h4>
+                            <p class="card-text">My Subjects</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ exam_countdowns|length }}</h4>
+                            <p class="card-text">Upcoming Exams</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ upcoming_exams|length }}</h4>
+                            <p class="card-text">Total Exams</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     {% if exam_countdowns %}
     <div class="row mb-4">
         <div class="col-12">
@@ -146,102 +241,129 @@
     </div>
     {% endif %}
 
-    
+
     <div class="row mb-4">
         <div class="col-12">
             <h3><i class="fas fa-rocket me-2"></i>Quick Actions</h3>
             <div class="row">
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
                             <h5 class="card-title">Add Subject</h5>
                             <p class="card-text">Start studying a new GCSE subject</p>
+                            <div class="mb-3">
+                                <small class="text-muted">{{ subjects|length }} subjects available</small>
+                            </div>
                             <a href="{{ url_for('gcse.subjects_list') }}" class="btn btn-primary">Browse Subjects</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
-                            <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
-                            <h5 class="card-title">Past Papers</h5>
-                            <p class="card-text">Practice with real GCSE exam questions</p>
-                            <a href="{{ url_for('gcse_past_papers.past_papers_list') }}" class="btn btn-success">Start
-                                Practice</a>
+                            <i class="fas fa-users fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Practice Questions</h5>
+                            <p class="card-text">Community practice questions for revision</p>
+                            <div class="mb-3">
+                                <small class="text-muted">User-generated content</small>
+                            </div>
+                            <a href="{{ url_for('gcse_past_papers.past_papers_list') }}" class="btn btn-success">Browse
+                                Questions</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-calendar-plus fa-3x text-warning mb-3"></i>
                             <h5 class="card-title">Add Exam</h5>
                             <p class="card-text">Schedule your GCSE exams</p>
+                            <div class="mb-3">
+                                <small class="text-muted">{{ upcoming_exams|length }} exams scheduled</small>
+                            </div>
                             <a href="{{ url_for('gcse.create_exam') }}" class="btn btn-warning">Add Exam</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
                             <h5 class="card-title">Revision Plan</h5>
                             <p class="card-text">Get your personalized revision schedule</p>
+                            <div class="mb-3">
+                                <small class="text-muted">AI-powered planning</small>
+                            </div>
                             <a href="{{ url_for('gcse.revision_schedule') }}" class="btn btn-info">View Plan</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-calculator fa-3x text-secondary mb-3"></i>
                             <h5 class="card-title">Grade Calculator</h5>
                             <p class="card-text">Calculate your predicted grades</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Based on current performance</small>
+                            </div>
                             <a href="{{ url_for('gcse_grading.grade_calculator') }}"
                                 class="btn btn-secondary">Calculate</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-calendar-alt fa-3x text-dark mb-3"></i>
                             <h5 class="card-title">Scheduling</h5>
                             <p class="card-text">Manage exams and revision plans</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Smart scheduling</small>
+                            </div>
                             <a href="{{ url_for('gcse_scheduling.scheduling_dashboard') }}" class="btn btn-dark">View
                                 Schedule</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-brain fa-3x text-purple mb-3"></i>
                             <h5 class="card-title">Study Techniques</h5>
                             <p class="card-text">Learn effective study methods</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Proven strategies</small>
+                            </div>
                             <a href="{{ url_for('gcse_techniques.techniques_dashboard') }}"
                                 class="btn btn-purple">Explore Techniques</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
                             <h5 class="card-title">Analytics</h5>
                             <p class="card-text">Track your performance progress</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Detailed insights</small>
+                            </div>
                             <a href="{{ url_for('gcse_analytics.analytics_dashboard') }}" class="btn btn-success">View
                                 Analytics</a>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="card text-center h-100">
+                    <div class="card text-center h-100 quick-action-card">
                         <div class="card-body">
                             <i class="fas fa-book fa-3x text-orange mb-3"></i>
                             <h5 class="card-title">Resources</h5>
                             <p class="card-text">Access learning materials and content</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Comprehensive library</small>
+                            </div>
                             <a href="{{ url_for('gcse_resources.resources_dashboard') }}" class="btn btn-orange">Browse
                                 Resources</a>
                         </div>
@@ -251,7 +373,7 @@
         </div>
     </div>
 
-    
+
     {% if user_gcse_topics %}
     <div class="row mb-4">
         <div class="col-12">
@@ -277,8 +399,7 @@
                                 <small class="text-muted">
                                     Created {{ topic.created_at.strftime('%d %b %Y') if topic.created_at }}
                                 </small>
-                                <a href="{{ url_for('topics.topic_detail', topic_id=topic.id) }}"
-                                    class="btn btn-sm btn-outline-primary">
+                                <a href="/topics/{{ topic.id }}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye me-1"></i>View
                                 </a>
                             </div>
@@ -290,7 +411,8 @@
         </div>
     </div>
     {% else %}
-    
+
+    <!-- Getting Started Section -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-primary">
@@ -306,15 +428,89 @@
             </div>
         </div>
     </div>
+
+    <!-- Getting Started Guide -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3><i class="fas fa-lightbulb me-2"></i>Getting Started Guide</h3>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">1</div>
+                            <h5 class="card-title">Choose Your Subjects</h5>
+                            <p class="card-text">Browse and select the GCSE subjects you're studying. We support all
+                                major exam boards including AQA, Edexcel, OCR, and WJEC.</p>
+                            <a href="{{ url_for('gcse.subjects_list') }}" class="btn btn-outline-primary">Browse
+                                Subjects</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">2</div>
+                            <h5 class="card-title">Schedule Your Exams</h5>
+                            <p class="card-text">Add your exam dates to get personalized countdowns, revision schedules,
+                                and study plans tailored to your timeline.</p>
+                            <a href="{{ url_for('gcse.create_exam') }}" class="btn btn-outline-success">Add Exams</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <div class="step-number bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">3</div>
+                            <h5 class="card-title">Start Studying</h5>
+                            <p class="card-text">Use our AI-powered tools to generate study plans, practice with past
+                                papers, and track your progress toward your target grades.</p>
+                            <a href="{{ url_for('ai_tutor.tutor_dashboard') }}" class="btn btn-outline-warning">AI
+                                Tools</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {% endif %}
 
-    
+
     <div class="row">
         <div class="col-12">
-            <h3><i class="fas fa-list me-2"></i>Available GCSE Subjects</h3>
-            <div class="row">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="fas fa-list me-2"></i>Available GCSE Subjects</h3>
+                <div>
+                    <span class="badge bg-primary me-2">{{ subjects|length }} Subjects Available</span>
+                    <a href="{{ url_for('gcse.subjects_list') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-search me-1"></i>Browse All
+                    </a>
+                </div>
+            </div>
+
+            <!-- Subject Filter -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <select class="form-select" id="examBoardFilter">
+                        <option value="">All Exam Boards</option>
+                        <option value="AQA">AQA</option>
+                        <option value="Edexcel">Edexcel</option>
+                        <option value="OCR">OCR</option>
+                        <option value="WJEC">WJEC</option>
+                        <option value="CCEA">CCEA</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="subjectSearch" placeholder="Search subjects...">
+                </div>
+            </div>
+
+            <div class="row" id="subjectsContainer">
                 {% for subject in subjects[:8] %}
-                <div class="col-md-6 col-lg-3 mb-3">
+                <div class="col-md-6 col-lg-3 mb-3 subject-item" data-exam-board="{{ subject.exam_board }}"
+                    data-subject-name="{{ subject.subject_name.lower() }}">
                     <div class="card subject-card h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -323,14 +519,21 @@
                             </div>
 
                             <p class="card-text small">
-                                Specification: {{ subject.specification_code }}<br>
-                                Topics: {{ subject.topics|length }}
+                                <strong>Specification:</strong> {{ subject.specification_code }}<br>
+                                <strong>Topics:</strong> {{ subject.topics|length }} topics<br>
+                                <strong>Exam Boards:</strong> {{ subject.exam_board }}
                             </p>
 
-                            <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}"
-                                class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-info-circle me-1"></i>View Details
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('gcse.subject_detail', subject_id=subject.id) }}"
+                                    class="btn btn-sm btn-outline-primary flex-fill">
+                                    <i class="fas fa-info-circle me-1"></i>Details
+                                </a>
+                                <button class="btn btn-sm btn-success" onclick="addSubjectToMyList('{{ subject.id }}')"
+                                    title="Add to My Subjects">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -380,6 +583,29 @@
     .text-orange {
         color: #fd7e14 !important;
     }
+
+    .quick-action-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-action-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .quick-action-card .fa-3x {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .quick-action-card:hover .fa-3x {
+        transform: scale(1.1);
+    }
 </style>
 
 <script>
@@ -398,6 +624,119 @@
                 console.log('Exam countdown clicked');
             });
         });
+
+        // Subject filtering functionality
+        const examBoardFilter = document.getElementById('examBoardFilter');
+        const subjectSearch = document.getElementById('subjectSearch');
+        const subjectsContainer = document.getElementById('subjectsContainer');
+
+        if (examBoardFilter && subjectSearch && subjectsContainer) {
+            function filterSubjects() {
+                const selectedBoard = examBoardFilter.value.toLowerCase();
+                const searchTerm = subjectSearch.value.toLowerCase();
+                const subjectItems = subjectsContainer.querySelectorAll('.subject-item');
+
+                subjectItems.forEach(function (item) {
+                    const examBoard = item.dataset.examBoard.toLowerCase();
+                    const subjectName = item.dataset.subjectName;
+
+                    const matchesBoard = !selectedBoard || examBoard === selectedBoard;
+                    const matchesSearch = !searchTerm || subjectName.includes(searchTerm);
+
+                    if (matchesBoard && matchesSearch) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Update visible count
+                const visibleItems = subjectsContainer.querySelectorAll('.subject-item[style*="block"], .subject-item:not([style*="none"])');
+                console.log(`${visibleItems.length} subjects visible`);
+            }
+
+            examBoardFilter.addEventListener('change', filterSubjects);
+            subjectSearch.addEventListener('input', filterSubjects);
+        }
     });
+
+    // Add subject to user's list
+    function addSubjectToMyList(subjectId) {
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        button.disabled = true;
+
+        // Make API call to add subject
+        fetch(`/gcse/subjects/${subjectId}/create-topic`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.content || ''
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Show success message
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+
+                    // Show toast notification
+                    showToast('Subject added to your list!', 'success');
+
+                    // Refresh page after 2 seconds to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to add subject');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding subject:', error);
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+                showToast('Failed to add subject. Please try again.', 'error');
+            });
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        // Remove toast element after it's hidden
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+
+    // Create toast container if it doesn't exist
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '1055';
+        document.body.appendChild(container);
+        return container;
+    }
 </script>
 {% endblock %}

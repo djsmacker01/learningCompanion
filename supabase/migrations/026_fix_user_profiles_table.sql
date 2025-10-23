@@ -45,3 +45,17 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_privacy_level ON user_profiles(privacy_level);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_timezone ON user_profiles(timezone);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_language ON user_profiles(language);
+
+
+
+
+
+
+
+
+
+
+
+
+
+

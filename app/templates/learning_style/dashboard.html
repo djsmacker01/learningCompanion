@@ -145,27 +145,68 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Subjects to Study</label>
-                            <div class="row">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-book me-2"></i>Subjects to Study & Learning Styles
+                                <small class="text-muted">(Select subjects and choose learning style for each)</small>
+                            </label>
+                            <div class="row g-3">
+                                <!-- Mathematics -->
                                 <div class="col-md-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="subjectMath"
-                                            value="Mathematics">
-                                        <label class="form-check-label" for="subjectMath">Mathematics</label>
+                                    <input class="form-check-input d-none subject-checkbox" type="checkbox"
+                                        id="subjectMath" value="Mathematics" onchange="toggleSubjectStyle('Math')">
+                                    <label class="subject-card" for="subjectMath"
+                                        style="cursor: pointer; display: block; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; text-align: center; transition: all 0.3s ease; background: white;">
+                                        <div style="font-size: 32px; margin-bottom: 8px;">📐</div>
+                                        <h6 class="mb-0" style="font-weight: 600; color: #212529;">Mathematics</h6>
+                                        <small class="text-muted">Numbers & Logic</small>
+                                    </label>
+                                    <div id="mathStyleSelect" class="mt-2" style="display: none;">
+                                        <select class="form-select form-select-sm" id="mathLearningStyle">
+                                            <option value="visual">📊 Visual</option>
+                                            <option value="auditory">🎧 Auditory</option>
+                                            <option value="kinesthetic">🤸 Kinesthetic</option>
+                                            <option value="reading">📖 Reading/Writing</option>
+                                        </select>
                                     </div>
                                 </div>
+
+                                <!-- English -->
                                 <div class="col-md-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="subjectEnglish"
-                                            value="English">
-                                        <label class="form-check-label" for="subjectEnglish">English</label>
+                                    <input class="form-check-input d-none subject-checkbox" type="checkbox"
+                                        id="subjectEnglish" value="English" onchange="toggleSubjectStyle('English')">
+                                    <label class="subject-card" for="subjectEnglish"
+                                        style="cursor: pointer; display: block; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; text-align: center; transition: all 0.3s ease; background: white;">
+                                        <div style="font-size: 32px; margin-bottom: 8px;">📚</div>
+                                        <h6 class="mb-0" style="font-weight: 600; color: #212529;">English</h6>
+                                        <small class="text-muted">Language & Literature</small>
+                                    </label>
+                                    <div id="englishStyleSelect" class="mt-2" style="display: none;">
+                                        <select class="form-select form-select-sm" id="englishLearningStyle">
+                                            <option value="visual">📊 Visual</option>
+                                            <option value="auditory">🎧 Auditory</option>
+                                            <option value="kinesthetic">🤸 Kinesthetic</option>
+                                            <option value="reading">📖 Reading/Writing</option>
+                                        </select>
                                     </div>
                                 </div>
+
+                                <!-- Science -->
                                 <div class="col-md-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="subjectScience"
-                                            value="Science">
-                                        <label class="form-check-label" for="subjectScience">Science</label>
+                                    <input class="form-check-input d-none subject-checkbox" type="checkbox"
+                                        id="subjectScience" value="Science" onchange="toggleSubjectStyle('Science')">
+                                    <label class="subject-card" for="subjectScience"
+                                        style="cursor: pointer; display: block; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; text-align: center; transition: all 0.3s ease; background: white;">
+                                        <div style="font-size: 32px; margin-bottom: 8px;">🔬</div>
+                                        <h6 class="mb-0" style="font-weight: 600; color: #212529;">Science</h6>
+                                        <small class="text-muted">Biology, Chemistry, Physics</small>
+                                    </label>
+                                    <div id="scienceStyleSelect" class="mt-2" style="display: none;">
+                                        <select class="form-select form-select-sm" id="scienceLearningStyle">
+                                            <option value="visual">📊 Visual</option>
+                                            <option value="auditory">🎧 Auditory</option>
+                                            <option value="kinesthetic">🤸 Kinesthetic</option>
+                                            <option value="reading">📖 Reading/Writing</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -286,29 +327,39 @@
                 </div>
             </div>
 
-            <!-- Learning Tips -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tips me-2"></i>Learning Tips
+            <!-- Learning Tips - Permanent Display -->
+            <div class="card border-0 shadow-sm" id="learningTipsCard"
+                style="border-left: 4px solid #6f42c1 !important;">
+                <div class="card-header"
+                    style="background: linear-gradient(135deg, #6f42c115 0%, #6f42c105 100%); border-bottom: 2px solid #6f42c1;">
+                    <h5 class="card-title mb-0 fw-bold" style="color: #6f42c1;">
+                        <i class="fas fa-lightbulb me-2"></i>Learning Tips
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-primary">
-                        <h6>Visual Learners:</h6>
+                    <div class="alert alert-primary border-0 mb-3" style="border-left: 4px solid #0d6efd !important;">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-eye text-primary me-2"></i>Visual Learners:
+                        </h6>
                         <p class="mb-0">Use mind maps, diagrams, and color coding to organize information effectively.
                         </p>
                     </div>
-                    <div class="alert alert-success">
-                        <h6>Auditory Learners:</h6>
+                    <div class="alert alert-success border-0 mb-3" style="border-left: 4px solid #28a745 !important;">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-headphones text-success me-2"></i>Auditory Learners:
+                        </h6>
                         <p class="mb-0">Record yourself explaining concepts and listen to educational podcasts.</p>
                     </div>
-                    <div class="alert alert-warning">
-                        <h6>Kinesthetic Learners:</h6>
+                    <div class="alert alert-warning border-0 mb-3" style="border-left: 4px solid #ffc107 !important;">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-hands text-warning me-2"></i>Kinesthetic Learners:
+                        </h6>
                         <p class="mb-0">Take frequent breaks and use hands-on activities to reinforce learning.</p>
                     </div>
-                    <div class="alert alert-info">
-                        <h6>Reading/Writing Learners:</h6>
+                    <div class="alert alert-info border-0 mb-0" style="border-left: 4px solid #17a2b8 !important;">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-book-open text-info me-2"></i>Reading/Writing Learners:
+                        </h6>
                         <p class="mb-0">Take detailed notes and create written summaries to solidify understanding.</p>
                     </div>
                 </div>
@@ -340,6 +391,160 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Subject Card Styling */
+    .subject-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subject-card:hover {
+        border-color: #ffc107 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+    }
+
+    .subject-checkbox:checked+.subject-card {
+        border-color: #ffc107 !important;
+        background: linear-gradient(135deg, #fff9e6 0%, #fffcf0 100%) !important;
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    .subject-checkbox:checked+.subject-card::before {
+        content: '✓';
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        background: #ffc107;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .subject-card h6 {
+        transition: color 0.3s ease;
+    }
+
+    .subject-checkbox:checked+.subject-card h6 {
+        color: #ffc107 !important;
+    }
+
+    /* Ensure Learning Tips Stay Visible - ULTRA AGGRESSIVE */
+    #learningTipsCard {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 999999 !important;
+        min-height: 400px !important;
+        height: auto !important;
+        overflow: visible !important;
+        pointer-events: auto !important;
+        background-color: white !important;
+        transform: none !important;
+        filter: none !important;
+        clip-path: none !important;
+        mask: none !important;
+    }
+
+    #learningTipsCard .card-body {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-height: 300px !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 1rem !important;
+        background-color: white !important;
+        transform: none !important;
+        filter: none !important;
+        clip-path: none !important;
+        mask: none !important;
+    }
+
+    #learningTipsCard .alert {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        z-index: 1000000 !important;
+        margin-bottom: 12px !important;
+        min-height: 60px !important;
+        height: auto !important;
+        padding: 0.75rem !important;
+        background-color: inherit !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 0.375rem !important;
+        transform: none !important;
+        filter: none !important;
+        clip-path: none !important;
+        mask: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    /* Override any possible hiding mechanisms */
+    #learningTipsCard .alert.d-none,
+    #learningTipsCard .alert.invisible,
+    #learningTipsCard .alert[style*="display: none"],
+    #learningTipsCard .alert[style*="visibility: hidden"],
+    #learningTipsCard .alert[style*="opacity: 0"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Force visibility even if parent is hidden */
+    #learningTipsCard .card-body.d-none,
+    #learningTipsCard .card-body.invisible,
+    #learningTipsCard .card-body[style*="display: none"],
+    #learningTipsCard .card-body[style*="visibility: hidden"],
+    #learningTipsCard .card-body[style*="opacity: 0"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    #learningTipsCard .alert-primary {
+        background-color: #cfe2ff !important;
+        border-color: #0d6efd !important;
+        color: #084298 !important;
+    }
+
+    #learningTipsCard .alert-success {
+        background-color: #d1e7dd !important;
+        border-color: #28a745 !important;
+        color: #0f5132 !important;
+    }
+
+    #learningTipsCard .alert-warning {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
+        color: #664d03 !important;
+    }
+
+    #learningTipsCard .alert-info {
+        background-color: #d1ecf1 !important;
+        border-color: #17a2b8 !important;
+        color: #055160 !important;
+    }
+
+    #learningTipsCard .card-header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background-color: #f8f9fa !important;
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
     let currentQuestionIndex = 0;
@@ -350,7 +555,251 @@
     document.addEventListener('DOMContentLoaded', function () {
         loadLearningStyles();
         loadSubjects();
+
+        // Ensure Learning Tips stay visible
+        ensureLearningTipsVisible();
     });
+
+    // Also run on window load to catch late-loading scripts
+    window.addEventListener('load', function () {
+        console.log('🔄 Window loaded - ensuring Learning Tips visible...');
+        setTimeout(ensureLearningTipsVisible, 500);
+        setTimeout(ensureLearningTipsVisible, 1500);
+        setTimeout(ensureLearningTipsVisible, 3000);
+    });
+
+    // Run on any page visibility change
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+            console.log('🔄 Page visible again - ensuring Learning Tips visible...');
+            setTimeout(ensureLearningTipsVisible, 100);
+        }
+    });
+
+    function ensureLearningTipsVisible() {
+        const tipsCard = document.getElementById('learningTipsCard');
+        if (tipsCard) {
+            // Force visibility aggressively
+            tipsCard.style.display = 'block';
+            tipsCard.style.visibility = 'visible';
+            tipsCard.style.opacity = '1';
+            tipsCard.style.position = 'relative';
+            tipsCard.style.zIndex = '1';
+            tipsCard.style.minHeight = '400px';
+
+            // Debug info
+            const rect = tipsCard.getBoundingClientRect();
+            console.log('✅ Learning Tips card is visible');
+            console.log('   Position:', { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+            console.log('   In viewport:', rect.top >= 0 && rect.top <= window.innerHeight);
+
+            // Force all child elements visible
+            const cardBody = tipsCard.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.style.display = 'block';
+                cardBody.style.visibility = 'visible';
+                cardBody.style.opacity = '1';
+                cardBody.style.height = 'auto';
+                cardBody.style.minHeight = '300px';
+                cardBody.style.padding = '1rem';
+                cardBody.style.backgroundColor = 'white';
+                console.log('✅ Card body forced visible');
+            }
+
+            const alerts = tipsCard.querySelectorAll('.alert');
+            console.log(`   Found ${alerts.length} alert elements`);
+            alerts.forEach((alert, idx) => {
+                // Remove any conflicting classes first
+                alert.classList.remove('d-none', 'invisible', 'opacity-0');
+
+                // Force visibility with specific styling
+                alert.style.display = 'block';
+                alert.style.visibility = 'visible';
+                alert.style.opacity = '1';
+                alert.style.position = 'relative';
+                alert.style.zIndex = '1000';
+                alert.style.minHeight = '60px';
+                alert.style.height = 'auto';
+                alert.style.marginBottom = '12px';
+                alert.style.padding = '0.75rem';
+                alert.style.borderRadius = '0.375rem';
+                alert.style.border = '1px solid #dee2e6';
+
+                // Apply specific colors based on alert type
+                if (alert.classList.contains('alert-primary')) {
+                    alert.style.backgroundColor = '#cfe2ff';
+                    alert.style.borderColor = '#0d6efd';
+                    alert.style.color = '#084298';
+                } else if (alert.classList.contains('alert-success')) {
+                    alert.style.backgroundColor = '#d1e7dd';
+                    alert.style.borderColor = '#28a745';
+                    alert.style.color = '#0f5132';
+                } else if (alert.classList.contains('alert-warning')) {
+                    alert.style.backgroundColor = '#fff3cd';
+                    alert.style.borderColor = '#ffc107';
+                    alert.style.color = '#664d03';
+                } else if (alert.classList.contains('alert-info')) {
+                    alert.style.backgroundColor = '#d1ecf1';
+                    alert.style.borderColor = '#17a2b8';
+                    alert.style.color = '#055160';
+                }
+
+                const alertRect = alert.getBoundingClientRect();
+                const computedStyle = window.getComputedStyle(alert);
+                console.log(`   Alert ${idx + 1}: ${alertRect.height}px tall, visible=${alertRect.height > 0}, display=${computedStyle.display}`);
+            });
+            console.log(`   ✓ All alerts processed with forced styling`);
+
+            // MutationObserver to watch for changes to alerts
+            const observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                        const target = mutation.target;
+                        if (target.classList && target.classList.contains('alert')) {
+                            console.warn('🔄 Alert style changed - restoring visibility...');
+                            target.style.display = 'block';
+                            target.style.visibility = 'visible';
+                            target.style.opacity = '1';
+                        }
+                    }
+                });
+            });
+
+            // Start observing all alerts
+            alerts.forEach(alert => {
+                observer.observe(alert, {
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+            });
+
+            // MULTIPLE monitoring intervals to catch different timing issues
+            // Ultra-fast monitoring for immediate issues
+            setInterval(function () {
+                recreateLearningTipsContent();
+            }, 50); // Every 50ms
+
+            // Fast monitoring for immediate issues
+            setInterval(function () {
+                forceLearningTipsVisible();
+            }, 100); // Every 100ms
+
+            // Medium monitoring for general issues  
+            setInterval(function () {
+                forceLearningTipsVisible();
+            }, 500); // Every 500ms
+
+            // Slow monitoring for late-loading scripts
+            setInterval(function () {
+                forceLearningTipsVisible();
+            }, 2000); // Every 2 seconds
+
+            // Delayed execution to catch scripts that load after page
+            setTimeout(recreateLearningTipsContent, 500);
+            setTimeout(forceLearningTipsVisible, 1000);
+            setTimeout(recreateLearningTipsContent, 2000);
+            setTimeout(forceLearningTipsVisible, 3000);
+            setTimeout(recreateLearningTipsContent, 4000);
+            setTimeout(forceLearningTipsVisible, 5000);
+            setTimeout(recreateLearningTipsContent, 8000);
+            setTimeout(forceLearningTipsVisible, 10000);
+
+            function recreateLearningTipsContent() {
+                const card = document.getElementById('learningTipsCard');
+                if (!card) return;
+
+                const cardBody = card.querySelector('.card-body');
+                if (!cardBody) return;
+
+                // Check if alerts are missing or hidden
+                const currentAlerts = cardBody.querySelectorAll('.alert');
+                let needsRecreation = false;
+
+                if (currentAlerts.length === 0) {
+                    needsRecreation = true;
+                } else {
+                    // Check if any alerts are hidden
+                    currentAlerts.forEach(alert => {
+                        const style = window.getComputedStyle(alert);
+                        if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) < 1) {
+                            needsRecreation = true;
+                        }
+                    });
+                }
+
+                if (needsRecreation) {
+                    console.warn('🔄 Learning Tips content missing/hidden - RECREATING...');
+
+                    // Completely recreate the card body content
+                    cardBody.innerHTML = `
+                        <div class="alert alert-primary border-0 mb-3" style="border-left: 4px solid #0d6efd !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1000000 !important; min-height: 60px !important; height: auto !important; margin-bottom: 12px !important; padding: 0.75rem !important; background-color: #cfe2ff !important; border-color: #0d6efd !important; color: #084298 !important; border-radius: 0.375rem !important;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-eye text-primary me-2"></i>Visual Learners:
+                            </h6>
+                            <p class="mb-0">Use mind maps, diagrams, and color coding to organize information effectively.</p>
+                        </div>
+                        <div class="alert alert-success border-0 mb-3" style="border-left: 4px solid #28a745 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1000000 !important; min-height: 60px !important; height: auto !important; margin-bottom: 12px !important; padding: 0.75rem !important; background-color: #d1e7dd !important; border-color: #28a745 !important; color: #0f5132 !important; border-radius: 0.375rem !important;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-headphones text-success me-2"></i>Auditory Learners:
+                            </h6>
+                            <p class="mb-0">Record yourself explaining concepts and listen to educational podcasts.</p>
+                        </div>
+                        <div class="alert alert-warning border-0 mb-3" style="border-left: 4px solid #ffc107 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1000000 !important; min-height: 60px !important; height: auto !important; margin-bottom: 12px !important; padding: 0.75rem !important; background-color: #fff3cd !important; border-color: #ffc107 !important; color: #664d03 !important; border-radius: 0.375rem !important;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-hands text-warning me-2"></i>Kinesthetic Learners:
+                            </h6>
+                            <p class="mb-0">Take frequent breaks and use hands-on activities to reinforce learning.</p>
+                        </div>
+                        <div class="alert alert-info border-0 mb-0" style="border-left: 4px solid #17a2b8 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1000000 !important; min-height: 60px !important; height: auto !important; margin-bottom: 0 !important; padding: 0.75rem !important; background-color: #d1ecf1 !important; border-color: #17a2b8 !important; color: #055160 !important; border-radius: 0.375rem !important;">
+                            <h6 class="fw-bold mb-2">
+                                <i class="fas fa-book-open text-info me-2"></i>Reading/Writing Learners:
+                            </h6>
+                            <p class="mb-0">Take detailed notes and create written summaries to solidify understanding.</p>
+                        </div>
+                    `;
+
+                    console.log('✅ Learning Tips content recreated successfully!');
+                }
+            }
+
+            function forceLearningTipsVisible() {
+                const card = document.getElementById('learningTipsCard');
+                if (!card) return;
+
+                // Force card visibility
+                const computedStyle = window.getComputedStyle(card);
+                if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || parseFloat(computedStyle.opacity) < 1) {
+                    console.warn('🔄 Learning Tips card visibility lost - restoring...');
+                    card.style.display = 'block';
+                    card.style.visibility = 'visible';
+                    card.style.opacity = '1';
+                    card.style.zIndex = '999999';
+                }
+
+                // Force card-body visibility
+                const cardBody = card.querySelector('.card-body');
+                if (cardBody) {
+                    const bodyStyle = window.getComputedStyle(cardBody);
+                    if (bodyStyle.display === 'none' || bodyStyle.visibility === 'hidden' || parseFloat(bodyStyle.opacity) < 1) {
+                        console.warn('🔄 Card body visibility lost - restoring...');
+                        cardBody.style.display = 'block';
+                        cardBody.style.visibility = 'visible';
+                        cardBody.style.opacity = '1';
+                        cardBody.style.height = 'auto';
+                        cardBody.style.minHeight = '300px';
+                        cardBody.style.padding = '1rem';
+                        cardBody.style.backgroundColor = 'white';
+                    }
+                }
+
+                // Try to recreate content if needed
+                recreateLearningTipsContent();
+            }
+
+        } else {
+            console.error('❌ Learning Tips card not found in DOM!');
+        }
+    }
 
     function loadSubjects() {
         fetch('/gcse-ai/api/subjects')
@@ -464,12 +913,12 @@
                 <div class="option-card mb-3 p-3 border rounded" style="cursor: pointer; transition: all 0.3s ease;" 
                      onclick="selectAnswerAndProceed('${option.style}', this)">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="question_${question.id}" 
+                    <input class="form-check-input" type="radio" name="question_${question.id}" 
                                id="option_${option.id}" value="${option.style}" style="cursor: pointer;">
                         <label class="form-check-label d-flex align-items-center" for="option_${option.id}" style="cursor: pointer; width: 100%;">
                             <span class="badge bg-primary me-3">${optionLetter}</span>
                             <span>${option.text}</span>
-                        </label>
+                    </label>
                     </div>
                 </div>
             `;
@@ -724,8 +1173,8 @@
                                     <strong>Completion Time:</strong><br>
                                     <span class="text-success">${data.estimated_completion_time || 'Varies'}</span>
                                 </div>
-                            </div>
-                    `;
+                    </div>
+                `;
 
                     // Learning Modules
                     if (data.learning_modules && Array.isArray(data.learning_modules) && data.learning_modules.length > 0) {
@@ -819,14 +1268,37 @@
             });
     }
 
+    function toggleSubjectStyle(subject) {
+        const checkbox = document.getElementById(`subject${subject}`);
+        const styleSelect = document.getElementById(`${subject.toLowerCase()}StyleSelect`);
+
+        if (checkbox.checked) {
+            styleSelect.style.display = 'block';
+        } else {
+            styleSelect.style.display = 'none';
+        }
+    }
+
     function createIntelligentStudySchedule() {
-        const learningStyle = document.getElementById('scheduleLearningStyle').value;
+        const globalLearningStyle = document.getElementById('scheduleLearningStyle').value;
         const availableTime = document.getElementById('availableTime').value;
 
+        // Collect selected subjects with their specific learning styles
         const selectedSubjects = [];
-        if (document.getElementById('subjectMath').checked) selectedSubjects.push('Mathematics');
-        if (document.getElementById('subjectEnglish').checked) selectedSubjects.push('English');
-        if (document.getElementById('subjectScience').checked) selectedSubjects.push('Science');
+        const subjectLearningStyles = {};
+
+        if (document.getElementById('subjectMath').checked) {
+            selectedSubjects.push('Mathematics');
+            subjectLearningStyles['Mathematics'] = document.getElementById('mathLearningStyle').value;
+        }
+        if (document.getElementById('subjectEnglish').checked) {
+            selectedSubjects.push('English');
+            subjectLearningStyles['English'] = document.getElementById('englishLearningStyle').value;
+        }
+        if (document.getElementById('subjectScience').checked) {
+            selectedSubjects.push('Science');
+            subjectLearningStyles['Science'] = document.getElementById('scienceLearningStyle').value;
+        }
 
         if (selectedSubjects.length === 0) {
             alert('Please select at least one subject');
@@ -852,7 +1324,8 @@
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                learning_style: learningStyle,
+                learning_style: globalLearningStyle,  // Fallback global style
+                subject_learning_styles: subjectLearningStyles,  // Subject-specific styles
                 available_time: availableTimeData,
                 subjects: selectedSubjects,
                 priorities: selectedSubjects.reduce((acc, subject, index) => {
@@ -897,7 +1370,7 @@
                                 </h6>
                                 <div class="weekly-calendar">
                         `;
-                        
+
                         const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
                         const dayIcons = {
                             'monday': '🌅',
@@ -908,7 +1381,7 @@
                             'saturday': '📚',
                             'sunday': '🧘'
                         };
-                        
+
                         dayOrder.forEach(day => {
                             const sessions = data.weekly_schedule[day];
                             if (sessions && Array.isArray(sessions)) {
@@ -921,7 +1394,7 @@
                                         </div>
                                         <div class="day-sessions">
                                 `;
-                                
+
                                 sessions.forEach((session, idx) => {
                                     const timeSlotColors = {
                                         'morning': '#28a745',
@@ -933,10 +1406,10 @@
                                         'afternoon': '☀️',
                                         'evening': '🌙'
                                     };
-                                    
+
                                     const color = timeSlotColors[session.time_slot] || '#6c757d';
                                     const icon = timeSlotIcons[session.time_slot] || '📖';
-                                    
+
                                     html += `
                                         <div class="session-block mb-2 p-2 rounded" style="border-left: 4px solid ${color}; background: #f8f9fa;">
                                             <div class="d-flex align-items-start">
@@ -957,14 +1430,14 @@
                                         </div>
                                     `;
                                 });
-                                
+
                                 html += `
                                         </div>
-                                    </div>
-                                `;
+                    </div>
+                `;
                             }
                         });
-                        
+
                         html += '</div></div>';
                     }
 
@@ -988,7 +1461,7 @@
                         });
                         html += '</div>';
                     }
-                    
+
                     // Break Recommendations
                     if (data.break_recommendations && Array.isArray(data.break_recommendations) && data.break_recommendations.length > 0) {
                         html += `
@@ -1001,7 +1474,7 @@
                             const activity = typeof breakRec === 'string' ? breakRec : (breakRec.activity || 'Take a break');
                             const duration = typeof breakRec === 'object' ? breakRec.duration : '';
                             const benefit = typeof breakRec === 'object' ? breakRec.benefit : '';
-                            
+
                             html += `
                                 <div class="break-card mb-3 p-3 bg-white border rounded shadow-sm">
                                     <div class="d-flex align-items-start">
@@ -1016,7 +1489,7 @@
                         });
                         html += '</div>';
                     }
-                    
+
                     // Motivation Triggers
                     if (data.motivation_triggers && Array.isArray(data.motivation_triggers) && data.motivation_triggers.length > 0) {
                         html += `
@@ -1029,7 +1502,7 @@
                             const triggerText = typeof trigger === 'string' ? trigger : (trigger.trigger || 'Motivation strategy');
                             const timing = typeof trigger === 'object' ? trigger.timing : '';
                             const benefit = typeof trigger === 'object' ? trigger.benefit : '';
-                            
+
                             html += `
                                 <div class="motivation-card mb-3 p-3 bg-white border rounded shadow-sm" style="border-left: 4px solid #dc3545;">
                                     <div class="d-flex align-items-start">
@@ -1045,7 +1518,7 @@
                         });
                         html += '</div>';
                     }
-                    
+
                     // Revision Schedule
                     if (data.revision_schedule && typeof data.revision_schedule === 'object') {
                         html += `
@@ -1055,7 +1528,7 @@
                                 </h6>
                                 <div class="revision-content p-3 bg-white rounded">
                         `;
-                        
+
                         if (data.revision_schedule.revision_intervals) {
                             html += `
                                 <div class="mb-3">
@@ -1067,7 +1540,7 @@
                             });
                             html += '</div></div>';
                         }
-                        
+
                         if (data.revision_schedule.revision_methods) {
                             html += `
                                 <div class="mb-3">
@@ -1079,7 +1552,7 @@
                             });
                             html += '</ul></div>';
                         }
-                        
+
                         if (data.revision_schedule.tips) {
                             html += `
                                 <div>
@@ -1091,10 +1564,10 @@
                             });
                             html += '</ul></div>';
                         }
-                        
+
                         html += '</div></div>';
                     }
-                    
+
                     // Intensity Patterns
                     if (data.intensity_patterns && typeof data.intensity_patterns === 'object') {
                         html += `
@@ -1104,13 +1577,13 @@
                                 </h6>
                                 <div class="intensity-grid">
                         `;
-                        
+
                         const intensityColors = {
                             'high': '#dc3545',
                             'medium': '#ffc107',
                             'low': '#28a745'
                         };
-                        
+
                         const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
                         dayOrder.forEach(day => {
                             const dayData = data.intensity_patterns[day];
@@ -1118,7 +1591,7 @@
                                 const intensity = dayData.intensity || 'medium';
                                 const focus = dayData.focus || 'Study';
                                 const color = intensityColors[intensity.toLowerCase()] || '#6c757d';
-                                
+
                                 html += `
                                     <div class="intensity-day mb-2 p-3 bg-white border-start border-4 rounded" style="border-left-color: ${color} !important;">
                                         <div class="d-flex justify-content-between align-items-center">
@@ -1132,7 +1605,7 @@
                                 `;
                             }
                         });
-                        
+
                         html += '</div></div>';
                     }
 
@@ -1177,9 +1650,98 @@
                                 </div>
                                 <div class="col-md-6">
                                     <strong>Learning Velocity:</strong><br>
-                                    <span class="text-success">${data.learning_velocity || 75}%</span>
+                                    <span class="text-success" style="font-size: 24px; font-weight: 700;">${data.learning_velocity || 75}%</span>
+                                </div>
+                    </div>
+                `;
+
+                    // Add Learning Velocity Explanation
+                    const velocity = data.learning_velocity || 75;
+                    let velocityLevel = '';
+                    let velocityColor = '';
+                    let velocityIcon = '';
+                    let velocityMessage = '';
+
+                    if (velocity >= 80) {
+                        velocityLevel = 'Excellent';
+                        velocityColor = '#28a745';
+                        velocityIcon = 'fa-trophy';
+                        velocityMessage = 'You\'re demonstrating outstanding learning momentum! Your consistent engagement and high activity levels show excellent dedication to your studies.';
+                    } else if (velocity >= 60) {
+                        velocityLevel = 'Good';
+                        velocityColor = '#17a2b8';
+                        velocityIcon = 'fa-chart-line';
+                        velocityMessage = 'You\'re maintaining solid learning progress! Your study habits are on the right track, with good consistency and engagement.';
+                    } else if (velocity >= 40) {
+                        velocityLevel = 'Moderate';
+                        velocityColor = '#ffc107';
+                        velocityIcon = 'fa-battery-half';
+                        velocityMessage = 'You\'re making steady progress! There\'s room to boost your learning velocity by increasing study frequency or quiz practice.';
+                    } else if (velocity >= 20) {
+                        velocityLevel = 'Building';
+                        velocityColor = '#fd7e14';
+                        velocityIcon = 'fa-seedling';
+                        velocityMessage = 'You\'re building your learning foundation! Consider increasing your daily study time and regular practice to accelerate your progress.';
+                    } else {
+                        velocityLevel = 'Getting Started';
+                        velocityColor = '#dc3545';
+                        velocityIcon = 'fa-flag';
+                        velocityMessage = 'Every learning journey starts somewhere! Focus on building consistent daily study habits to boost your velocity.';
+                    }
+
+                    html += `
+                        <div class="velocity-explanation" style="margin: 15px 0; padding: 20px; background: linear-gradient(135deg, ${velocityColor}15 0%, ${velocityColor}05 100%); border-radius: 12px; border-left: 4px solid ${velocityColor};">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas ${velocityIcon}" style="font-size: 32px; color: ${velocityColor}; margin-right: 15px;"></i>
+                                <div>
+                                    <h6 style="color: ${velocityColor}; font-weight: 700; margin: 0; font-size: 18px;">
+                                        ${velocityLevel} Learning Velocity
+                                    </h6>
+                                    <small class="text-muted">Your current learning pace</small>
                                 </div>
                             </div>
+                            <p style="margin-bottom: 15px; line-height: 1.6; color: #495057;">
+                                ${velocityMessage}
+                            </p>
+                            
+                            <div class="velocity-breakdown" style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <h6 style="font-weight: 600; margin-bottom: 12px; color: #495057;">
+                                    <i class="fas fa-info-circle me-2"></i>How Velocity is Calculated:
+                                </h6>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <i class="fas fa-clock text-primary mb-1" style="font-size: 20px;"></i>
+                                            <div style="font-size: 11px; font-weight: 600; color: #6c757d;">STUDY TIME</div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #212529;">40 points</div>
+                                            <small style="font-size: 10px; color: #6c757d;">60 min/day = max</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <i class="fas fa-question-circle text-info mb-1" style="font-size: 20px;"></i>
+                                            <div style="font-size: 11px; font-weight: 600; color: #6c757d;">QUIZ PRACTICE</div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #212529;">30 points</div>
+                                            <small style="font-size: 10px; color: #6c757d;">2 quizzes/week = max</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <i class="fas fa-book text-success mb-1" style="font-size: 20px;"></i>
+                                            <div style="font-size: 11px; font-weight: 600; color: #6c757d;">CONTENT CREATION</div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #212529;">30 points</div>
+                                            <small style="font-size: 10px; color: #6c757d;">1 topic/week = max</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-center">
+                                    <small style="color: #6c757d;">
+                                        <i class="fas fa-plus-circle me-1"></i>
+                                        <strong>Bonus:</strong> Up to 10 points for total activity volume
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     `;
 
                     // Learning Style Evolution
@@ -1252,11 +1814,527 @@
     }
 
     function generateLearningInsights() {
-        alert('Learning insights generation feature coming soon!');
+        // Create a modal to show insights
+        const modalHTML = `
+            <div class="modal fade" id="insightsModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-gradient-warning text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-lightbulb me-2"></i>AI-Powered Learning Insights
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="insightsContent">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin fa-3x text-warning mb-3"></i>
+                                <p class="text-muted">Generating personalized insights...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove old modal if exists
+        const oldModal = document.getElementById('insightsModal');
+        if (oldModal) oldModal.remove();
+
+        // Add new modal
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = new bootstrap.Modal(document.getElementById('insightsModal'));
+        modal.show();
+
+        // Fetch insights
+        fetch('/learning-style/api/generate-learning-insights')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('insightsContent').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>${data.error}
+                        </div>
+                    `;
+                } else {
+                    displayLearningInsights(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('insightsContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>Failed to generate insights
+                    </div>
+                `;
+            });
+    }
+
+    function displayLearningInsights(data) {
+        console.log('Insights data:', data);
+        let html = '';
+
+        // Overview Stats
+        html += `
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="stat-card p-3 bg-light rounded text-center">
+                        <i class="fas fa-brain text-warning" style="font-size: 32px;"></i>
+                        <div class="mt-2">
+                            <small class="text-muted">Analysis Depth</small>
+                            <h6 class="mb-0 fw-bold">${data.analysis_depth || 'Comprehensive'}</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card p-3 bg-light rounded text-center">
+                        <i class="fas fa-certificate text-success" style="font-size: 32px;"></i>
+                        <div class="mt-2">
+                            <small class="text-muted">Confidence</small>
+                            <h6 class="mb-0 fw-bold">${data.insights_confidence || 90}%</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Personalized Insights
+        const insights = data.personalized_insights || [];
+        if (Array.isArray(insights) && insights.length > 0) {
+            html += `
+                <div class="insights-section mb-4">
+                    <h6 class="fw-bold text-warning mb-3">
+                        <i class="fas fa-star me-2"></i>Key Insights About Your Learning
+                    </h6>
+            `;
+            insights.forEach((insight, idx) => {
+                html += `
+                    <div class="insight-card p-3 mb-2 bg-light rounded border-start border-warning border-4">
+                        <div class="d-flex align-items-start">
+                            <span class="badge bg-warning text-dark me-2" style="margin-top: 2px;">${idx + 1}</span>
+                            <p class="mb-0" style="line-height: 1.6;">${insight}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Strengths & Weaknesses
+        const strengthsWeaknesses = data.strengths_weaknesses || {};
+        const strengths = strengthsWeaknesses.strengths || [];
+        const weaknesses = strengthsWeaknesses.weaknesses || [];
+
+        if (strengths.length > 0) {
+            html += `
+                <div class="insights-section mb-4">
+                    <h6 class="fw-bold text-success mb-3">
+                        <i class="fas fa-check-circle me-2"></i>Your Strengths
+                    </h6>
+                    <div class="row g-2">
+            `;
+            strengths.forEach(strength => {
+                html += `
+                    <div class="col-md-6">
+                        <div class="p-2 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-plus-circle text-success me-2"></i>
+                            <span>${strength}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        }
+
+        if (weaknesses.length > 0) {
+            html += `
+                <div class="insights-section mb-4">
+                    <h6 class="fw-bold text-info mb-3">
+                        <i class="fas fa-arrow-up me-2"></i>Areas for Growth
+                    </h6>
+                    <div class="row g-2">
+            `;
+            weaknesses.forEach(area => {
+                html += `
+                    <div class="col-md-6">
+                        <div class="p-2 bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-seedling text-info me-2"></i>
+                            <span>${area}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        }
+
+        // Action Plan
+        const actionPlan = data.action_plan || {};
+        if (typeof actionPlan === 'object' && Object.keys(actionPlan).length > 0) {
+            html += `
+                <div class="insights-section mb-4">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-tasks me-2"></i>Your Personalized Action Plan
+                    </h6>
+            `;
+
+            Object.entries(actionPlan).forEach(([key, value]) => {
+                if (value && typeof value === 'string') {
+                    html += `
+                        <div class="action-card p-3 mb-2 border rounded">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-chevron-right text-primary me-2" style="margin-top: 4px;"></i>
+                                <div style="flex: 1;">
+                                    <strong style="color: #0d6efd;">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                                    <p class="mb-0 mt-1">${value}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (Array.isArray(value)) {
+                    html += `
+                        <div class="action-card p-3 mb-2 border rounded">
+                            <strong style="color: #0d6efd;">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                            <ul class="mb-0 mt-2">
+                    `;
+                    value.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul></div>';
+                }
+            });
+            html += '</div>';
+        }
+
+        // Success Predictions
+        if (data.success_predictions && typeof data.success_predictions === 'object') {
+            html += `
+                <div class="insights-section">
+                    <h6 class="fw-bold text-purple mb-3">
+                        <i class="fas fa-crystal-ball me-2"></i>Success Predictions
+                    </h6>
+                    <div class="prediction-content p-3 bg-light rounded">
+            `;
+
+            Object.entries(data.success_predictions).forEach(([key, value]) => {
+                if (value) {
+                    html += `
+                        <div class="mb-2">
+                            <strong>${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                            <span class="ms-2">${value}</span>
+                        </div>
+                    `;
+                }
+            });
+            html += '</div></div>';
+        }
+
+        if (!html) {
+            html = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No insights data available. Continue using the platform to generate personalized insights!
+                </div>
+            `;
+        }
+
+        document.getElementById('insightsContent').innerHTML = html;
     }
 
     function personalizeContent() {
-        alert('Content personalization feature coming soon!');
+        // Create a modal for content personalization
+        const modalHTML = `
+            <div class="modal fade" id="personalizeContentModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-gradient-info text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-user-cog me-2"></i>Personalize Learning Content
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="personalizeContentForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-book me-2"></i>Select Content to Personalize
+                                            </label>
+                                            <select class="form-select" id="personalizeContentId" required>
+                                                <option value="">Loading your topics...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-palette me-2"></i>Target Learning Style
+                                            </label>
+                                            <select class="form-select" id="personalizeTargetStyle" required>
+                                                <option value="visual">📊 Visual - Diagrams & Charts</option>
+                                                <option value="auditory">🎧 Auditory - Listening & Discussion</option>
+                                                <option value="kinesthetic">🤸 Kinesthetic - Hands-on Practice</option>
+                                                <option value="reading">📖 Reading/Writing - Text-based</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-sliders-h me-2"></i>Personalization Options
+                                    </label>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="addVisualAids" checked>
+                                                <label class="form-check-label" for="addVisualAids">
+                                                    Add Visual Aids
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="addPracticeQuestions" checked>
+                                                <label class="form-check-label" for="addPracticeQuestions">
+                                                    Add Practice Questions
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="addSummaries" checked>
+                                                <label class="form-check-label" for="addSummaries">
+                                                    Add Summaries
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn btn-info" onclick="generatePersonalizedContent()">
+                                    <i class="fas fa-magic me-2"></i>Personalize Content
+                                </button>
+                            </form>
+                            
+                            <div id="personalizedContentResult" class="mt-4" style="display: none;">
+                                <!-- Results will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove old modal if exists
+        const oldModal = document.getElementById('personalizeContentModal');
+        if (oldModal) oldModal.remove();
+
+        // Add new modal
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = new bootstrap.Modal(document.getElementById('personalizeContentModal'));
+        modal.show();
+
+        // Load user's topics
+        loadUserTopicsForPersonalization();
+    }
+
+    function loadUserTopicsForPersonalization() {
+        // Use the Supabase client to fetch topics directly
+        fetch('/learning-style/api/user-topics')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('personalizeContentId');
+                if (data.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+                    select.innerHTML = '<option value="">-- Select a topic --</option>';
+                    data.topics.forEach(topic => {
+                        const title = topic.title || 'Untitled Topic';
+                        select.innerHTML += `<option value="${topic.id}">${title}</option>`;
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No topics found - create a topic first</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading topics:', error);
+                document.getElementById('personalizeContentId').innerHTML = '<option value="">Error loading topics</option>';
+            });
+    }
+
+    function generatePersonalizedContent() {
+        const contentId = document.getElementById('personalizeContentId').value;
+        const targetStyle = document.getElementById('personalizeTargetStyle').value;
+        const addVisualAids = document.getElementById('addVisualAids').checked;
+        const addPracticeQuestions = document.getElementById('addPracticeQuestions').checked;
+        const addSummaries = document.getElementById('addSummaries').checked;
+
+        if (!contentId) {
+            alert('Please select a topic to personalize');
+            return;
+        }
+
+        const resultDiv = document.getElementById('personalizedContentResult');
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Personalizing content for your learning style...</div>';
+        resultDiv.style.display = 'block';
+
+        fetch('/learning-style/api/personalize-content-delivery', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content_id: contentId,
+                user_learning_style: targetStyle,
+                performance_history: {},
+                options: {
+                    add_visual_aids: addVisualAids,
+                    add_practice_questions: addPracticeQuestions,
+                    add_summaries: addSummaries
+                }
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Personalized Content:', data);
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
+                } else {
+                    displayPersonalizedContent(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">Error personalizing content</div>';
+            });
+    }
+
+    function displayPersonalizedContent(data) {
+        let html = `
+            <div class="personalized-content-card" style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e9ecef;">
+                <div class="result-header" style="border-bottom: 2px solid #17a2b8; padding-bottom: 12px; margin-bottom: 15px;">
+                    <h6 style="color: #17a2b8; font-weight: 700; font-size: 18px;">
+                        <i class="fas fa-check-circle me-2"></i>Content Personalized Successfully!
+                    </h6>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Learning Style:</strong><br>
+                        <span class="text-primary">${data.adapted_content?.learning_style || 'visual'}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Personalization Score:</strong><br>
+                        <span class="text-success">${data.personalization_score || 85}%</span>
+                    </div>
+                </div>
+        `;
+
+        // Adapted Content
+        if (data.adapted_content) {
+            const content = data.adapted_content;
+
+            html += `
+                <div class="content-section mb-4 p-4 bg-light rounded">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-magic me-2 text-info"></i>Personalized Content
+                    </h6>
+            `;
+
+            // Main content
+            if (content.main_content) {
+                html += `<div class="mb-3">${content.main_content}</div>`;
+            }
+
+            // Visual aids
+            if (content.visual_aids && Array.isArray(content.visual_aids)) {
+                html += `
+                    <div class="visual-aids mb-3">
+                        <strong class="text-success"><i class="fas fa-image me-2"></i>Visual Aids:</strong>
+                        <ul class="mt-2">
+                `;
+                content.visual_aids.forEach(aid => {
+                    html += `<li>${aid}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            // Examples
+            if (content.examples && Array.isArray(content.examples)) {
+                html += `
+                    <div class="examples mb-3">
+                        <strong class="text-warning"><i class="fas fa-lightbulb me-2"></i>Examples:</strong>
+                        <ul class="mt-2">
+                `;
+                content.examples.forEach(example => {
+                    html += `<li>${example}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            html += '</div>';
+        }
+
+        // Interactive Elements
+        if (data.interactive_elements && Array.isArray(data.interactive_elements) && data.interactive_elements.length > 0) {
+            html += `
+                <div class="interactive-section mb-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-hands me-2 text-primary"></i>Interactive Activities
+                    </h6>
+            `;
+            data.interactive_elements.forEach((element, idx) => {
+                html += `
+                    <div class="interactive-card p-3 mb-2 border rounded">
+                        <strong>${idx + 1}. ${element.type || 'Activity'}:</strong>
+                        <p class="mb-0 mt-1">${element.description || element}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Comprehension Checks
+        if (data.comprehension_checks && Array.isArray(data.comprehension_checks) && data.comprehension_checks.length > 0) {
+            html += `
+                <div class="comprehension-section mb-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-question-circle me-2 text-warning"></i>Check Your Understanding
+                    </h6>
+            `;
+            data.comprehension_checks.forEach((check, idx) => {
+                const question = typeof check === 'string' ? check : (check.question || check);
+                html += `
+                    <div class="check-card p-3 mb-2 bg-warning bg-opacity-10 rounded">
+                        <strong>${idx + 1}.</strong> ${question}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Reinforcement Activities
+        if (data.reinforcement_activities && Array.isArray(data.reinforcement_activities) && data.reinforcement_activities.length > 0) {
+            html += `
+                <div class="reinforcement-section">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-dumbbell me-2 text-success"></i>Practice Activities
+                    </h6>
+            `;
+            data.reinforcement_activities.forEach((activity, idx) => {
+                html += `
+                    <div class="activity-card p-3 mb-2 bg-success bg-opacity-10 rounded border-start border-success border-4">
+                        <div class="d-flex align-items-start">
+                            <span class="badge bg-success me-2">${idx + 1}</span>
+                            <div>${activity}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        html += '</div>';
+        document.getElementById('personalizedContentResult').innerHTML = html;
     }
 
     function viewPersonalizationCenter() {

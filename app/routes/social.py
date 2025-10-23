@@ -43,7 +43,10 @@ def social_dashboard():
                              recent_activity=recent_activity)
     
     except Exception as e:
-        flash('Error loading social dashboard.', 'error')
+        print(f"Error loading social dashboard: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error loading social dashboard: {str(e)}', 'error')
         return redirect(url_for('main.dashboard'))
 
 
@@ -82,28 +85,36 @@ def add_friend():
         form = FriendRequestForm()
         
         if form.validate_on_submit():
+            friend_email = form.friend_email.data.lower().strip()
             
+            # Check if it's your own email
+            if friend_email == user.email:
+                flash("You cannot add yourself as a friend!", 'error')
+                return render_template('social/add_friend.html', form=form)
             
-            friend_email = form.friend_email.data
+            # Try to find existing user with this email
+            existing_user = User.get_user_by_email(friend_email)
             
-            
-            if friend_email == 'friend@example.com':
-                friend_id = 'mock-friend-id'
-                
-                success = Friend.send_friend_request(friend_id)
+            if existing_user:
+                # User exists - send friend request
+                success = Friend.send_friend_request(user.id, existing_user.id)
                 
                 if success:
-                    flash('Friend request sent successfully!', 'success')
+                    flash(f'Friend request sent!', 'success')
                     return redirect(url_for('social.friends_list'))
                 else:
-                    flash('Error sending friend request.', 'error')
+                    flash('Error sending friend request. You may already be friends or have a pending request.', 'error')
             else:
-                flash('User not found with that email address.', 'error')
+                # User doesn't exist - they need to register first
+                flash('User not found. They need to create an account first before you can add them as a friend.', 'info')
         
         return render_template('social/add_friend.html', form=form)
     
     except Exception as e:
-        flash('Error adding friend.', 'error')
+        print(f"Error adding friend: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error adding friend: {str(e)}', 'error')
         return redirect(url_for('social.friends_list'))
 
 
@@ -161,13 +172,34 @@ def create_study_group():
         form = StudyGroupForm()
         
         if form.validate_on_submit():
+            # Convert string 'true'/'false' to boolean
+            is_public_value = form.is_public.data == 'true'
+            
+            print(f"\n{'='*60}")
+            print(f"DEBUG: Form submitted!")
+            print(f"  - form.is_public.data (raw): '{form.is_public.data}' (type: {type(form.is_public.data)})")
+            print(f"  - is_public_value (converted): {is_public_value} (type: {type(is_public_value)})")
+            print(f"{'='*60}\n")
+            
             group = StudyGroup.create_group(
                 name=form.name.data,
                 description=form.description.data,
                 creator_id=user.id,
-                is_public=form.is_public.data,
+                is_public=is_public_value,
                 max_members=form.max_members.data
             )
+            
+            if group:
+                print(f"\n{'='*60}")
+                print(f"DEBUG: Group created successfully!")
+                print(f"  - Group ID: {group.id}")
+                print(f"  - Group name: {group.name}")
+                print(f"  - Group is_public attribute: {group.is_public} (type: {type(group.is_public)})")
+                print(f"{'='*60}\n")
+            else:
+                print(f"\n{'='*60}")
+                print(f"ERROR: Group creation returned None!")
+                print(f"{'='*60}\n")
             
             if group:
                 flash('Study group created successfully!', 'success')
@@ -197,7 +229,10 @@ def join_study_group(group_id):
         return redirect(url_for('social.study_groups'))
     
     except Exception as e:
-        flash('Error joining study group.', 'error')
+        print(f"Error joining study group: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error joining study group: {str(e)}', 'error')
         return redirect(url_for('social.study_groups'))
 
 

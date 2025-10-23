@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule GCSE Exam - Learning Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .form-section h5 {
+        color: #495057;
+        font-weight: 600;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE Dashboard</a></li>
+            <li class="breadcrumb-item active">Schedule Exam</li>
+        </ol>
+    </nav>
+
+    <div class="exam-form-container">
+        <!-- Header -->
+        <div class="form-header">
+            <h1><i class="fas fa-calendar-plus me-2"></i>Schedule GCSE Exam</h1>
+            <p class="mb-0">Add your exam dates to get personalized countdowns and revision schedules</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Exam Creation Form -->
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('gcse.create_exam') }}" id="createExamForm">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+
+                        <div class="mb-3">
+                            <label for="subject_id" class="form-label required-field">Subject</label>
+                            <select class="form-select" id="subject_id" name="subject_id" required>
+                                <option value="">-- Select Subject --</option>
+                                {% if subjects %}
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}" data-exam-board="{{ subject.exam_board }}"
+                                    data-spec-code="{{ subject.specification_code }}">
+                                    {{ subject.subject_name }} ({{ subject.exam_board }})
+                                </option>
+                                {% endfor %}
+                                {% else %}
+                                <option value="" disabled>No subjects available - Loading subjects failed</option>
+                                {% endif %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Choose the GCSE subject for this exam
+                                <span class="text-danger">({{ subjects|length if subjects else 0 }} subjects
+                                    loaded)</span>
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exam_name" class="form-label required-field">Exam Name</label>
+                            <input type="text" class="form-control" id="exam_name" name="exam_name"
+                                placeholder="e.g., Mathematics Paper 1" required>
+                            <small class="form-text text-muted">Give your exam a descriptive name</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exam_date" class="form-label required-field">Exam Date</label>
+                            <input type="date" class="form-control" id="exam_date" name="exam_date" required>
+                            <small class="form-text text-muted">When is your exam scheduled?</small>
+                        </div>
+                    </div>
+
+                    <!-- Exam Details -->
+                    <div class="form-section">
+                        <h5 class="mb-3"><i class="fas fa-clipboard-list me-2"></i>Exam Details (Optional)</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="exam_board" class="form-label">Exam Board</label>
+                                <select class="form-select" id="exam_board" name="exam_board">
+                                    <option value="">-- Auto-detected --</option>
+                                    {% for board in exam_boards %}
+                                    <option value="{{ board }}">{{ board }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Auto-filled from selected subject</small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="specification_code" class="form-label">Specification Code</label>
+                                <input type="text" class="form-control" id="specification_code"
+                                    name="specification_code" placeholder="e.g., 8300">
+                                <small class="form-text text-muted">Auto-filled from selected subject</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="paper_number" class="form-label">Paper Number</label>
+                                <input type="number" class="form-control" id="paper_number" name="paper_number" min="1"
+                                    max="10" placeholder="1">
+                                <small class="form-text text-muted">Which paper? (1, 2, 3, etc.)</small>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="duration_minutes" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration_minutes" name="duration_minutes"
+                                    min="30" max="300" placeholder="90">
+                                <small class="form-text text-muted">Exam length in minutes</small>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="total_marks" class="form-label">Total Marks</label>
+                                <input type="number" class="form-control" id="total_marks" name="total_marks" min="1"
+                                    max="500" placeholder="80">
+                                <small class="form-text text-muted">Total marks available</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{{ url_for('gcse.gcse_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-plus me-2"></i>Schedule Exam
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Helpful Tips -->
+        <div class="card mt-4 border-info">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-lightbulb me-2 text-info"></i>Tips for Scheduling Exams</h5>
+                <ul class="mb-0">
+                    <li>Add all your exam dates as soon as you receive your timetable</li>
+                    <li>The system will create personalized revision schedules based on your exam dates</li>
+                    <li>You'll get countdown timers to help you track time until each exam</li>
+                    <li>Exam details (paper number, duration, marks) help generate better study plans</li>
+                    <li>You can edit or delete exams later from the "My Exams" page</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-fill exam board and specification code when subject is selected
+    document.getElementById('subject_id').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const examBoard = selectedOption.getAttribute('data-exam-board');
+        const specCode = selectedOption.getAttribute('data-spec-code');
+
+        if (examBoard) {
+            document.getElementById('exam_board').value = examBoard;
+        }
+        if (specCode) {
+            document.getElementById('specification_code').value = specCode;
+        }
+
+        // Auto-generate exam name suggestion
+        const subjectName = selectedOption.text.split('(')[0].trim();
+        const paperNumber = document.getElementById('paper_number').value || '1';
+        document.getElementById('exam_name').value = `${subjectName} Paper ${paperNumber}`;
+    });
+
+    // Update exam name when paper number changes
+    document.getElementById('paper_number').addEventListener('input', function () {
+        const subjectSelect = document.getElementById('subject_id');
+        const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
+
+        if (selectedOption.value) {
+            const subjectName = selectedOption.text.split('(')[0].trim();
+            const paperNumber = this.value || '1';
+            document.getElementById('exam_name').value = `${subjectName} Paper ${paperNumber}`;
+        }
+    });
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('exam_date').setAttribute('min', today);
+
+    // Form validation
+    document.getElementById('createExamForm').addEventListener('submit', function (e) {
+        const subjectId = document.getElementById('subject_id').value;
+        const examName = document.getElementById('exam_name').value;
+        const examDate = document.getElementById('exam_date').value;
+
+        if (!subjectId || !examName || !examDate) {
+            e.preventDefault();
+            alert('Please fill in all required fields (marked with *)');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}{{ paper.paper_title }} - GCSE Past Paper{% endblock %}
+
+{% block extra_css %}
+<style>
+    .paper-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+
+    .question-card {
+        transition: transform 0.2s ease-in-out;
+        border-left: 4px solid #667eea;
+        margin-bottom: 20px;
+    }
+
+    .question-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .mark-scheme-box {
+        background: #f8f9fa;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        border-radius: 5px;
+    }
+
+    .info-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        display: inline-block;
+        margin: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Community Content Notice (Permanent) -->
+    <div class="alert alert-primary mb-3" role="alert">
+        <i class="fas fa-users me-2"></i>
+        <strong>Community Practice Questions:</strong> This is a user-generated practice set. Questions are created by
+        teachers and students for practice purposes.
+        <strong class="text-danger">NOT official exam board past papers.</strong>
+        For official papers, visit your exam board's website.
+    </div>
+
+    <!-- Paper Hero Section -->
+    <div class="paper-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-file-alt me-2"></i>{{ paper.paper_title }}</h1>
+                    <p class="lead mb-3">{{ paper.exam_board }} - {{ paper.exam_year }} {{ paper.exam_month }}</p>
+                    <div>
+                        <span class="info-badge bg-light text-dark">
+                            <i class="fas fa-clock me-1"></i>{{ paper.duration_minutes }} minutes
+                        </span>
+                        <span class="info-badge bg-light text-dark">
+                            <i class="fas fa-star me-1"></i>{{ paper.total_marks }} marks
+                        </span>
+                        <span class="info-badge bg-light text-dark">
+                            <i class="fas fa-layer-group me-1"></i>{{ paper.difficulty_level }}
+                        </span>
+                        <span class="info-badge bg-light text-dark">
+                            <i class="fas fa-list me-1"></i>{{ paper.questions|length }} questions
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ url_for('gcse_past_papers.start_practice_session', paper_id=paper.id) }}"
+                        class="btn btn-light btn-lg">
+                        <i class="fas fa-play me-2"></i>Start Practice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('gcse_past_papers.past_papers_list') }}">Past Papers</a>
+                </li>
+                <li class="breadcrumb-item active">{{ paper.paper_title }}</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Paper Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Paper Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Subject:</strong> {{ subject.subject_name if subject else 'N/A' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Exam Board:</strong> {{ paper.exam_board }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Specification:</strong> {{ paper.specification_code }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Paper Number:</strong> {{ paper.paper_number if paper.paper_number else 'N/A' }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Difficulty Level:</strong>
+                                <span
+                                    class="badge bg-{{ 'success' if paper.difficulty_level == 'Foundation' else 'danger' if paper.difficulty_level == 'Higher' else 'warning' }}">
+                                    {{ paper.difficulty_level }}
+                                </span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Year & Session:</strong> {{ paper.exam_year }} {{ paper.exam_month }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-list me-2"></i>Questions ({{ paper.questions|length }})</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if paper.questions %}
+                        {% for question in paper.questions %}
+                        <div class="card question-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title">
+                                        <span class="badge bg-primary me-2">Q{{ question.question_number }}</span>
+                                        {{ question.marks }} mark{{ 's' if question.marks > 1 else '' }}
+                                    </h5>
+                                    <span class="badge bg-info">{{ question.question_type|replace('_', ' ')|title
+                                        }}</span>
+                                </div>
+
+                                <p class="card-text">{{ question.question_text }}</p>
+
+                                {% if question.mark_scheme %}
+                                <div class="mark-scheme-box mt-3">
+                                    <strong><i class="fas fa-check-circle me-2"></i>Mark Scheme:</strong>
+                                    <p class="mb-0 mt-2">{{ question.mark_scheme }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No questions available for this paper yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Grade Boundaries -->
+                {% if grade_boundaries %}
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Grade Boundaries
+                            <span class="badge bg-dark ms-2">Example 2023</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for tier, boundaries in grade_boundaries.items() %}
+                        <h6 class="mt-3">{{ tier }} Tier</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Grade</th>
+                                    <th>Marks Required</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade, marks in boundaries.items() %}
+                                <tr>
+                                    <td><span class="badge bg-primary">{{ grade }}</span></td>
+                                    <td>{{ marks }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endfor %}
+                        <small class="text-muted mt-2">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Example boundaries only - verify with official exam board resources.
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('gcse_past_papers.start_practice_session', paper_id=paper.id) }}"
+                                class="btn btn-success">
+                                <i class="fas fa-play me-2"></i>Start Practice Session
+                            </a>
+                            <a href="{{ url_for('gcse_past_papers.past_papers_list') }}"
+                                class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Past Papers
+                            </a>
+                            <a href="{{ url_for('gcse_past_papers.practice_history') }}" class="btn btn-outline-info">
+                                <i class="fas fa-history me-2"></i>View Practice History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Performance -->
+                {% if paper_sessions %}
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Your Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Previous Attempts:</strong> {{ paper_sessions|length }}</p>
+                        {% if paper_sessions %}
+                        <hr>
+                        <h6>Recent Sessions:</h6>
+                        {% for session in paper_sessions[:3] %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <small>{{ session.started_at.strftime('%d %b %Y') if session.started_at }}</small>
+                                <span class="badge bg-{{ 'success' if session.status == 'completed' else 'warning' }}">
+                                    {{ session.status|title }}
+                                </span>
+                            </div>
+                            {% if session.status == 'completed' %}
+                            <div class="progress mt-2" style="height: 25px;">
+                                {% set percentage = (session.achieved_marks / session.total_marks * 100) if
+                                session.total_marks > 0 else 0 %}
+                                <div class="progress-bar bg-{{ 'success' if percentage >= 70 else 'warning' if percentage >= 40 else 'danger' }}"
+                                    style="width: {{ percentage }}%">
+                                    {{ session.achieved_marks }}/{{ session.total_marks }} ({{ percentage|round }}%)
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Paper Statistics -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Paper Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <strong>Duration:</strong> {{ paper.duration_minutes }} minutes
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <strong>Total Marks:</strong> {{ paper.total_marks }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-list text-success me-2"></i>
+                                <strong>Questions:</strong> {{ paper.questions|length }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-layer-group text-info me-2"></i>
+                                <strong>Level:</strong> {{ paper.difficulty_level }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

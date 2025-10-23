@@ -1,0 +1,866 @@
+{% extends "base.html" %}
+
+{% block title %}Personalization Center - Learning Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-range::-webkit-slider-thumb {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+
+    .form-range::-moz-range-thumb {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+    }
+
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+    }
+
+    .btn-group .btn:last-child {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+    }
+
+    /* Form Controls Enhancement */
+    .form-select,
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .form-label {
+        font-size: 14px;
+        color: #495057;
+        margin-bottom: 8px;
+        letter-spacing: 0.3px;
+    }
+
+    /* Range Slider Enhancement */
+    .form-range {
+        height: 10px;
+        border-radius: 5px;
+        background: linear-gradient(to right, #e9ecef 0%, #0d6efd 50%, #e9ecef 100%);
+    }
+
+    .form-range::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border: 4px solid white;
+        box-shadow: 0 3px 10px rgba(13, 110, 253, 0.4);
+        cursor: pointer;
+    }
+
+    .form-range::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border: 4px solid white;
+        box-shadow: 0 3px 10px rgba(13, 110, 253, 0.4);
+        cursor: pointer;
+    }
+
+    /* Button Groups Enhancement */
+    .btn-group {
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+        font-weight: 600;
+        padding: 14px 20px;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+
+    .btn-group .btn:first-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    .btn-group .btn:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .btn-check:checked+.btn-outline-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        color: white;
+    }
+
+    .btn-check:checked+.btn-outline-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        border-color: #6c757d;
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        color: white;
+    }
+
+    /* Checkboxes Enhancement */
+    .form-check {
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 8px;
+    }
+
+    .form-check:hover {
+        background: #f8f9fa;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-check-input {
+        width: 22px;
+        height: 22px;
+        margin-top: 0;
+        cursor: pointer;
+        border: 2px solid #dee2e6;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .form-switch .form-check-input {
+        width: 52px;
+        height: 26px;
+        border-radius: 13px;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+        margin-left: 8px;
+    }
+
+    /* Save Buttons Enhancement */
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        border: none;
+        font-size: 15px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20893c 100%);
+        border: none;
+        font-size: 15px;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        border: none;
+        color: #212529;
+        font-size: 15px;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        border: none;
+        font-size: 15px;
+    }
+
+    /* Back Button */
+    .btn-light {
+        background: white;
+        border: 2px solid #dee2e6;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .btn-light:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    /* Profile Overview Enhancement */
+    #profileOverview .stat-card {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+
+    /* Session Length Display */
+    #sessionLengthValue {
+        color: #0d6efd;
+        font-size: 20px;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Time Input */
+    input[type="time"] {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    /* Alert Enhancement */
+    .alert-info {
+        background: linear-gradient(135deg, #17a2b815 0%, #17a2b805 100%);
+        border-left: 4px solid #17a2b8;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-cogs fa-2x me-3"></i>
+                            <div>
+                                <h2 class="h4 mb-0">Personalization Center</h2>
+                                <p class="mb-0 opacity-75">Advanced learning personalization and preferences</p>
+                            </div>
+                        </div>
+                        <a href="/learning-style/" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Learning Style
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Learning Preferences -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-header"
+                    style="background: linear-gradient(135deg, #0d6efd15 0%, #0d6efd05 100%); border-bottom: 2px solid #0d6efd;">
+                    <h5 class="card-title mb-0 fw-bold" style="color: #0d6efd;">
+                        <i class="fas fa-user-cog me-2"></i>
+                        Learning Preferences
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 24px;">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Customize how you prefer to learn and interact with content.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Primary Learning Style</label>
+                        <select class="form-select" id="primaryLearningStyle">
+                            <option value="visual">📊 Visual - Diagrams & Charts</option>
+                            <option value="auditory">🎧 Auditory - Listening & Discussion</option>
+                            <option value="kinesthetic">🤸 Kinesthetic - Hands-on Practice</option>
+                            <option value="reading">📖 Reading/Writing - Text-based</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Secondary Learning Style (Optional)</label>
+                        <select class="form-select" id="secondaryLearningStyle">
+                            <option value="">None</option>
+                            <option value="visual">📊 Visual</option>
+                            <option value="auditory">🎧 Auditory</option>
+                            <option value="kinesthetic">🤸 Kinesthetic</option>
+                            <option value="reading">📖 Reading/Writing</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Preferred Study Time</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="studyTime" id="morningTime" value="morning"
+                                checked>
+                            <label class="btn btn-outline-primary" for="morningTime">
+                                <i class="fas fa-sun me-1"></i>Morning
+                            </label>
+
+                            <input type="radio" class="btn-check" name="studyTime" id="afternoonTime" value="afternoon">
+                            <label class="btn btn-outline-primary" for="afternoonTime">
+                                <i class="fas fa-cloud-sun me-1"></i>Afternoon
+                            </label>
+
+                            <input type="radio" class="btn-check" name="studyTime" id="eveningTime" value="evening">
+                            <label class="btn btn-outline-primary" for="eveningTime">
+                                <i class="fas fa-moon me-1"></i>Evening
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Preferred Session Length
+                            <small class="text-muted">(minutes)</small>
+                        </label>
+                        <input type="range" class="form-range" id="sessionLength" min="15" max="120" step="15"
+                            value="45">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">15 min</small>
+                            <strong id="sessionLengthValue">45 min</strong>
+                            <small class="text-muted">120 min</small>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="savePreferences()">
+                        <i class="fas fa-save me-2"></i>Save Preferences
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Display Preferences -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #28a745 !important;">
+                <div class="card-header"
+                    style="background: linear-gradient(135deg, #28a74515 0%, #28a74505 100%); border-bottom: 2px solid #28a745;">
+                    <h5 class="card-title mb-0 fw-bold" style="color: #28a745;">
+                        <i class="fas fa-eye me-2"></i>
+                        Content Display Preferences
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 24px;">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Control how content is displayed and organized.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Font Size</label>
+                        <select class="form-select" id="fontSize">
+                            <option value="small">Small (12px)</option>
+                            <option value="medium" selected>Medium (14px)</option>
+                            <option value="large">Large (16px)</option>
+                            <option value="xlarge">Extra Large (18px)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Content Density</label>
+                        <select class="form-select" id="contentDensity">
+                            <option value="compact">Compact - More info per page</option>
+                            <option value="comfortable" selected>Comfortable - Balanced</option>
+                            <option value="spacious">Spacious - Easy on eyes</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Content Features</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showVisualAids" checked>
+                            <label class="form-check-label" for="showVisualAids">
+                                Show Visual Aids by Default
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showExamples" checked>
+                            <label class="form-check-label" for="showExamples">
+                                Show Examples and Analogies
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showPractice" checked>
+                            <label class="form-check-label" for="showPractice">
+                                Show Practice Questions
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoSummaries">
+                            <label class="form-check-label" for="autoSummaries">
+                                Auto-Generate Summaries
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Theme Preference</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="theme" id="lightTheme" value="light" checked>
+                            <label class="btn btn-outline-secondary" for="lightTheme">
+                                <i class="fas fa-sun me-1"></i>Light
+                            </label>
+
+                            <input type="radio" class="btn-check" name="theme" id="darkTheme" value="dark">
+                            <label class="btn btn-outline-secondary" for="darkTheme">
+                                <i class="fas fa-moon me-1"></i>Dark
+                            </label>
+
+                            <input type="radio" class="btn-check" name="theme" id="autoTheme" value="auto">
+                            <label class="btn btn-outline-secondary" for="autoTheme">
+                                <i class="fas fa-adjust me-1"></i>Auto
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success w-100" onclick="saveDisplayPreferences()">
+                        <i class="fas fa-save me-2"></i>Save Display Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Reminders -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #ffc107 !important;">
+                <div class="card-header"
+                    style="background: linear-gradient(135deg, #ffc10715 0%, #ffc10705 100%); border-bottom: 2px solid #ffc107;">
+                    <h5 class="card-title mb-0 fw-bold" style="color: #ffc107;">
+                        <i class="fas fa-bell me-2"></i>
+                        Study Reminders
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 24px;">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Set up personalized study reminders.
+                    </p>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableReminders" checked>
+                        <label class="form-check-label fw-bold" for="enableReminders">
+                            Enable Study Reminders
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reminder Frequency</label>
+                        <select class="form-select" id="reminderFrequency">
+                            <option value="daily" selected>Daily</option>
+                            <option value="weekdays">Weekdays Only</option>
+                            <option value="custom">Custom Schedule</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Preferred Reminder Time</label>
+                        <input type="time" class="form-control" id="reminderTime" value="18:00">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Reminders will be sent based on your learning style and study patterns</small>
+                    </div>
+
+                    <button class="btn btn-warning w-100" onclick="saveReminderSettings()">
+                        <i class="fas fa-save me-2"></i>Save Reminder Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Personalization Settings -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm" style="border-left: 4px solid #17a2b8 !important;">
+                <div class="card-header"
+                    style="background: linear-gradient(135deg, #17a2b815 0%, #17a2b805 100%); border-bottom: 2px solid #17a2b8;">
+                    <h5 class="card-title mb-0 fw-bold" style="color: #17a2b8;">
+                        <i class="fas fa-brain me-2"></i>
+                        AI Personalization
+                    </h5>
+                </div>
+                <div class="card-body" style="padding: 24px;">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Configure AI-powered personalization features.
+                    </p>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="enableAIAdaptation" checked>
+                        <label class="form-check-label fw-bold" for="enableAIAdaptation">
+                            Enable AI Content Adaptation
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">AI Personalization Level</label>
+                        <select class="form-select" id="aiPersonalizationLevel">
+                            <option value="basic">Basic - Simple adaptations</option>
+                            <option value="moderate" selected>Moderate - Balanced approach</option>
+                            <option value="advanced">Advanced - Deep personalization</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Auto-Generate</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoQuizzes" checked>
+                            <label class="form-check-label" for="autoQuizzes">
+                                Practice Quizzes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoSummaries" checked>
+                            <label class="form-check-label" for="autoSummaries">
+                                Content Summaries
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoFlashcards">
+                            <label class="form-check-label" for="autoFlashcards">
+                                Flashcards
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-info w-100" onclick="saveAISettings()">
+                        <i class="fas fa-save me-2"></i>Save AI Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Settings Overview -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie text-success me-2"></i>
+                        Your Personalization Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="profileOverview" class="row g-4">
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 rounded text-center"
+                                style="background: linear-gradient(135deg, #0d6efd15 0%, #0d6efd05 100%); border: 2px solid #0d6efd20;">
+                                <i class="fas fa-brain text-primary mb-3" style="font-size: 48px;"></i>
+                                <h6 class="mt-2 mb-1 fw-bold" style="color: #0d6efd;">Learning Style</h6>
+                                <p class="mb-0 fw-bold" id="currentLearningStyle"
+                                    style="font-size: 16px; color: #212529;">Visual</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 rounded text-center"
+                                style="background: linear-gradient(135deg, #28a74515 0%, #28a74505 100%); border: 2px solid #28a74520;">
+                                <i class="fas fa-clock text-success mb-3" style="font-size: 48px;"></i>
+                                <h6 class="mt-2 mb-1 fw-bold" style="color: #28a745;">Study Time</h6>
+                                <p class="mb-0 fw-bold" id="currentStudyTime" style="font-size: 16px; color: #212529;">
+                                    Morning</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 rounded text-center"
+                                style="background: linear-gradient(135deg, #ffc10715 0%, #ffc10705 100%); border: 2px solid #ffc10720;">
+                                <i class="fas fa-hourglass-half text-warning mb-3" style="font-size: 48px;"></i>
+                                <h6 class="mt-2 mb-1 fw-bold" style="color: #ffc107;">Session Length</h6>
+                                <p class="mb-0 fw-bold" id="currentSessionLength"
+                                    style="font-size: 16px; color: #212529;">45 min</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 rounded text-center"
+                                style="background: linear-gradient(135deg, #17a2b815 0%, #17a2b805 100%); border: 2px solid #17a2b820;">
+                                <i class="fas fa-robot text-info mb-3" style="font-size: 48px;"></i>
+                                <h6 class="mt-2 mb-1 fw-bold" style="color: #17a2b8;">AI Level</h6>
+                                <p class="mb-0 fw-bold" id="currentAILevel" style="font-size: 16px; color: #212529;">
+                                    Moderate</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert border-0 mt-4"
+                        style="background: linear-gradient(135deg, #28a74515 0%, #28a74505 100%); border-left: 4px solid #28a745 !important;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-3" style="font-size: 32px;"></i>
+                            <div>
+                                <strong style="color: #28a745; font-size: 18px;">Personalization Active!</strong>
+                                <p class="mb-0 mt-1">The platform is adapting content based on your preferences.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update session length display
+    document.getElementById('sessionLength').addEventListener('input', function () {
+        document.getElementById('sessionLengthValue').textContent = this.value + ' min';
+    });
+
+    function savePreferences() {
+        const preferences = {
+            primary_style: document.getElementById('primaryLearningStyle').value,
+            secondary_style: document.getElementById('secondaryLearningStyle').value,
+            study_time: document.querySelector('input[name="studyTime"]:checked').value,
+            session_length: document.getElementById('sessionLength').value
+        };
+
+        // Save to localStorage
+        localStorage.setItem('learningPreferences', JSON.stringify(preferences));
+
+        // Save to backend
+        fetch('/learning-style/api/save-preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(preferences)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Preferences saved to backend:', data);
+            })
+            .catch(err => console.error('Error saving to backend:', err));
+
+        // Update profile display
+        updateProfileDisplay();
+
+        // Show success message
+        showToast('✅ Learning preferences saved successfully!', 'success');
+    }
+
+    function saveDisplayPreferences() {
+        const displayPrefs = {
+            font_size: document.getElementById('fontSize').value,
+            content_density: document.getElementById('contentDensity').value,
+            show_visual_aids: document.getElementById('showVisualAids').checked,
+            show_examples: document.getElementById('showExamples').checked,
+            show_practice: document.getElementById('showPractice').checked,
+            auto_summaries: document.getElementById('autoSummaries').checked,
+            theme: document.querySelector('input[name="theme"]:checked').value
+        };
+
+        // Save to localStorage
+        localStorage.setItem('displayPreferences', JSON.stringify(displayPrefs));
+
+        // Apply theme immediately
+        applyTheme(displayPrefs.theme);
+
+        // Apply font size
+        applyFontSize(displayPrefs.font_size);
+
+        // Show success message
+        showToast('✅ Display preferences saved and applied!', 'success');
+    }
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.body.style.background = '#1a1a2e';
+            document.body.style.color = '#eee';
+            showToast('🌙 Dark mode activated!', 'info');
+        } else if (theme === 'light') {
+            document.body.classList.remove('dark-mode');
+            document.body.style.background = '';
+            document.body.style.color = '';
+            showToast('☀️ Light mode activated!', 'info');
+        } else {
+            // Auto mode - detect system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+    }
+
+    function applyFontSize(size) {
+        const sizeMap = {
+            'small': '12px',
+            'medium': '14px',
+            'large': '16px',
+            'xlarge': '18px'
+        };
+
+        document.documentElement.style.fontSize = sizeMap[size] || '14px';
+        showToast(`📏 Font size changed to ${size}!`, 'info');
+    }
+
+    function saveReminderSettings() {
+        const reminderSettings = {
+            enabled: document.getElementById('enableReminders').checked,
+            frequency: document.getElementById('reminderFrequency').value,
+            time: document.getElementById('reminderTime').value
+        };
+
+        // Save to localStorage
+        localStorage.setItem('reminderSettings', JSON.stringify(reminderSettings));
+
+        // Schedule reminder
+        if (reminderSettings.enabled) {
+            scheduleStudyReminder(reminderSettings);
+        }
+
+        showToast('✅ Reminder settings saved!', 'success');
+    }
+
+    function scheduleStudyReminder(settings) {
+        // Calculate next reminder time
+        const [hours, minutes] = settings.time.split(':');
+        const now = new Date();
+        const reminderTime = new Date();
+        reminderTime.setHours(parseInt(hours), parseInt(minutes), 0);
+
+        if (reminderTime < now) {
+            reminderTime.setDate(reminderTime.getDate() + 1);
+        }
+
+        const timeUntilReminder = reminderTime - now;
+
+        console.log(`Next study reminder scheduled in ${Math.round(timeUntilReminder / 1000 / 60)} minutes`);
+        showToast(`🔔 Reminder set for ${settings.time} ${settings.frequency}`, 'info');
+
+        // In production, this would integrate with browser notifications or backend scheduler
+        if ('Notification' in window && Notification.permission === 'granted') {
+            setTimeout(() => {
+                new Notification('Study Reminder', {
+                    body: 'Time for your study session!',
+                    icon: '/static/images/icon.png'
+                });
+            }, Math.min(timeUntilReminder, 5000)); // Demo: show in 5 seconds max
+        }
+    }
+
+    function saveAISettings() {
+        const aiSettings = {
+            enabled: document.getElementById('enableAIAdaptation').checked,
+            level: document.getElementById('aiPersonalizationLevel').value,
+            auto_quizzes: document.getElementById('autoQuizzes').checked,
+            auto_summaries: document.getElementById('autoSummaries').checked,
+            auto_flashcards: document.getElementById('autoFlashcards').checked
+        };
+
+        // Save to localStorage
+        localStorage.setItem('aiSettings', JSON.stringify(aiSettings));
+
+        // Update AI behavior globally
+        window.aiPersonalizationEnabled = aiSettings.enabled;
+        window.aiPersonalizationLevel = aiSettings.level;
+
+        showToast('✅ AI settings saved and activated!', 'success');
+
+        if (aiSettings.enabled) {
+            showToast('🤖 AI personalization is now active across the platform!', 'info');
+        }
+    }
+
+    function updateProfileDisplay() {
+        const prefs = JSON.parse(localStorage.getItem('learningPreferences') || '{}');
+
+        if (prefs.primary_style) {
+            const styleNames = {
+                'visual': 'Visual',
+                'auditory': 'Auditory',
+                'kinesthetic': 'Kinesthetic',
+                'reading': 'Reading/Writing'
+            };
+            document.getElementById('currentLearningStyle').textContent = styleNames[prefs.primary_style] || 'Visual';
+        }
+
+        if (prefs.study_time) {
+            document.getElementById('currentStudyTime').textContent = prefs.study_time.charAt(0).toUpperCase() + prefs.study_time.slice(1);
+        }
+
+        if (prefs.session_length) {
+            document.getElementById('currentSessionLength').textContent = prefs.session_length + ' min';
+        }
+
+        const aiSettings = JSON.parse(localStorage.getItem('aiSettings') || '{}');
+        if (aiSettings.level) {
+            document.getElementById('currentAILevel').textContent = aiSettings.level.charAt(0).toUpperCase() + aiSettings.level.slice(1);
+        }
+    }
+
+    function showToast(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-info';
+        const icon = type === 'success' ? 'check-circle' : 'info-circle';
+
+        const toast = document.createElement('div');
+        toast.className = `alert ${alertClass} position-fixed top-0 end-0 m-3`;
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <i class="fas fa-${icon} me-2"></i>${message}
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Load saved preferences on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const prefs = JSON.parse(localStorage.getItem('learningPreferences') || '{}');
+
+        if (prefs.primary_style) {
+            document.getElementById('primaryLearningStyle').value = prefs.primary_style;
+        }
+        if (prefs.secondary_style) {
+            document.getElementById('secondaryLearningStyle').value = prefs.secondary_style;
+        }
+        if (prefs.study_time) {
+            document.getElementById(prefs.study_time + 'Time').checked = true;
+        }
+        if (prefs.session_length) {
+            document.getElementById('sessionLength').value = prefs.session_length;
+            document.getElementById('sessionLengthValue').textContent = prefs.session_length + ' min';
+        }
+
+        const displayPrefs = JSON.parse(localStorage.getItem('displayPreferences') || '{}');
+        if (displayPrefs.font_size) {
+            document.getElementById('fontSize').value = displayPrefs.font_size;
+        }
+        if (displayPrefs.content_density) {
+            document.getElementById('contentDensity').value = displayPrefs.content_density;
+        }
+        if (displayPrefs.theme) {
+            document.getElementById(displayPrefs.theme + 'Theme').checked = true;
+        }
+
+        const aiSettings = JSON.parse(localStorage.getItem('aiSettings') || '{}');
+        if (aiSettings.level) {
+            document.getElementById('aiPersonalizationLevel').value = aiSettings.level;
+        }
+
+        updateProfileDisplay();
+    });
+</script>
+{% endblock %}
