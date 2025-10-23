@@ -13,10 +13,10 @@ def login():
             flash('Please fill in all fields.', 'error')
             return render_template('auth/login.html')
         
-        # Import here to avoid circular imports
+
         from app.models.auth import AuthUser
         
-        # Try to find user by username or email
+
         user = AuthUser.get_by_username_or_email(username)
         
         if user and user.check_password(password):

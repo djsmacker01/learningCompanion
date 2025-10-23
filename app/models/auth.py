@@ -488,12 +488,12 @@ class AuthUser:
         try:
             supabase = get_supabase_client()
             
-            # Try username first
+
             response = supabase.table('users').select('*').eq('username', identifier).execute()
             if response.data:
                 return cls(response.data[0])
             
-            # Try email
+
             response = supabase.table('users').select('*').eq('email', identifier).execute()
             if response.data:
                 return cls(response.data[0])
