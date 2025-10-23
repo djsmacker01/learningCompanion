@@ -156,14 +156,33 @@ class StudyGroup:
                 'updated_at': datetime.utcnow().isoformat()
             }
             
+            print(f"\n{'='*60}")
+            print(f"DEBUG: StudyGroup.create_group() - Data being sent to database:")
+            print(f"  - is_public in data dict: {data['is_public']} (type: {type(data['is_public'])})")
+            print(f"  - Full data: {data}")
+            print(f"{'='*60}\n")
+            
             result = client.table('study_groups').insert(data).execute()
+            
+            print(f"\n{'='*60}")
+            print(f"DEBUG: Database insert result:")
+            print(f"  - result.data: {result.data}")
+            print(f"{'='*60}\n")
+            
             if result.data:
                 group = cls(**result.data[0])
+                
+                print(f"\n{'='*60}")
+                print(f"DEBUG: Group object created from database response:")
+                print(f"  - group.is_public: {group.is_public} (type: {type(group.is_public)})")
+                print(f"{'='*60}\n")
                 
                 StudyGroupMember.add_member(group.id, creator_id, 'admin')
                 return group
         except Exception as e:
             print(f"Error creating study group: {e}")
+            import traceback
+            traceback.print_exc()
         
         return None
     

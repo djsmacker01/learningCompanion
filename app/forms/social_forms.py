@@ -51,11 +51,10 @@ class StudyGroupForm(FlaskForm):
     
     is_public = SelectField('Visibility', 
         choices=[
-            (True, 'Public - Anyone can join'),
-            (False, 'Private - Invite only')
+            ('true', 'Public - Anyone can join'),
+            ('false', 'Private - Invite only')
         ],
-        coerce=bool,
-        default=True,
+        default='true',
         render_kw={
             'class': 'form-control'
         }
