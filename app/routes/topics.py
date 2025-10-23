@@ -462,7 +462,7 @@ def import_materials():
                     return render_template('topics/import_materials.html', form=form)
                 
 
-                from app.utils.document_processor import DocumentProcessor
+                from app.utils.document_processor_simple import process_document
                 doc_processor = DocumentProcessor()
                 
 
@@ -613,7 +613,7 @@ def test_document_processing():
             flash('User not authenticated.', 'error')
             return redirect(url_for('auth.login'))
         
-        from app.utils.document_processor import DocumentProcessor
+        from app.utils.document_processor_simple import process_document
         
         # Check document processing availability
         available_formats = DocumentProcessor.is_document_processing_available()
