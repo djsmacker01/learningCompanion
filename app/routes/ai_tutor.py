@@ -83,7 +83,7 @@ def generate_study_plan(topic_id):
         
         tutor = AITutor(user.id)
         
-        # Get optional parameters
+
         target_grade = request.args.get('target_grade')
         time_available = request.args.get('time_available', type=int)
         
@@ -143,7 +143,7 @@ def predict_grade(topic_id):
         
         tutor = AITutor(user.id)
         
-        # Get optional exam date
+
         exam_date = request.args.get('exam_date')
         
         prediction = tutor.predict_grade(topic_id, exam_date)
@@ -312,20 +312,20 @@ def save_learning_style():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        # Extract learning style data
+
         learning_style = data.get('learning_style', 'visual')
         confidence = data.get('confidence', 75)
         recommendations = data.get('recommendations', [])
         saved_at = data.get('saved_at', datetime.now().isoformat())
         
-        # Save to database
+
         from app.models import get_supabase_client
         supabase = get_supabase_client()
         
         if not supabase:
             return jsonify({'error': 'Database connection failed'}), 500
         
-        # Prepare data for database
+
         style_data = {
             'user_id': user.id,
             'learning_style': learning_style,
@@ -338,12 +338,12 @@ def save_learning_style():
             'created_at': datetime.now().isoformat()
         }
         
-        # Use proper upsert with on_conflict handling
-        # First check if record exists
+
+
         existing = supabase.table('ai_learning_styles').select('id').eq('user_id', user.id).execute()
         
         if existing.data and len(existing.data) > 0:
-            # Update existing record
+
             result = supabase.table('ai_learning_styles').update({
                 'learning_style': learning_style,
                 'confidence_score': confidence,
@@ -355,7 +355,7 @@ def save_learning_style():
                 'updated_at': datetime.now().isoformat()
             }).eq('user_id', user.id).execute()
         else:
-            # Insert new record
+
             result = supabase.table('ai_learning_styles').insert(style_data).execute()
         
         if result.data:

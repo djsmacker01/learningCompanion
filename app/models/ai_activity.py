@@ -152,7 +152,7 @@ class AIActivity:
         from datetime import timezone
         now = datetime.now(timezone.utc)
         if self.created_at.tzinfo is None:
-            # If created_at is naive, assume it's UTC
+
             created_at = self.created_at.replace(tzinfo=timezone.utc)
         else:
             created_at = self.created_at
