@@ -1,6 +1,6 @@
 
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List, Dict, Optional, Tuple
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
 import json
@@ -50,13 +50,25 @@ class GCSESubject:
     @classmethod
     def get_all_subjects(cls) -> List['GCSESubject']:
         
+        print(f"DEBUG: Getting GCSE subjects... SUPABASE_AVAILABLE={SUPABASE_AVAILABLE}")
+        
         if not SUPABASE_AVAILABLE:
-            return cls._get_default_subjects()
+            print("DEBUG: Supabase not available, returning default subjects")
+            defaults = cls._get_default_subjects()
+            print(f"DEBUG: Returning {len(defaults)} default subjects")
+            return defaults
             
         supabase = get_supabase_client()
         
         try:
+            print("DEBUG: Querying gcse_subjects table...")
             result = supabase.table('gcse_subjects').select('*').eq('is_active', True).order('subject_name').execute()
+            print(f"DEBUG: Query returned {len(result.data)} subjects from database")
+            
+            if not result.data or len(result.data) == 0:
+                print("DEBUG: No subjects in database, falling back to defaults")
+                return cls._get_default_subjects()
+            
             subjects = [cls(**subject) for subject in result.data]
             
             
@@ -65,13 +77,22 @@ class GCSESubject:
                 
             return subjects
         except Exception as e:
-            print(f"Error getting GCSE subjects: {e}")
+            print(f"ERROR getting GCSE subjects from database: {e}")
+            import traceback
+            traceback.print_exc()
+            print("DEBUG: Exception occurred, falling back to default subjects")
             return cls._get_default_subjects()
 
     @classmethod
     def get_subject_by_id(cls, subject_id: str) -> Optional['GCSESubject']:
         
         if not SUPABASE_AVAILABLE:
+            # Return from default subjects if database not available
+            default_subjects = cls._get_default_subjects()
+            for subject in default_subjects:
+                if subject.id == subject_id:
+                    subject.topics = GCSETopic.get_topics_by_subject(subject.id)
+                    return subject
             return None
             
         supabase = get_supabase_client()
@@ -84,6 +105,12 @@ class GCSESubject:
                 return subject
         except Exception as e:
             print(f"Error getting GCSE subject by ID: {e}")
+            # Fallback to default subjects on database error
+            default_subjects = cls._get_default_subjects()
+            for subject in default_subjects:
+                if subject.id == subject_id:
+                    subject.topics = GCSETopic.get_topics_by_subject(subject.id)
+                    return subject
             
         return None
 
@@ -91,6 +118,7 @@ class GCSESubject:
     def _get_default_subjects(cls) -> List['GCSESubject']:
         
         return [
+            # AQA subjects
             cls(
                 id="1",
                 subject_name="Mathematics",
@@ -126,26 +154,114 @@ class GCSESubject:
                 specification_code="8462", 
                 subject_code="CHEM"
             ),
+            # Edexcel subjects
             cls(
                 id="6",
                 subject_name="Physics",
-                exam_board="AQA",
-                specification_code="8463",
+                exam_board="Edexcel",
+                specification_code="1PH0",
                 subject_code="PHYS"
             ),
             cls(
                 id="7",
                 subject_name="History",
-                exam_board="AQA",
-                specification_code="8145",
+                exam_board="Edexcel",
+                specification_code="1HI0",
                 subject_code="HIST"
             ),
             cls(
                 id="8",
                 subject_name="Geography", 
-                exam_board="AQA",
-                specification_code="8035",
+                exam_board="Edexcel",
+                specification_code="1GA0",
                 subject_code="GEOG"
+            ),
+            cls(
+                id="9",
+                subject_name="French",
+                exam_board="Edexcel",
+                specification_code="1FR0",
+                subject_code="FRENCH"
+            ),
+            # OCR subjects
+            cls(
+                id="10",
+                subject_name="Spanish",
+                exam_board="OCR",
+                specification_code="J732",
+                subject_code="SPANISH"
+            ),
+            cls(
+                id="11",
+                subject_name="German",
+                exam_board="OCR",
+                specification_code="J732",
+                subject_code="GERMAN"
+            ),
+            cls(
+                id="12",
+                subject_name="Computer Science",
+                exam_board="OCR",
+                specification_code="J277",
+                subject_code="COMPSCI"
+            ),
+            cls(
+                id="13",
+                subject_name="Business Studies",
+                exam_board="OCR",
+                specification_code="J204",
+                subject_code="BUSINESS"
+            ),
+            # WJEC subjects
+            cls(
+                id="14",
+                subject_name="Economics",
+                exam_board="WJEC",
+                specification_code="C700U",
+                subject_code="ECONOMICS"
+            ),
+            cls(
+                id="15",
+                subject_name="Psychology",
+                exam_board="WJEC",
+                specification_code="C860U",
+                subject_code="PSYCHOLOGY"
+            ),
+            cls(
+                id="16",
+                subject_name="Sociology",
+                exam_board="WJEC",
+                specification_code="C690U",
+                subject_code="SOCIOLOGY"
+            ),
+            cls(
+                id="17",
+                subject_name="Art & Design",
+                exam_board="WJEC",
+                specification_code="C650U",
+                subject_code="ART"
+            ),
+            # Mix of boards for remaining subjects
+            cls(
+                id="18",
+                subject_name="Music",
+                exam_board="Edexcel",
+                specification_code="1MU0",
+                subject_code="MUSIC"
+            ),
+            cls(
+                id="19",
+                subject_name="Drama",
+                exam_board="OCR",
+                specification_code="J316",
+                subject_code="DRAMA"
+            ),
+            cls(
+                id="20",
+                subject_name="Physical Education",
+                exam_board="AQA",
+                specification_code="8582",
+                subject_code="PE"
             )
         ]
 
@@ -225,7 +341,7 @@ class GCSETopic:
     def _get_default_topics(cls, subject_id: str) -> List['GCSETopic']:
         
         default_topics = {
-            "1": [  
+            "1": [  # Mathematics
                 cls(id="1", subject_id="1", topic_name="Number", topic_number="1", 
                     topic_description="Basic number operations, fractions, decimals, percentages",
                     exam_weight=25.0, difficulty_level="Both"),
@@ -242,25 +358,76 @@ class GCSETopic:
                     topic_description="Data handling, probability, statistics",
                     exam_weight=10.0, difficulty_level="Both")
             ],
-            "4": [  
-                cls(id="6", subject_id="4", topic_name="Cell Biology", topic_number="1",
+            "2": [  # English Language
+                cls(id="6", subject_id="2", topic_name="Reading Skills", topic_number="1",
+                    topic_description="Comprehension, analysis, evaluation",
+                    exam_weight=40.0, difficulty_level="Both"),
+                cls(id="7", subject_id="2", topic_name="Writing Skills", topic_number="2",
+                    topic_description="Creative writing, transactional writing",
+                    exam_weight=40.0, difficulty_level="Both"),
+                cls(id="8", subject_id="2", topic_name="Spoken Language", topic_number="3",
+                    topic_description="Speaking and listening skills",
+                    exam_weight=20.0, difficulty_level="Both")
+            ],
+            "4": [  # Biology
+                cls(id="9", subject_id="4", topic_name="Cell Biology", topic_number="1",
                     topic_description="Cell structure, transport, division",
                     exam_weight=15.0, difficulty_level="Both"),
-                cls(id="7", subject_id="4", topic_name="Organisation", topic_number="2",
+                cls(id="10", subject_id="4", topic_name="Organisation", topic_number="2",
                     topic_description="Organ systems, digestive system, circulatory system",
                     exam_weight=20.0, difficulty_level="Both"),
-                cls(id="8", subject_id="4", topic_name="Infection & Response", topic_number="3",
+                cls(id="11", subject_id="4", topic_name="Infection & Response", topic_number="3",
                     topic_description="Pathogens, immune system, vaccination",
                     exam_weight=15.0, difficulty_level="Both"),
-                cls(id="9", subject_id="4", topic_name="Bioenergetics", topic_number="4",
+                cls(id="12", subject_id="4", topic_name="Bioenergetics", topic_number="4",
                     topic_description="Photosynthesis, respiration",
                     exam_weight=15.0, difficulty_level="Both"),
-                cls(id="10", subject_id="4", topic_name="Homeostasis & Response", topic_number="5",
+                cls(id="13", subject_id="4", topic_name="Homeostasis & Response", topic_number="5",
                     topic_description="Nervous system, endocrine system, homeostasis",
                     exam_weight=15.0, difficulty_level="Both"),
-                cls(id="11", subject_id="4", topic_name="Inheritance, Variation & Evolution", topic_number="6",
+                cls(id="14", subject_id="4", topic_name="Inheritance, Variation & Evolution", topic_number="6",
                     topic_description="Genetics, evolution, natural selection",
                     exam_weight=20.0, difficulty_level="Both")
+            ],
+            "5": [  # Chemistry
+                cls(id="15", subject_id="5", topic_name="Atomic Structure", topic_number="1",
+                    topic_description="Atoms, elements, compounds, mixtures",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="16", subject_id="5", topic_name="Bonding & Structure", topic_number="2",
+                    topic_description="Ionic, covalent, metallic bonding",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="17", subject_id="5", topic_name="Quantitative Chemistry", topic_number="3",
+                    topic_description="Moles, calculations, equations",
+                    exam_weight=15.0, difficulty_level="Both"),
+                cls(id="18", subject_id="5", topic_name="Chemical Changes", topic_number="4",
+                    topic_description="Acids, bases, electrolysis, redox",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="19", subject_id="5", topic_name="Energy Changes", topic_number="5",
+                    topic_description="Exothermic, endothermic reactions",
+                    exam_weight=15.0, difficulty_level="Both"),
+                cls(id="20", subject_id="5", topic_name="Rate & Extent of Change", topic_number="6",
+                    topic_description="Reaction rates, equilibrium",
+                    exam_weight=10.0, difficulty_level="Both")
+            ],
+            "6": [  # Physics
+                cls(id="21", subject_id="6", topic_name="Energy", topic_number="1",
+                    topic_description="Energy stores, transfers, efficiency",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="22", subject_id="6", topic_name="Electricity", topic_number="2",
+                    topic_description="Current, voltage, resistance, circuits",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="23", subject_id="6", topic_name="Particle Model", topic_number="3",
+                    topic_description="States of matter, pressure, gas laws",
+                    exam_weight=15.0, difficulty_level="Both"),
+                cls(id="24", subject_id="6", topic_name="Atomic Structure", topic_number="4",
+                    topic_description="Radioactivity, nuclear fission, fusion",
+                    exam_weight=15.0, difficulty_level="Both"),
+                cls(id="25", subject_id="6", topic_name="Forces", topic_number="5",
+                    topic_description="Motion, forces, pressure, moments",
+                    exam_weight=20.0, difficulty_level="Both"),
+                cls(id="26", subject_id="6", topic_name="Waves", topic_number="6",
+                    topic_description="Properties of waves, electromagnetic spectrum",
+                    exam_weight=10.0, difficulty_level="Both")
             ]
         }
         return default_topics.get(subject_id, [])
@@ -325,7 +492,8 @@ class GCSEExam:
     
     def __init__(self, id=None, subject_id=None, exam_name=None, exam_date=None,
                  paper_number=None, duration_minutes=None, total_marks=None,
-                 exam_board=None, specification_code=None, is_active=True):
+                 exam_board=None, specification_code=None, user_id=None, is_active=True,
+                 created_at=None, updated_at=None):
         self.id = id
         self.subject_id = subject_id
         self.exam_name = exam_name
@@ -335,10 +503,13 @@ class GCSEExam:
         self.total_marks = total_marks
         self.exam_board = exam_board
         self.specification_code = specification_code
+        self.user_id = user_id
         self.is_active = is_active
+        self.created_at = created_at
+        self.updated_at = updated_at
 
     @classmethod
-    def create_exam(cls, subject_id: str, exam_name: str, exam_date: date,
+    def create_exam(cls, user_id: str, subject_id: str, exam_name: str, exam_date: date,
                    paper_number: int = None, duration_minutes: int = None,
                    total_marks: int = None, exam_board: str = None,
                    specification_code: str = None) -> 'GCSEExam':
@@ -349,7 +520,8 @@ class GCSEExam:
         supabase = get_supabase_client()
         
         exam_data = {
-            'subject_id': subject_id,
+            'user_id': str(user_id),  # Convert to string
+            'subject_id': str(subject_id),  # Convert to string
             'exam_name': exam_name,
             'exam_date': exam_date.isoformat() if isinstance(exam_date, date) else exam_date,
             'paper_number': paper_number,
@@ -365,8 +537,12 @@ class GCSEExam:
             if result.data:
                 exam_data = result.data[0]
                 return cls(**exam_data)
+            else:
+                print(f"No data returned from insert: {result}")
         except Exception as e:
             print(f"Error creating GCSE exam: {e}")
+            import traceback
+            traceback.print_exc()
             
         return None
 
@@ -379,12 +555,19 @@ class GCSEExam:
         supabase = get_supabase_client()
         
         try:
-            
             end_date = (datetime.now() + timedelta(days=days_ahead)).date().isoformat()
-            result = supabase.table('gcse_exams').select('*').gte('exam_date', datetime.now().date().isoformat()).lte('exam_date', end_date).eq('is_active', True).order('exam_date').execute()
+            query = supabase.table('gcse_exams').select('*').gte('exam_date', datetime.now().date().isoformat()).lte('exam_date', end_date).eq('is_active', True)
+            
+            # Filter by user if user_id provided
+            if user_id:
+                query = query.eq('user_id', str(user_id))  # Convert to string for comparison
+            
+            result = query.order('exam_date').execute()
             return [cls(**exam) for exam in result.data]
         except Exception as e:
             print(f"Error getting upcoming exams: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     @staticmethod

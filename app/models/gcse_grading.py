@@ -115,6 +115,9 @@ class GCSEGradeCalculator:
         
         boundaries = GCSEGradeBoundary.get_grade_boundaries(exam_board, subject_code, exam_year, tier)
         
+        print(f"DEBUG: Grade calculation - Board: {exam_board}, Code: {subject_code}, Tier: {tier}")
+        print(f"DEBUG: Boundaries found: {list(boundaries.keys()) if boundaries else 'None'}")
+        
         
         if not tier:
             if "Foundation" in boundaries and "Higher" in boundaries:
@@ -130,9 +133,21 @@ class GCSEGradeCalculator:
         
         tier_boundaries = boundaries.get(tier, {})
         
+        print(f"DEBUG: Selected tier: {tier}")
+        print(f"DEBUG: Tier boundaries: {tier_boundaries}")
+        
         
         grade = "U"
-        grade_info = {"grade": "U", "description": "Ungraded", "percentage": percentage}
+        grade_info = {
+            "grade": "U", 
+            "description": "Ungraded", 
+            "percentage": percentage,
+            "raw_mark": achieved_marks,
+            "total_mark": total_marks,
+            "tier": tier if tier else "Not specified",
+            "exam_board": exam_board,
+            "subject_code": subject_code
+        }
         
         if tier_boundaries:
             

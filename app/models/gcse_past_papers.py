@@ -104,7 +104,8 @@ class GCSEPastPaper:
     def get_past_paper_by_id(cls, paper_id: str) -> Optional['GCSEPastPaper']:
         
         if not SUPABASE_AVAILABLE:
-            return None
+            # Fallback to default papers
+            return cls._get_default_paper_by_id(paper_id)
             
         supabase = get_supabase_client()
         
@@ -117,56 +118,125 @@ class GCSEPastPaper:
                 return paper
         except Exception as e:
             print(f"Error getting past paper by ID: {e}")
-            
-        return None
+        
+        # Fallback to default papers if not found in database
+        return cls._get_default_paper_by_id(paper_id)
 
     @classmethod
     def _get_default_past_papers(cls, subject_id: str) -> List['GCSEPastPaper']:
+        """Get default/example past papers for demonstration"""
         
-        
+        # Mathematics (Subject ID: 1)
         if subject_id == "1":
             return [
-                cls(
-                    id="1",
-                    subject_id="1",
-                    paper_title="Mathematics Foundation Paper 1",
-                    exam_year=2023,
-                    exam_month="June",
-                    paper_number=1,
-                    exam_board="AQA",
-                    specification_code="8300",
-                    difficulty_level="Foundation",
-                    total_marks=80,
-                    duration_minutes=90
-                ),
-                cls(
-                    id="2",
-                    subject_id="1",
-                    paper_title="Mathematics Foundation Paper 2",
-                    exam_year=2023,
-                    exam_month="June",
-                    paper_number=2,
-                    exam_board="AQA",
-                    specification_code="8300",
-                    difficulty_level="Foundation",
-                    total_marks=80,
-                    duration_minutes=90
-                ),
-                cls(
-                    id="3",
-                    subject_id="1",
-                    paper_title="Mathematics Foundation Paper 3",
-                    exam_year=2023,
-                    exam_month="June",
-                    paper_number=3,
-                    exam_board="AQA",
-                    specification_code="8300",
-                    difficulty_level="Foundation",
-                    total_marks=80,
-                    duration_minutes=90
-                )
+                # Sample Practice Sets
+                cls(id="1", subject_id="1", paper_title="Mathematics Foundation Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8300", difficulty_level="Foundation", total_marks=80, duration_minutes=90),
+                cls(id="2", subject_id="1", paper_title="Mathematics Foundation Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="AQA",
+                    specification_code="8300", difficulty_level="Foundation", total_marks=80, duration_minutes=90),
+                cls(id="3", subject_id="1", paper_title="Mathematics Higher Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8300", difficulty_level="Higher", total_marks=80, duration_minutes=90),
+                cls(id="4", subject_id="1", paper_title="Mathematics Foundation Practice Set 3",
+                    exam_year=2022, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8300", difficulty_level="Foundation", total_marks=80, duration_minutes=90),
+                cls(id="5", subject_id="1", paper_title="Mathematics Higher Practice Set 2",
+                    exam_year=2022, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8300", difficulty_level="Higher", total_marks=80, duration_minutes=90),
             ]
+        
+        # English Language (Subject ID: 2)
+        elif subject_id == "2":
+            return [
+                cls(id="6", subject_id="2", paper_title="English Language Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8700", difficulty_level="Both", total_marks=80, duration_minutes=105),
+                cls(id="7", subject_id="2", paper_title="English Language Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="AQA",
+                    specification_code="8700", difficulty_level="Both", total_marks=80, duration_minutes=105),
+                cls(id="8", subject_id="2", paper_title="English Language Practice Set 3",
+                    exam_year=2022, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8700", difficulty_level="Both", total_marks=80, duration_minutes=105),
+            ]
+        
+        # Biology (Subject ID: 4)
+        elif subject_id == "4":
+            return [
+                cls(id="9", subject_id="4", paper_title="Biology Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8461", difficulty_level="Both", total_marks=100, duration_minutes=105),
+                cls(id="10", subject_id="4", paper_title="Biology Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="AQA",
+                    specification_code="8461", difficulty_level="Both", total_marks=100, duration_minutes=105),
+                cls(id="11", subject_id="4", paper_title="Biology Practice Set 3",
+                    exam_year=2022, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8461", difficulty_level="Both", total_marks=100, duration_minutes=105),
+            ]
+        
+        # Chemistry (Subject ID: 5)
+        elif subject_id == "5":
+            return [
+                cls(id="12", subject_id="5", paper_title="Chemistry Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="AQA",
+                    specification_code="8462", difficulty_level="Both", total_marks=100, duration_minutes=105),
+                cls(id="13", subject_id="5", paper_title="Chemistry Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="AQA",
+                    specification_code="8462", difficulty_level="Both", total_marks=100, duration_minutes=105),
+            ]
+        
+        # Physics (Subject ID: 6)
+        elif subject_id == "6":
+            return [
+                cls(id="14", subject_id="6", paper_title="Physics Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="Edexcel",
+                    specification_code="1PH0", difficulty_level="Both", total_marks=100, duration_minutes=110),
+                cls(id="15", subject_id="6", paper_title="Physics Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="Edexcel",
+                    specification_code="1PH0", difficulty_level="Both", total_marks=100, duration_minutes=110),
+            ]
+        
+        # History (Subject ID: 7)
+        elif subject_id == "7":
+            return [
+                cls(id="16", subject_id="7", paper_title="History Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="Edexcel",
+                    specification_code="1HI0", difficulty_level="Both", total_marks=84, duration_minutes=120),
+                cls(id="17", subject_id="7", paper_title="History Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="Edexcel",
+                    specification_code="1HI0", difficulty_level="Both", total_marks=84, duration_minutes=120),
+            ]
+        
+        # Computer Science (Subject ID: 12)
+        elif subject_id == "12":
+            return [
+                cls(id="18", subject_id="12", paper_title="Computer Science Practice Set 1",
+                    exam_year=2023, exam_month="Community", paper_number=1, exam_board="OCR",
+                    specification_code="J277", difficulty_level="Both", total_marks=80, duration_minutes=90),
+                cls(id="19", subject_id="12", paper_title="Computer Science Practice Set 2",
+                    exam_year=2023, exam_month="Community", paper_number=2, exam_board="OCR",
+                    specification_code="J277", difficulty_level="Both", total_marks=80, duration_minutes=90),
+            ]
+        
         return []
+    
+    @classmethod
+    def _get_default_paper_by_id(cls, paper_id: str) -> Optional['GCSEPastPaper']:
+        """Get a specific default paper by ID"""
+        # Get all default papers from all subjects
+        all_papers = []
+        for subject_id in ["1", "2", "4", "5", "6", "7", "12"]:
+            all_papers.extend(cls._get_default_past_papers(subject_id))
+        
+        # Find the paper with matching ID
+        for paper in all_papers:
+            if paper.id == paper_id:
+                # Load default questions for this paper
+                paper.questions = GCSEPastPaperQuestion._get_default_questions(paper_id)
+                return paper
+        
+        return None
 
 
 class GCSEPastPaperQuestion:
@@ -247,48 +317,48 @@ class GCSEPastPaperQuestion:
 
     @classmethod
     def _get_default_questions(cls, past_paper_id: str) -> List['GCSEPastPaperQuestion']:
+        """Get default/example questions for demonstration purposes"""
         
-        
-        if past_paper_id in ["1", "2", "3"]:
-            return [
-                cls(
-                    id="1",
-                    past_paper_id=past_paper_id,
-                    question_number="1",
-                    question_text="Calculate 12 + 8 × 3",
-                    question_type="short_answer",
-                    marks=2,
-                    difficulty_level="Foundation",
-                    topic_tags=["1"],  
-                    correct_answer="36",
-                    mark_scheme="M1 for 8 × 3 = 24, A1 for 12 + 24 = 36"
-                ),
-                cls(
-                    id="2",
-                    past_paper_id=past_paper_id,
-                    question_number="2",
-                    question_text="Solve 2x + 5 = 13",
-                    question_type="short_answer",
-                    marks=2,
-                    difficulty_level="Foundation",
-                    topic_tags=["2"],  
-                    correct_answer="x = 4",
-                    mark_scheme="M1 for 2x = 8, A1 for x = 4"
-                ),
-                cls(
-                    id="3",
-                    past_paper_id=past_paper_id,
-                    question_number="3",
-                    question_text="A rectangle has length 8 cm and width 5 cm. Calculate its area.",
-                    question_type="short_answer",
-                    marks=2,
-                    difficulty_level="Foundation",
-                    topic_tags=["4"],  
-                    correct_answer="40 cm²",
-                    mark_scheme="M1 for 8 × 5, A1 for 40 cm²"
-                )
-            ]
-        return []
+        # Return sample community-generated questions
+        # Note: These are placeholders - real questions would be created by users
+        return [
+            cls(
+                id=f"q1_{past_paper_id}",
+                past_paper_id=past_paper_id,
+                question_number="1",
+                question_text="[PLACEHOLDER] Community members can create practice questions here. This is a sample question to demonstrate the platform's functionality.",
+                question_type="multiple_choice",
+                marks=1,
+                difficulty_level="Both",
+                topic_tags=[],
+                correct_answer="N/A - Placeholder question",
+                mark_scheme="Community-generated questions will have mark schemes provided by the creator."
+            ),
+            cls(
+                id=f"q2_{past_paper_id}",
+                past_paper_id=past_paper_id,
+                question_number="2",
+                question_text="[PLACEHOLDER] Teachers and students can contribute their own practice questions to help others prepare for GCSE exams.",
+                question_type="short_answer",
+                marks=2,
+                difficulty_level="Both",
+                topic_tags=[],
+                correct_answer="N/A - Placeholder question",
+                mark_scheme="Mark schemes will be provided by question creators."
+            ),
+            cls(
+                id=f"q3_{past_paper_id}",
+                past_paper_id=past_paper_id,
+                question_number="3",
+                question_text="[PLACEHOLDER] This platform is for community practice questions only. For official past papers, please visit your exam board's website.",
+                question_type="essay",
+                marks=6,
+                difficulty_level="Both",
+                topic_tags=[],
+                correct_answer="N/A - Placeholder question",
+                mark_scheme="Community members provide detailed marking criteria for their questions."
+            )
+        ]
 
 
 class GCSEExamPractice:
