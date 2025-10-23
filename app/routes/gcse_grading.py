@@ -274,11 +274,17 @@ def api_calculate_grade():
             return jsonify({'error': 'User not authenticated'}), 401
         
         data = request.get_json()
-        achieved_marks = data.get('achieved_marks', type=int)
-        total_marks = data.get('total_marks', type=int)
+        
+        # Convert string values to appropriate types
+        try:
+            achieved_marks = int(data.get('achieved_marks'))
+            total_marks = int(data.get('total_marks'))
+        except (ValueError, TypeError) as e:
+            return jsonify({'error': 'Invalid marks values - must be numbers'}), 400
+        
         exam_board = data.get('exam_board')
         subject_code = data.get('subject_code')
-        tier = data.get('tier')
+        tier = data.get('tier') if data.get('tier') else None
         
         if not all([achieved_marks, total_marks, exam_board, subject_code]):
             return jsonify({'error': 'Missing required fields'}), 400
@@ -294,6 +300,9 @@ def api_calculate_grade():
         })
     
     except Exception as e:
+        print(f"Error calculating grade: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @gcse_grading.route('/api/predict', methods=['POST'])
