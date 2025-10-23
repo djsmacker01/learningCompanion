@@ -87,16 +87,16 @@ def add_friend():
         if form.validate_on_submit():
             friend_email = form.friend_email.data.lower().strip()
             
-            # Check if it's your own email
+
             if friend_email == user.email:
                 flash("You cannot add yourself as a friend!", 'error')
                 return render_template('social/add_friend.html', form=form)
             
-            # Try to find existing user with this email
+
             existing_user = User.get_user_by_email(friend_email)
             
             if existing_user:
-                # User exists - send friend request
+
                 success = Friend.send_friend_request(user.id, existing_user.id)
                 
                 if success:
@@ -105,7 +105,7 @@ def add_friend():
                 else:
                     flash('Error sending friend request. You may already be friends or have a pending request.', 'error')
             else:
-                # User doesn't exist - they need to register first
+
                 flash('User not found. They need to create an account first before you can add them as a friend.', 'info')
         
         return render_template('social/add_friend.html', form=form)
@@ -172,7 +172,7 @@ def create_study_group():
         form = StudyGroupForm()
         
         if form.validate_on_submit():
-            # Convert string 'true'/'false' to boolean
+
             is_public_value = form.is_public.data == 'true'
             
             print(f"\n{'='*60}")

@@ -569,7 +569,7 @@ def study_timer():
 @sessions.route('/sessions/api/start-timer', methods=['POST'])
 def start_timer_session():
     try:
-        # Check authentication manually to return JSON error instead of redirect
+
         if not current_user.is_authenticated:
             return jsonify({'error': 'User not authenticated. Please log in to use the study timer.'}), 401
         
@@ -590,7 +590,7 @@ def start_timer_session():
             return jsonify({'error': 'Topic not found'}), 404
         
         
-        # Try to create session with today's date first
+
         try:
             session = StudySession.create_session(
                 user_id=user.id,
@@ -604,10 +604,10 @@ def start_timer_session():
                 completed=False
             )
         except Exception as e:
-            # If analytics constraint fails, try with a date that's far enough in the past
-            # to make next_recommended_date (session_date + 1 day) be in the future
+
+
             from datetime import timedelta
-            past_date = datetime.now() - timedelta(days=730)  # 2 years ago
+            past_date = datetime.now() - timedelta(days=730)
             
             try:
                 session = StudySession.create_session(
@@ -632,7 +632,7 @@ def start_timer_session():
                 'message': 'Timer session started'
             })
         else:
-            # Database constraint issue - provide helpful error message with fix instructions
+
             return jsonify({
                 'error': 'Database constraint prevents session creation. The next_recommended_date_future constraint is blocking session creation.',
                 'details': 'To fix this issue, run the following SQL in your Supabase dashboard: ALTER TABLE user_analytics DROP CONSTRAINT IF EXISTS next_recommended_date_future;',
