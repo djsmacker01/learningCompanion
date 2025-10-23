@@ -9,7 +9,7 @@ analytics = Blueprint('analytics', __name__)
 
 @analytics.route('/analytics')
 @login_required
-def analytics_dashboard():
+def dashboard():
     try:
         user = get_current_user()
         if not user:

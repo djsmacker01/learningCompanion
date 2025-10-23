@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from app.models.gcse_curriculum import GCSESubject, GCSETopic, GCSESpecification, GCSEExam
-from app.models import Topic, get_supabase_client
+from app.models import Topic, get_supabase_client, SUPABASE_AVAILABLE
 from app.routes.topics import get_current_user
 from datetime import datetime, date, timedelta
 import json
@@ -83,7 +83,7 @@ def subject_detail(subject_id):
         
         subject = GCSESubject.get_subject_by_id(subject_id)
         if not subject:
-            flash('GCSE subject not found.', 'error')
+            flash(f'GCSE subject with ID {subject_id} not found. Please try again.', 'error')
             return redirect(url_for('gcse.subjects_list'))
         
         
@@ -102,7 +102,10 @@ def subject_detail(subject_id):
                              existing_topic=existing_topic)
     
     except Exception as e:
-        flash('Error loading subject details.', 'error')
+        print(f"Error loading subject details: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error loading subject details: {str(e)}', 'error')
         return redirect(url_for('gcse.subjects_list'))
 
 @gcse.route('/subjects/<subject_id>/create-topic', methods=['POST'])
@@ -120,16 +123,23 @@ def create_subject_topic(subject_id):
             flash('GCSE subject not found.', 'error')
             return redirect(url_for('gcse.subjects_list'))
         
+        print(f"DEBUG: Creating GCSE topic for user {user.id}, subject {subject.subject_name}")
+        
+        # Don't save gcse_subject_id if it's a default subject (not a UUID)
+        # For default subjects, just save the exam board and spec code
+        gcse_subject_id_value = None  # Default subjects use simple IDs, not UUIDs
         
         topic = Topic.create_topic(
             user_id=user.id,
             title=f"{subject.subject_name} ({subject.exam_board})",
             description=f"GCSE {subject.subject_name} revision for {subject.exam_board} specification {subject.specification_code}",
             is_gcse=True,
-            gcse_subject_id=subject_id,
+            gcse_subject_id=gcse_subject_id_value,  # Set to None for default subjects
             gcse_exam_board=subject.exam_board,
             gcse_specification_code=subject.specification_code
         )
+        
+        print(f"DEBUG: Topic created: {topic.id if topic else 'None - creation failed'}")
         
         if topic:
             
@@ -140,18 +150,21 @@ def create_subject_topic(subject_id):
                     description=gcse_topic.topic_description,
                     parent_topic_id=topic.id,
                     is_gcse=True,
-                    gcse_topic_id=gcse_topic.id,
-                    exam_weight=gcse_topic.exam_weight
+                    gcse_topic_id=None,  # Set to None for default topics
+                    exam_weight=int(gcse_topic.exam_weight) if gcse_topic.exam_weight else None  # Convert float to int
                 )
             
             flash(f'GCSE {subject.subject_name} topic created successfully!', 'success')
-            return redirect(url_for('topics.topic_detail', topic_id=topic.id))
+            return redirect(url_for('topics.view_topic', topic_id=topic.id))
         else:
             flash('Error creating GCSE topic.', 'error')
             return redirect(url_for('gcse.subject_detail', subject_id=subject_id))
     
     except Exception as e:
-        flash('Error creating GCSE topic.', 'error')
+        print(f"Error creating GCSE topic: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error creating GCSE topic: {str(e)}', 'error')
         return redirect(url_for('gcse.subject_detail', subject_id=subject_id))
 
 @gcse.route('/exams')
@@ -219,7 +232,10 @@ def create_exam():
                 flash('Invalid exam date format.', 'error')
                 return redirect(url_for('gcse.create_exam'))
             
+            print(f"Creating exam with data: user_id={user.id}, subject_id={subject_id}, exam_name={exam_name}, exam_date={exam_date}")
+            
             exam = GCSEExam.create_exam(
+                user_id=user.id,
                 subject_id=subject_id,
                 exam_name=exam_name,
                 exam_date=exam_date,
@@ -234,18 +250,26 @@ def create_exam():
                 flash('GCSE exam created successfully!', 'success')
                 return redirect(url_for('gcse.exams_list'))
             else:
-                flash('Error creating GCSE exam.', 'error')
+                print("Exam creation returned None - check database connection and table")
+                flash('Unable to create exam. The exam scheduling feature requires database setup. Please check the terminal for details.', 'error')
         
         
         subjects = GCSESubject.get_all_subjects()
         exam_boards = GCSESpecification.get_exam_boards()
+        
+        print(f"DEBUG: Loading create_exam page - {len(subjects)} subjects, {len(exam_boards)} exam boards")
+        if subjects:
+            print(f"DEBUG: First subject: {subjects[0].subject_name} ({subjects[0].exam_board})")
         
         return render_template('gcse/create_exam.html',
                              subjects=subjects,
                              exam_boards=exam_boards)
     
     except Exception as e:
-        flash('Error loading exam creation page.', 'error')
+        print(f"Error loading exam creation page: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error loading exam creation page: {str(e)}', 'error')
         return redirect(url_for('gcse.exams_list'))
 
 @gcse.route('/revision-schedule')
@@ -433,6 +457,31 @@ def api_grade_boundaries(exam_board, subject_code):
             'exam_board': exam_board,
             'subject_code': subject_code,
             'boundaries': grade_boundaries
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@gcse.route('/api/debug/subjects')
+@login_required
+def api_debug_subjects():
+    
+    try:
+        subjects = GCSESubject.get_all_subjects()
+        subjects_data = []
+        for subject in subjects:
+            subjects_data.append({
+                'id': subject.id,
+                'subject_name': subject.subject_name,
+                'exam_board': subject.exam_board,
+                'specification_code': subject.specification_code,
+                'topics_count': len(subject.topics)
+            })
+        
+        return jsonify({
+            'total_subjects': len(subjects),
+            'subjects': subjects_data,
+            'supabase_available': SUPABASE_AVAILABLE
         })
     
     except Exception as e:
