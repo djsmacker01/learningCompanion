@@ -104,7 +104,7 @@ class GCSEPastPaper:
     def get_past_paper_by_id(cls, paper_id: str) -> Optional['GCSEPastPaper']:
         
         if not SUPABASE_AVAILABLE:
-            # Fallback to default papers
+
             return cls._get_default_paper_by_id(paper_id)
             
         supabase = get_supabase_client()
@@ -119,7 +119,7 @@ class GCSEPastPaper:
         except Exception as e:
             print(f"Error getting past paper by ID: {e}")
         
-        # Fallback to default papers if not found in database
+
         return cls._get_default_paper_by_id(paper_id)
 
     @classmethod
@@ -224,15 +224,15 @@ class GCSEPastPaper:
     @classmethod
     def _get_default_paper_by_id(cls, paper_id: str) -> Optional['GCSEPastPaper']:
         """Get a specific default paper by ID"""
-        # Get all default papers from all subjects
+
         all_papers = []
         for subject_id in ["1", "2", "4", "5", "6", "7", "12"]:
             all_papers.extend(cls._get_default_past_papers(subject_id))
         
-        # Find the paper with matching ID
+
         for paper in all_papers:
             if paper.id == paper_id:
-                # Load default questions for this paper
+
                 paper.questions = GCSEPastPaperQuestion._get_default_questions(paper_id)
                 return paper
         

@@ -125,16 +125,16 @@ def create_subject_topic(subject_id):
         
         print(f"DEBUG: Creating GCSE topic for user {user.id}, subject {subject.subject_name}")
         
-        # Don't save gcse_subject_id if it's a default subject (not a UUID)
-        # For default subjects, just save the exam board and spec code
-        gcse_subject_id_value = None  # Default subjects use simple IDs, not UUIDs
+
+
+        gcse_subject_id_value = None
         
         topic = Topic.create_topic(
             user_id=user.id,
             title=f"{subject.subject_name} ({subject.exam_board})",
             description=f"GCSE {subject.subject_name} revision for {subject.exam_board} specification {subject.specification_code}",
             is_gcse=True,
-            gcse_subject_id=gcse_subject_id_value,  # Set to None for default subjects
+            gcse_subject_id=gcse_subject_id_value,
             gcse_exam_board=subject.exam_board,
             gcse_specification_code=subject.specification_code
         )
@@ -150,8 +150,8 @@ def create_subject_topic(subject_id):
                     description=gcse_topic.topic_description,
                     parent_topic_id=topic.id,
                     is_gcse=True,
-                    gcse_topic_id=None,  # Set to None for default topics
-                    exam_weight=int(gcse_topic.exam_weight) if gcse_topic.exam_weight else None  # Convert float to int
+                    gcse_topic_id=None,
+                    exam_weight=int(gcse_topic.exam_weight) if gcse_topic.exam_weight else None
                 )
             
             flash(f'GCSE {subject.subject_name} topic created successfully!', 'success')

@@ -275,7 +275,7 @@ def api_calculate_grade():
         
         data = request.get_json()
         
-        # Convert string values to appropriate types
+
         try:
             achieved_marks = int(data.get('achieved_marks'))
             total_marks = int(data.get('total_marks'))

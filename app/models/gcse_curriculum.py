@@ -87,7 +87,7 @@ class GCSESubject:
     def get_subject_by_id(cls, subject_id: str) -> Optional['GCSESubject']:
         
         if not SUPABASE_AVAILABLE:
-            # Return from default subjects if database not available
+
             default_subjects = cls._get_default_subjects()
             for subject in default_subjects:
                 if subject.id == subject_id:
@@ -105,7 +105,7 @@ class GCSESubject:
                 return subject
         except Exception as e:
             print(f"Error getting GCSE subject by ID: {e}")
-            # Fallback to default subjects on database error
+
             default_subjects = cls._get_default_subjects()
             for subject in default_subjects:
                 if subject.id == subject_id:
@@ -118,7 +118,7 @@ class GCSESubject:
     def _get_default_subjects(cls) -> List['GCSESubject']:
         
         return [
-            # AQA subjects
+
             cls(
                 id="1",
                 subject_name="Mathematics",
@@ -154,7 +154,7 @@ class GCSESubject:
                 specification_code="8462", 
                 subject_code="CHEM"
             ),
-            # Edexcel subjects
+
             cls(
                 id="6",
                 subject_name="Physics",
@@ -183,7 +183,7 @@ class GCSESubject:
                 specification_code="1FR0",
                 subject_code="FRENCH"
             ),
-            # OCR subjects
+
             cls(
                 id="10",
                 subject_name="Spanish",
@@ -212,7 +212,7 @@ class GCSESubject:
                 specification_code="J204",
                 subject_code="BUSINESS"
             ),
-            # WJEC subjects
+
             cls(
                 id="14",
                 subject_name="Economics",
@@ -241,7 +241,7 @@ class GCSESubject:
                 specification_code="C650U",
                 subject_code="ART"
             ),
-            # Mix of boards for remaining subjects
+
             cls(
                 id="18",
                 subject_name="Music",
@@ -341,7 +341,7 @@ class GCSETopic:
     def _get_default_topics(cls, subject_id: str) -> List['GCSETopic']:
         
         default_topics = {
-            "1": [  # Mathematics
+            "1": [
                 cls(id="1", subject_id="1", topic_name="Number", topic_number="1", 
                     topic_description="Basic number operations, fractions, decimals, percentages",
                     exam_weight=25.0, difficulty_level="Both"),
@@ -358,7 +358,7 @@ class GCSETopic:
                     topic_description="Data handling, probability, statistics",
                     exam_weight=10.0, difficulty_level="Both")
             ],
-            "2": [  # English Language
+            "2": [
                 cls(id="6", subject_id="2", topic_name="Reading Skills", topic_number="1",
                     topic_description="Comprehension, analysis, evaluation",
                     exam_weight=40.0, difficulty_level="Both"),
@@ -369,7 +369,7 @@ class GCSETopic:
                     topic_description="Speaking and listening skills",
                     exam_weight=20.0, difficulty_level="Both")
             ],
-            "4": [  # Biology
+            "4": [
                 cls(id="9", subject_id="4", topic_name="Cell Biology", topic_number="1",
                     topic_description="Cell structure, transport, division",
                     exam_weight=15.0, difficulty_level="Both"),
@@ -389,7 +389,7 @@ class GCSETopic:
                     topic_description="Genetics, evolution, natural selection",
                     exam_weight=20.0, difficulty_level="Both")
             ],
-            "5": [  # Chemistry
+            "5": [
                 cls(id="15", subject_id="5", topic_name="Atomic Structure", topic_number="1",
                     topic_description="Atoms, elements, compounds, mixtures",
                     exam_weight=20.0, difficulty_level="Both"),
@@ -409,7 +409,7 @@ class GCSETopic:
                     topic_description="Reaction rates, equilibrium",
                     exam_weight=10.0, difficulty_level="Both")
             ],
-            "6": [  # Physics
+            "6": [
                 cls(id="21", subject_id="6", topic_name="Energy", topic_number="1",
                     topic_description="Energy stores, transfers, efficiency",
                     exam_weight=20.0, difficulty_level="Both"),
@@ -520,8 +520,8 @@ class GCSEExam:
         supabase = get_supabase_client()
         
         exam_data = {
-            'user_id': str(user_id),  # Convert to string
-            'subject_id': str(subject_id),  # Convert to string
+            'user_id': str(user_id),
+            'subject_id': str(subject_id),
             'exam_name': exam_name,
             'exam_date': exam_date.isoformat() if isinstance(exam_date, date) else exam_date,
             'paper_number': paper_number,
@@ -558,9 +558,9 @@ class GCSEExam:
             end_date = (datetime.now() + timedelta(days=days_ahead)).date().isoformat()
             query = supabase.table('gcse_exams').select('*').gte('exam_date', datetime.now().date().isoformat()).lte('exam_date', end_date).eq('is_active', True)
             
-            # Filter by user if user_id provided
+
             if user_id:
-                query = query.eq('user_id', str(user_id))  # Convert to string for comparison
+                query = query.eq('user_id', str(user_id))
             
             result = query.order('exam_date').execute()
             return [cls(**exam) for exam in result.data]
