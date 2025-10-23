@@ -44,7 +44,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+    
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
@@ -53,7 +53,7 @@
         </ol>
     </nav>
 
-    <!-- Hero Section -->
+    
     <div class="analytics-hero">
         <div class="container">
             <h1><i class="fas fa-chart-line me-2"></i>GCSE Performance Analytics</h1>
@@ -62,7 +62,7 @@
     </div>
 
     <div class="container">
-        <!-- Performance Overview -->
+        
         {% if performance_report %}
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
@@ -105,7 +105,7 @@
         {% endif %}
 
         <div class="row">
-            <!-- Subject Comparison -->
+            
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
@@ -137,7 +137,7 @@
                         </div>
                         {% endfor %}
                         {% else %}
-                        <!-- Default Display -->
+                        
                         <div class="text-center py-5">
                             <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
                             <h5>No Performance Data Yet</h5>
@@ -154,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- Personalized Recommendations -->
+            
             <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header bg-success text-white">
@@ -175,7 +175,7 @@
                         </div>
                         {% endfor %}
                         {% else %}
-                        <!-- Default Recommendations -->
+                        
                         <div class="recommendation-card card mb-2">
                             <div class="card-body p-3">
                                 <h6 class="mb-1">

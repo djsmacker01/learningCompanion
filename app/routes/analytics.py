@@ -46,7 +46,7 @@ def dashboard():
 @analytics.route('/analytics/api/overview')
 def analytics_overview():
     try:
-        # Check authentication manually to return JSON error instead of redirect
+
         if not current_user.is_authenticated:
             return jsonify({'error': 'User not authenticated'}), 401
         
@@ -442,7 +442,7 @@ def get_learning_trends_data(user_id, client):
         print(f"Error getting learning trends: {e}")
         return {'trends': []}
 
-# Predictive Analytics Routes
+
 @analytics.route('/analytics/performance-trends')
 def performance_trends():
     """Get performance trends analysis"""
@@ -549,7 +549,7 @@ def performance_trends():
 def grade_prediction(topic_id):
     """Predict grade for a specific topic"""
     try:
-        # Check authentication manually to return JSON error instead of redirect
+
         if not current_user.is_authenticated:
             return jsonify({'error': 'User not authenticated'}), 401
         
@@ -561,14 +561,14 @@ def grade_prediction(topic_id):
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Analytics not available'}), 500
         
-        # Get topic information
+
         topic_response = client.table('topics').select('*').eq('id', topic_id).eq('user_id', user.id).execute()
         if not topic_response.data:
             return jsonify({'error': 'Topic not found'}), 404
         
         topic = topic_response.data[0]
         
-        # Get sessions for this topic
+
         sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).eq('topic_id', topic_id).execute()
         sessions = sessions_response.data if sessions_response.data else []
         
@@ -584,12 +584,12 @@ def grade_prediction(topic_id):
                 'recommendations': ['Start studying this topic to get grade predictions']
             })
         
-        # Calculate performance metrics
+
         total_sessions = len(sessions)
         total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
         avg_session_length = total_study_time / total_sessions if total_sessions > 0 else 0
         
-        # Calculate confidence trends
+
         confidence_gains = []
         for session in sessions:
             if session.get('confidence_after') and session.get('confidence_before'):
@@ -598,10 +598,10 @@ def grade_prediction(topic_id):
         
         avg_confidence_gain = sum(confidence_gains) / len(confidence_gains) if confidence_gains else 0
         
-        # Simple grade prediction algorithm
-        base_grade = 5  # Start with grade 5
+
+        base_grade = 5
         
-        # Adjust based on confidence gain
+
         if avg_confidence_gain > 2:
             grade_adjustment = 2
         elif avg_confidence_gain > 1:
@@ -611,15 +611,15 @@ def grade_prediction(topic_id):
         else:
             grade_adjustment = -1
         
-        # Adjust based on study time
-        if total_study_time > 300:  # More than 5 hours
+
+        if total_study_time > 300:
             time_adjustment = 1
-        elif total_study_time > 120:  # More than 2 hours
+        elif total_study_time > 120:
             time_adjustment = 0
         else:
             time_adjustment = -1
         
-        # Adjust based on session frequency
+
         if total_sessions > 10:
             frequency_adjustment = 1
         elif total_sessions > 5:
@@ -629,10 +629,10 @@ def grade_prediction(topic_id):
         
         predicted_grade = min(9, max(1, base_grade + grade_adjustment + time_adjustment + frequency_adjustment))
         
-        # Calculate confidence
+
         confidence = min(95, max(20, 50 + (avg_confidence_gain * 10) + (total_sessions * 2)))
         
-        # Generate recommendations
+
         recommendations = []
         if predicted_grade < 7:
             recommendations.append('Increase study time for this topic')
@@ -731,7 +731,7 @@ def learning_trajectory(topic_id):
 def ai_insights():
     """Get AI-powered learning insights"""
     try:
-        # Check authentication manually to return JSON error instead of redirect
+
         if not current_user.is_authenticated:
             return jsonify({'error': 'User not authenticated'}), 401
         
@@ -743,7 +743,7 @@ def ai_insights():
         if not SUPABASE_AVAILABLE or not client:
             return jsonify({'error': 'Analytics not available'}), 500
         
-        # Get user's study data
+
         sessions_response = client.table('study_sessions').select('*').eq('user_id', user.id).order('session_date', desc=True).limit(20).execute()
         sessions = sessions_response.data if sessions_response.data else []
         
@@ -753,12 +753,12 @@ def ai_insights():
                 'recommendations': ['Create your first topic and begin studying']
             })
         
-        # Analyze study patterns
+
         total_sessions = len(sessions)
         total_study_time = sum(session.get('duration_minutes', 0) for session in sessions)
         avg_session_length = total_study_time / total_sessions if total_sessions > 0 else 0
         
-        # Calculate confidence trends
+
         confidence_gains = []
         for session in sessions:
             if session.get('confidence_after') and session.get('confidence_before'):
@@ -767,7 +767,7 @@ def ai_insights():
         
         avg_confidence_gain = sum(confidence_gains) / len(confidence_gains) if confidence_gains else 0
         
-        # Generate insights
+
         key_insights = []
         recommendations = []
         

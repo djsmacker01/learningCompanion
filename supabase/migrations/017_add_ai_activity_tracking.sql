@@ -1,21 +1,21 @@
--- Create AI Activity Tracking Table
+
 CREATE TABLE IF NOT EXISTS ai_activity (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    activity_type VARCHAR(50) NOT NULL, -- 'grade_prediction', 'study_plan', 'concept_explanation', 'adaptive_quiz', 'chat'
+    activity_type VARCHAR(50) NOT NULL, 
     topic_id UUID REFERENCES topics(id) ON DELETE SET NULL,
-    activity_data JSONB, -- Store relevant data like concept, grade, etc.
-    result_summary TEXT, -- Brief summary of what was generated
+    activity_data JSONB, 
+    result_summary TEXT, 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for better performance
+
 CREATE INDEX IF NOT EXISTS idx_ai_activity_user_id ON ai_activity(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_activity_created_at ON ai_activity(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ai_activity_type ON ai_activity(activity_type);
 
--- Create updated_at trigger
+
 CREATE OR REPLACE FUNCTION update_ai_activity_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -29,10 +29,10 @@ CREATE TRIGGER trigger_update_ai_activity_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_ai_activity_updated_at();
 
--- Enable RLS
+
 ALTER TABLE ai_activity ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+
 CREATE POLICY "Users can view their own AI activity" ON ai_activity
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -45,7 +45,7 @@ CREATE POLICY "Users can update their own AI activity" ON ai_activity
 CREATE POLICY "Users can delete their own AI activity" ON ai_activity
     FOR DELETE USING (auth.uid() = user_id);
 
--- Insert sample data for testing
+
 INSERT INTO ai_activity (user_id, activity_type, topic_id, activity_data, result_summary)
 SELECT 
     u.id,

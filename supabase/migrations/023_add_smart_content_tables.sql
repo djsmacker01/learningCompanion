@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS generated_content (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Content Templates Table
+
 CREATE TABLE IF NOT EXISTS content_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     template_name VARCHAR(100) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS content_templates (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Content Generation History Table
+
 CREATE TABLE IF NOT EXISTS content_generation_history (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS content_generation_history (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Content Ratings Table
+
 CREATE TABLE IF NOT EXISTS content_ratings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

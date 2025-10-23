@@ -63,13 +63,13 @@ class StudySession:
         except Exception as e:
             print(f" Error creating session in Supabase: {e}")
             
-            # Check if it's the analytics constraint violation
+
             if "next_recommended_date_future" in str(e) or "session_type_valid" in str(e):
                 print("Analytics constraint violation detected, trying to create session without analytics trigger...")
                 
-                # Try to create a minimal session record that bypasses the analytics trigger
+
                 try:
-                    # Create a session with minimal data to avoid trigger issues
+
                     minimal_data = {
                         'topic_id': topic_id,
                         'user_id': user_id,
@@ -83,7 +83,7 @@ class StudySession:
                         'created_at': datetime.utcnow().isoformat()
                     }
                     
-                    # Try to insert directly without triggering analytics
+
                     response = client.table('study_sessions').insert(minimal_data).execute()
                     if response.data:
                         session_data = response.data[0]

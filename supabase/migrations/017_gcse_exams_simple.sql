@@ -1,5 +1,5 @@
--- Simplest possible migration for gcse_exams table
--- No RLS, no complex policies - just the table
+
+
 
 DROP TABLE IF EXISTS gcse_exams CASCADE;
 

@@ -1,5 +1,5 @@
--- Friend Invitation System
--- Allow users to invite people who don't have accounts yet
+
+
 
 CREATE TABLE IF NOT EXISTS friend_invitations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

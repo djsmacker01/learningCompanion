@@ -6,7 +6,7 @@ import os
 
 load_dotenv()
 
-# Secure logging - no credential exposure
+
 if os.getenv('SUPABASE_URL'):
     print("✓ Supabase configured")
 if os.getenv('SUPABASE_SERVICE_ROLE_KEY'):

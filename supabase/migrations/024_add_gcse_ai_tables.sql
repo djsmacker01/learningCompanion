@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS gcse_grade_boundary_predictions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- GCSE Revision Schedules Table
+
 CREATE TABLE IF NOT EXISTS gcse_revision_schedules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS gcse_revision_schedules (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- GCSE Exam Techniques Table
+
 CREATE TABLE IF NOT EXISTS gcse_exam_techniques (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS gcse_exam_techniques (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- GCSE Performance Gap Analysis Table
+
 CREATE TABLE IF NOT EXISTS gcse_performance_gap_analysis (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS gcse_performance_gap_analysis (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- GCSE Personalized Content Table
+
 CREATE TABLE IF NOT EXISTS gcse_personalized_content (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS gcse_personalized_content (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- GCSE Grade Boundaries Table
+
 CREATE TABLE IF NOT EXISTS gcse_grade_boundaries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     subject VARCHAR(100) NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS gcse_grade_boundaries (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for performance
+
 CREATE INDEX IF NOT EXISTS idx_gcse_study_plans_user_id ON gcse_study_plans(user_id);
 CREATE INDEX IF NOT EXISTS idx_gcse_study_plans_subject ON gcse_study_plans(subject);
 CREATE INDEX IF NOT EXISTS idx_gcse_study_plans_exam_board ON gcse_study_plans(exam_board);
@@ -172,7 +172,7 @@ CREATE INDEX IF NOT EXISTS idx_gcse_grade_boundaries_subject ON gcse_grade_bound
 CREATE INDEX IF NOT EXISTS idx_gcse_grade_boundaries_exam_board ON gcse_grade_boundaries(exam_board);
 CREATE INDEX IF NOT EXISTS idx_gcse_grade_boundaries_year ON gcse_grade_boundaries(year);
 
--- Enable RLS
+
 ALTER TABLE gcse_study_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_curriculum ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_past_paper_analysis ENABLE ROW LEVEL SECURITY;
@@ -183,7 +183,7 @@ ALTER TABLE gcse_performance_gap_analysis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_personalized_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_grade_boundaries ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+
 CREATE POLICY "Users can view their own GCSE study plans" ON gcse_study_plans
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -250,7 +250,7 @@ CREATE POLICY "Users can delete their own GCSE personalized content" ON gcse_per
 CREATE POLICY "Everyone can view GCSE grade boundaries" ON gcse_grade_boundaries
     FOR SELECT USING (true);
 
--- Grant permissions
+
 GRANT ALL ON gcse_study_plans TO authenticated;
 GRANT ALL ON gcse_curriculum TO authenticated;
 GRANT ALL ON gcse_past_paper_analysis TO authenticated;
@@ -261,38 +261,38 @@ GRANT ALL ON gcse_performance_gap_analysis TO authenticated;
 GRANT ALL ON gcse_personalized_content TO authenticated;
 GRANT ALL ON gcse_grade_boundaries TO authenticated;
 
--- Insert sample GCSE curriculum data
+
 INSERT INTO gcse_curriculum (subject, exam_board, topic_name, topic_code, assessment_objectives, grade_descriptors, exam_weight, difficulty_level) VALUES
--- Mathematics topics
+
 ('Mathematics', 'AQA', 'Algebra', 'A1', '{"AO1": "Use and apply standard techniques", "AO2": "Reason, interpret and communicate mathematically", "AO3": "Solve problems within mathematics"}', '{"Grade 9": "Solve complex multi-step problems", "Grade 7": "Solve standard problems with confidence", "Grade 5": "Apply basic techniques correctly"}', 25.0, 'intermediate'),
 ('Mathematics', 'AQA', 'Geometry', 'G1', '{"AO1": "Use and apply standard techniques", "AO2": "Reason, interpret and communicate mathematically", "AO3": "Solve problems within mathematics"}', '{"Grade 9": "Solve complex geometrical problems", "Grade 7": "Apply geometric reasoning", "Grade 5": "Use basic geometric concepts"}', 20.0, 'intermediate'),
 ('Mathematics', 'AQA', 'Number', 'N1', '{"AO1": "Use and apply standard techniques", "AO2": "Reason, interpret and communicate mathematically", "AO3": "Solve problems within mathematics"}', '{"Grade 9": "Work with complex number problems", "Grade 7": "Apply number concepts confidently", "Grade 5": "Use basic number operations"}', 15.0, 'beginner'),
 ('Mathematics', 'AQA', 'Statistics', 'S1', '{"AO1": "Use and apply standard techniques", "AO2": "Reason, interpret and communicate mathematically", "AO3": "Solve problems within mathematics"}', '{"Grade 9": "Analyze complex statistical data", "Grade 7": "Interpret statistical information", "Grade 5": "Calculate basic statistics"}', 15.0, 'intermediate'),
 
--- English Language topics
+
 ('English Language', 'AQA', 'Reading Comprehension', 'R1', '{"AO1": "Identify and interpret explicit and implicit information", "AO2": "Explain, comment on and analyze how writers use language", "AO3": "Compare writers ideas and perspectives", "AO4": "Evaluate texts critically"}', '{"Grade 9": "Sophisticated analysis of language and structure", "Grade 7": "Clear analysis with supporting evidence", "Grade 5": "Basic understanding with some analysis"}', 50.0, 'intermediate'),
 ('English Language', 'AQA', 'Creative Writing', 'W1', '{"AO5": "Communicate clearly, effectively and imaginatively", "AO6": "Use a range of vocabulary and sentence structures"}', '{"Grade 9": "Compelling and sophisticated writing", "Grade 7": "Clear and engaging writing", "Grade 5": "Competent writing with some flair"}', 50.0, 'intermediate'),
 
--- Biology topics
+
 ('Biology', 'AQA', 'Cell Biology', 'B1', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Deep understanding of complex biological processes", "Grade 7": "Good understanding of key concepts", "Grade 5": "Basic understanding of biological facts"}', 12.5, 'beginner'),
 ('Biology', 'AQA', 'Organisation', 'B2', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex analysis of biological systems", "Grade 7": "Clear understanding of biological organisation", "Grade 5": "Basic knowledge of biological structures"}', 12.5, 'beginner'),
 ('Biology', 'AQA', 'Infection and Response', 'B3', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Sophisticated understanding of immune responses", "Grade 7": "Good understanding of infection mechanisms", "Grade 5": "Basic knowledge of disease and immunity"}', 12.5, 'intermediate'),
 ('Biology', 'AQA', 'Bioenergetics', 'B4', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex understanding of energy transfer", "Grade 7": "Clear understanding of photosynthesis and respiration", "Grade 5": "Basic knowledge of energy processes"}', 12.5, 'intermediate'),
 
--- Chemistry topics
+
 ('Chemistry', 'AQA', 'Atomic Structure', 'C1', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Sophisticated understanding of atomic theory", "Grade 7": "Good understanding of atomic structure", "Grade 5": "Basic knowledge of atoms and elements"}', 10.0, 'beginner'),
 ('Chemistry', 'AQA', 'Bonding', 'C2', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex understanding of chemical bonding", "Grade 7": "Clear understanding of bonding types", "Grade 5": "Basic knowledge of chemical bonds"}', 15.0, 'intermediate'),
 ('Chemistry', 'AQA', 'Quantitative Chemistry', 'C3', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex calculations with confidence", "Grade 7": "Accurate chemical calculations", "Grade 5": "Basic chemical calculations"}', 20.0, 'advanced'),
 ('Chemistry', 'AQA', 'Chemical Changes', 'C4', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Sophisticated understanding of chemical reactions", "Grade 7": "Good understanding of reaction types", "Grade 5": "Basic knowledge of chemical changes"}', 20.0, 'intermediate'),
 
--- Physics topics
+
 ('Physics', 'AQA', 'Energy', 'P1', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex understanding of energy concepts", "Grade 7": "Clear understanding of energy transfer", "Grade 5": "Basic knowledge of energy types"}', 10.0, 'beginner'),
 ('Physics', 'AQA', 'Electricity', 'P2', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Sophisticated understanding of electrical circuits", "Grade 7": "Good understanding of electrical principles", "Grade 5": "Basic knowledge of electricity"}', 15.0, 'intermediate'),
 ('Physics', 'AQA', 'Particle Model', 'P3', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Complex understanding of particle behavior", "Grade 7": "Clear understanding of particle model", "Grade 5": "Basic knowledge of matter states"}', 10.0, 'beginner'),
 ('Physics', 'AQA', 'Atomic Structure', 'P4', '{"AO1": "Demonstrate knowledge and understanding", "AO2": "Apply knowledge and understanding", "AO3": "Analyze information and ideas"}', '{"Grade 9": "Sophisticated understanding of atomic physics", "Grade 7": "Good understanding of atomic structure", "Grade 5": "Basic knowledge of atoms and radiation"}', 15.0, 'intermediate')
 ON CONFLICT DO NOTHING;
 
--- Insert sample grade boundaries
+
 INSERT INTO gcse_grade_boundaries (subject, exam_board, year, grade_9_boundary, grade_8_boundary, grade_7_boundary, grade_6_boundary, grade_5_boundary, grade_4_boundary, grade_3_boundary, grade_2_boundary, grade_1_boundary, max_mark) VALUES
 ('Mathematics', 'AQA', 2023, 85, 75, 65, 55, 45, 35, 25, 15, 5, 240),
 ('Mathematics', 'AQA', 2022, 83, 73, 63, 53, 43, 33, 23, 13, 3, 240),

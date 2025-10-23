@@ -38,7 +38,7 @@ class UserProfile:
         
         try:
             
-            # Select only gamification-related columns
+
             result = supabase.table('user_profiles').select(
                 'id, user_id, total_xp, current_level, study_streak, longest_streak, '
                 'total_study_time_minutes, badges_earned, achievements_unlocked, '

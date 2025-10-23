@@ -65,24 +65,24 @@ class AITutor:
     def generate_study_plan(self, topic_id: str, target_grade: str = None, time_available: int = None) -> Dict:
         """Generate a personalized study plan for a specific topic"""
         try:
-            # Get topic information
+
             topic = Topic.get_topic_by_id(topic_id, self.user_id)
             if not topic:
                 return {'error': 'Topic not found'}
             
-            # Get user's performance on this topic
+
             topic_performance = self._get_topic_performance(topic_id)
             
-            # Build study plan prompt
+
             prompt = self._build_study_plan_prompt(topic, topic_performance, target_grade, time_available)
             
-            # Get AI-generated study plan
+
             study_plan = self._call_ai_for_study_plan(prompt)
             
-            # Save study plan
+
             self._save_study_plan(topic_id, study_plan)
             
-            # Track AI activity
+
             self._track_ai_activity('study_plan', topic_id, {
                 'target_grade': target_grade,
                 'time_available': time_available,
@@ -150,25 +150,25 @@ class AITutor:
     def predict_grade(self, topic_id: str, exam_date: str = None) -> Dict:
         """Predict user's likely grade based on current performance"""
         try:
-            # Get topic performance data
+
             performance_data = self._get_topic_performance(topic_id)
             
-            # Get recent quiz scores
+
             recent_scores = self._get_recent_quiz_scores(topic_id)
             
-            # Calculate learning velocity
+
             learning_velocity = self._calculate_learning_velocity(topic_id)
             
-            # Build prediction prompt
+
             prompt = self._build_grade_prediction_prompt(performance_data, recent_scores, learning_velocity, exam_date)
             
-            # Get AI prediction
+
             prediction = self._call_ai_for_prediction(prompt)
             
-            # Save prediction for tracking
+
             self._save_grade_prediction(topic_id, prediction, exam_date)
             
-            # Track AI activity
+
             self._track_ai_activity('grade_prediction', topic_id, {
                 'predicted_grade': prediction.get('grade', 'Unknown'),
                 'confidence': prediction.get('confidence', 0),
@@ -222,7 +222,7 @@ class AITutor:
         try:
             print(f"Adaptive Quiz Debug - Starting recommendations for topic: {topic_id}")
             
-            # Get actual topic information
+
             print(f"Adaptive Quiz Debug - Fetching topic information...")
             from app.models import Topic
             topic = Topic.get_by_id(topic_id, self.user_id)
@@ -232,28 +232,28 @@ class AITutor:
             else:
                 print(f"Adaptive Quiz Debug - Topic found: {topic.title}")
             
-            # Get topic performance
+
             print(f"Adaptive Quiz Debug - Getting topic performance...")
             performance = self._get_topic_performance(topic_id)
             print(f"Adaptive Quiz Debug - Performance: {performance}")
             
-            # Get weak areas
+
             print(f"Adaptive Quiz Debug - Identifying weak areas...")
             weak_areas = self._identify_weak_areas(topic_id)
             print(f"Adaptive Quiz Debug - Weak areas: {weak_areas}")
             
-            # Build adaptive recommendations prompt
+
             print(f"Adaptive Quiz Debug - Building prompt...")
             prompt = self._build_adaptive_quiz_prompt(performance, weak_areas, topic)
             print(f"Adaptive Quiz Debug - Prompt length: {len(prompt)}")
             
-            # Get AI recommendations
+
             print(f"Adaptive Quiz Debug - Calling AI...")
             recommendations = self._call_ai_for_adaptive_quiz(prompt)
             print(f"Adaptive Quiz Debug - AI response type: {type(recommendations)}")
             print(f"Adaptive Quiz Debug - AI response keys: {list(recommendations.keys()) if isinstance(recommendations, dict) else 'Not dict'}")
             
-            # Safely extract recommendations
+
             if isinstance(recommendations, dict) and 'recommendations' in recommendations:
                 rec_list = recommendations['recommendations']
             else:
@@ -273,7 +273,7 @@ class AITutor:
                 'timestamp': datetime.now().isoformat()
             }
             
-            # Track AI activity
+
             self._track_ai_activity('adaptive_quiz', topic_id, {
                 'recommendations_count': len(rec_list),
                 'topic_title': topic.title if topic else 'Unknown Topic'
@@ -288,7 +288,7 @@ class AITutor:
             traceback.print_exc()
             return {'error': f'Failed to get quiz recommendations: {str(e)}'}
     
-    # Helper methods
+
     def _get_user_learning_data(self) -> Dict:
         """Get comprehensive user learning data"""
         if not self.supabase:
@@ -436,7 +436,7 @@ class AITutor:
             from app.models import Topic
             topic = Topic.get_by_id(topic_id, self.user_id)
             if topic:
-                # Generate topic-specific performance data
+
                 topic_lower = topic.title.lower()
                 if 'math' in topic_lower or 'algebra' in topic_lower:
                     return {
@@ -528,7 +528,7 @@ Format the response as a structured study plan with clear sections and actionabl
             
             ai_response = response.choices[0].message.content
             
-            # Parse the AI response into structured format
+
             return self._parse_study_plan_response(ai_response)
             
         except Exception as e:
@@ -603,7 +603,7 @@ Format the response as a structured study plan with clear sections and actionabl
     
     def _save_study_plan(self, topic_id: str, study_plan: Dict):
         """Save study plan to database"""
-        # Implementation would save to database
+
         pass
     
     def _get_user_learning_profile(self) -> Dict:
@@ -670,7 +670,7 @@ Make the explanation engaging and educational, suitable for the {level} level.
     def _parse_explanation_response(self, ai_response: str) -> Dict:
         """Parse AI response into structured explanation"""
         try:
-            # Split the response into sections
+
             lines = ai_response.split('\n')
             structured_explanation = {
                 'explanation': '',
@@ -688,17 +688,17 @@ Make the explanation engaging and educational, suitable for the {level} level.
                 if not line:
                     continue
                     
-                # Detect section headers
+
                 if any(keyword in line.lower() for keyword in ['example', 'for instance', 'such as', 'like']):
                     current_section = 'examples'
                 elif any(keyword in line.lower() for keyword in ['related', 'connected', 'similar', 'associated']):
                     current_section = 'related'
                 else:
-                    # Add content to appropriate section
+
                     if current_section == 'examples':
                         examples_section.append(line)
                     elif current_section == 'related':
-                        # Extract concept names from the line
+
                         if ':' in line:
                             concepts = line.split(':')[1].strip()
                             related_concepts.extend([c.strip() for c in concepts.split(',') if c.strip()])
@@ -707,15 +707,15 @@ Make the explanation engaging and educational, suitable for the {level} level.
                     else:
                         structured_explanation['explanation'] += line + '\n'
             
-            # Clean up examples
+
             if examples_section:
                 structured_explanation['examples'] = '\n'.join(examples_section)
             
-            # Clean up related concepts
+
             if related_concepts:
                 structured_explanation['related_concepts'] = [c for c in related_concepts if len(c) > 2]
             
-            # If no structured data, use full text
+
             if not structured_explanation['explanation']:
                 structured_explanation['explanation'] = ai_response
             
@@ -738,7 +738,7 @@ Make the explanation engaging and educational, suitable for the {level} level.
     def _parse_adaptive_quiz_response(self, ai_response: str) -> Dict:
         """Parse AI response into structured quiz recommendations"""
         try:
-            # Split the response into lines
+
             lines = ai_response.split('\n')
             recommendations = []
             
@@ -752,7 +752,7 @@ Make the explanation engaging and educational, suitable for the {level} level.
                         current_recommendation = {}
                     continue
                 
-                # Detect recommendation headers
+
                 if any(keyword in line.lower() for keyword in ['recommendation', 'suggestion', 'quiz', 'practice']):
                     if current_recommendation:
                         recommendations.append(current_recommendation)
@@ -763,13 +763,13 @@ Make the explanation engaging and educational, suitable for the {level} level.
                         'estimated_time': 15
                     }
                 elif current_recommendation:
-                    # Add details to current recommendation
+
                     if 'difficulty' in line.lower():
                         current_recommendation['difficulty'] = line.split(':')[-1].strip() if ':' in line else 'medium'
                     elif 'time' in line.lower():
                         time_match = line.split(':')[-1].strip() if ':' in line else '15'
                         try:
-                            # Extract numbers from time string safely
+
                             digits = ''.join(filter(str.isdigit, time_match))
                             current_recommendation['estimated_time'] = int(digits) if digits else 15
                         except (ValueError, TypeError):
@@ -777,11 +777,11 @@ Make the explanation engaging and educational, suitable for the {level} level.
                     else:
                         current_recommendation['recommendation'] += f" {line}"
             
-            # Add the last recommendation
+
             if current_recommendation:
                 recommendations.append(current_recommendation)
             
-            # If no structured recommendations found, create a general one
+
             if not recommendations:
                 recommendations = [{
                     'quiz_type': 'General Practice',
@@ -840,7 +840,7 @@ Make the explanation engaging and educational, suitable for the {level} level.
             if not self.client:
                 return "I'm sorry, but I'm currently unavailable. Please check your OpenAI API key configuration."
             
-            # Get topic context if provided
+
             topic_context = ""
             if topic_id:
                 from app.models import Topic
@@ -848,7 +848,7 @@ Make the explanation engaging and educational, suitable for the {level} level.
                 if topic:
                     topic_context = f"Topic: {topic.title}\nDescription: {topic.description}\n"
             
-            # Build enhanced prompt
+
             prompt = f"""
 You are an expert AI tutor specializing in personalized education. Help the student with their question.
 
@@ -879,9 +879,9 @@ Keep your response conversational and supportive.
             
             ai_response = response.choices[0].message.content
             
-            # Track chat activity
+
             self._track_ai_activity('chat', topic_id, {
-                'message': message[:100],  # First 100 chars
+                'message': message[:100],
                 'topic_title': topic.title if topic_id and 'topic' in locals() else 'General'
             }, f"Chat interaction: {message[:50]}...")
             
@@ -933,7 +933,7 @@ Keep your response conversational and supportive.
             from app.models import Topic
             topic = Topic.get_by_id(topic_id, self.user_id)
             if topic:
-                # Generate topic-specific weak areas based on the topic content
+
                 topic_lower = topic.title.lower()
                 if 'math' in topic_lower or 'algebra' in topic_lower:
                     return ['basic operations', 'equation solving', 'word problems']
@@ -948,7 +948,7 @@ Keep your response conversational and supportive.
                 elif 'biology' in topic_lower:
                     return ['cell structure', 'processes', 'classification']
                 else:
-                    # Generic weak areas based on common learning challenges
+
                     return ['fundamental concepts', 'application', 'problem solving']
             else:
                 return ['fundamental concepts', 'application', 'problem solving']
@@ -1013,7 +1013,7 @@ Format your response as structured recommendations that will help the student im
             
             ai_response = response.choices[0].message.content
             
-            # Parse the AI response into structured recommendations
+
             return self._parse_adaptive_quiz_response(ai_response)
             
         except Exception as e:
@@ -1093,7 +1093,7 @@ Format your response as structured recommendations that will help the student im
         for session in sessions:
             created_at = session.get('created_at', '')
             if created_at:
-                # Simple time analysis (would be more sophisticated in production)
+
                 hour = int(created_at.split('T')[1].split(':')[0]) if 'T' in created_at else 9
                 if 6 <= hour < 12:
                     time_preferences.append('morning')
@@ -1102,7 +1102,7 @@ Format your response as structured recommendations that will help the student im
                 else:
                     time_preferences.append('evening')
         
-        # Return most common time
+
         from collections import Counter
         return [Counter(time_preferences).most_common(1)[0][0]] if time_preferences else ['morning']
     
@@ -1125,12 +1125,12 @@ Format your response as structured recommendations that will help the student im
         if not quiz_results:
             return 'stable'
         
-        # Use score field from quiz_attempts table
+
         scores = [r.get('score', 0) for r in quiz_results if r.get('score') is not None]
         if len(scores) < 2:
             return 'stable'
         
-        # Simple trend analysis
+
         if scores[-1] > scores[0]:
             return 'improving'
         elif scores[-1] < scores[0]:
@@ -1161,7 +1161,7 @@ Format your response as structured recommendations that will help the student im
             session_type = session.get('session_type', 'study')
             session_types.append(session_type)
         
-        # Return most common session types
+
         from collections import Counter
         return [item[0] for item in Counter(session_types).most_common(3)]
     
@@ -1270,7 +1270,7 @@ Format your response as structured recommendations that will help the student im
     
     def _parse_learning_style_response(self, response: str) -> Dict:
         """Parse AI response for learning style"""
-        # Extract style from response
+
         style = 'visual'
         if 'auditory' in response.lower():
             style = 'auditory'
@@ -1281,12 +1281,12 @@ Format your response as structured recommendations that will help the student im
         elif 'multimodal' in response.lower():
             style = 'multimodal'
         
-        # Extract confidence
+
         import re
         confidence_match = re.search(r'(\d+)%', response)
         confidence = int(confidence_match.group(1)) if confidence_match else 75
         
-        # Extract recommendations
+
         recommendations = [
             'Use visual learning materials',
             'Create study diagrams',

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS ai_recommendations (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- AI Study Plans Table
+
 CREATE TABLE IF NOT EXISTS ai_study_plans (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS ai_study_plans (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- AI Explanations Table
+
 CREATE TABLE IF NOT EXISTS ai_explanations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS ai_explanations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- AI Grade Predictions Table
+
 CREATE TABLE IF NOT EXISTS ai_grade_predictions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS ai_grade_predictions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- AI Learning Styles Table
+
 CREATE TABLE IF NOT EXISTS ai_learning_styles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS ai_learning_styles (
     UNIQUE(user_id)
 );
 
--- AI Tutor Conversations Table
+
 CREATE TABLE IF NOT EXISTS ai_tutor_conversations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS ai_tutor_conversations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- AI Adaptive Quiz Recommendations Table
+
 CREATE TABLE IF NOT EXISTS ai_adaptive_quiz_recommendations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS ai_adaptive_quiz_recommendations (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for performance
+
 CREATE INDEX IF NOT EXISTS idx_ai_recommendations_user_id ON ai_recommendations(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_recommendations_type ON ai_recommendations(recommendation_type);
 CREATE INDEX IF NOT EXISTS idx_ai_recommendations_created_at ON ai_recommendations(created_at);
@@ -111,7 +111,7 @@ CREATE INDEX IF NOT EXISTS idx_ai_tutor_conversations_created_at ON ai_tutor_con
 CREATE INDEX IF NOT EXISTS idx_ai_adaptive_quiz_user_id ON ai_adaptive_quiz_recommendations(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_adaptive_quiz_topic_id ON ai_adaptive_quiz_recommendations(topic_id);
 
--- Enable RLS
+
 ALTER TABLE ai_recommendations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_study_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_explanations ENABLE ROW LEVEL SECURITY;
@@ -120,7 +120,7 @@ ALTER TABLE ai_learning_styles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_tutor_conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_adaptive_quiz_recommendations ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+
 CREATE POLICY "Users can view their own AI recommendations" ON ai_recommendations
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -172,7 +172,7 @@ CREATE POLICY "Users can view their own adaptive quiz recommendations" ON ai_ada
 CREATE POLICY "Users can insert their own adaptive quiz recommendations" ON ai_adaptive_quiz_recommendations
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Grant permissions
+
 GRANT ALL ON ai_recommendations TO authenticated;
 GRANT ALL ON ai_study_plans TO authenticated;
 GRANT ALL ON ai_explanations TO authenticated;

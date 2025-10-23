@@ -294,7 +294,7 @@ ALTER TABLE gcse_study_plan_steps ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to gcse_subjects" ON gcse_subjects FOR SELECT USING (true);
 CREATE POLICY "Allow public read access to gcse_topics" ON gcse_topics FOR SELECT USING (true);
 
--- User-specific policies for gcse_exams
+
 CREATE POLICY "Users can view own exams" ON gcse_exams FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own exams" ON gcse_exams FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own exams" ON gcse_exams FOR UPDATE USING (auth.uid() = user_id);

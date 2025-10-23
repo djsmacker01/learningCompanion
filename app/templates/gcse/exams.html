@@ -46,7 +46,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+    
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
@@ -55,7 +55,7 @@
         </ol>
     </nav>
 
-    <!-- Header -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <!-- Statistics -->
+    
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card bg-primary text-white">
@@ -103,7 +103,7 @@
         </div>
     </div>
 
-    <!-- Exams by Subject -->
+    
     {% if exams_by_subject %}
     <div class="row">
         <div class="col-12">
@@ -206,7 +206,7 @@
         </div>
     </div>
     {% else %}
-    <!-- Empty State -->
+    
     <div class="row">
         <div class="col-12">
             <div class="card border-primary">

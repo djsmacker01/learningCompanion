@@ -1,9 +1,9 @@
--- Minimal migration: Just create gcse_exams table for exam scheduling
 
--- First, drop the table if it exists to start fresh
+
+
 DROP TABLE IF EXISTS gcse_exams CASCADE;
 
--- Create gcse_exams table
+
 CREATE TABLE gcse_exams (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -20,14 +20,14 @@ CREATE TABLE gcse_exams (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes
+
 CREATE INDEX idx_gcse_exams_user_id ON gcse_exams(user_id);
 CREATE INDEX idx_gcse_exams_exam_date ON gcse_exams(exam_date);
 
--- Enable Row Level Security
+
 ALTER TABLE gcse_exams ENABLE ROW LEVEL SECURITY;
 
--- Create policies (user_id is TEXT, so compare as text)
+
 CREATE POLICY "Users can view own exams" ON gcse_exams FOR SELECT USING (auth.uid()::text = user_id);
 CREATE POLICY "Users can insert own exams" ON gcse_exams FOR INSERT WITH CHECK (auth.uid()::text = user_id);
 CREATE POLICY "Users can update own exams" ON gcse_exams FOR UPDATE USING (auth.uid()::text = user_id);

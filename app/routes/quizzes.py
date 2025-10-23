@@ -742,26 +742,26 @@ def auto_generate_quiz(topic_id):
         flash('User not authenticated.', 'error')
         return redirect(url_for('auth.login'))
     
-    # Get the topic
+
     topic = Topic.get_topic_by_id(topic_id, user.id)
     if not topic:
         flash('Topic not found', 'error')
         return redirect(url_for('quizzes.quiz_list'))
     
     if request.method == 'GET':
-        # Show the generation options form
+
         return render_template('quizzes/auto_generate.html', topic=topic)
     
-    # Handle POST request - generate the quiz
+
     try:
         data = request.get_json() if request.is_json else request.form
         
-        # Get generation parameters
+
         num_questions = int(data.get('num_questions', 5))
         difficulty = data.get('difficulty', 'mixed')
         question_types = data.get('question_types', ['multiple_choice', 'true_false', 'fill_blank'])
         
-        # Validate parameters
+
         if num_questions < 1 or num_questions > 20:
             num_questions = 5
         
@@ -771,7 +771,7 @@ def auto_generate_quiz(topic_id):
         if isinstance(question_types, str):
             question_types = [question_types]
         
-        # Generate the quiz using our smart generator
+
         quiz_data = SmartQuestionGenerator.generate_smart_quiz_from_topic(
             topic.title, 
             topic.description or "No description available",
@@ -783,7 +783,7 @@ def auto_generate_quiz(topic_id):
         if not quiz_data or not quiz_data.get('questions'):
             return jsonify({'error': 'Failed to generate quiz questions'}), 500
         
-        # Create the quiz in the database
+
         quiz = Quiz.create_quiz(
             title=quiz_data['quiz_title'],
             description=quiz_data['quiz_description'],
@@ -795,7 +795,7 @@ def auto_generate_quiz(topic_id):
         if not quiz:
             return jsonify({'error': 'Failed to create quiz'}), 500
         
-        # Add questions to the quiz
+
         questions_added = 0
         for q_data in quiz_data['questions']:
             question = QuizQuestion.create_question(
@@ -808,7 +808,7 @@ def auto_generate_quiz(topic_id):
             )
             
             if question and q_data['question_type'] == 'multiple_choice':
-                # Add options for multiple choice questions
+
                 for option_data in q_data.get('options', []):
                     QuizQuestionOption.create_option(
                         question_id=question.id,
@@ -820,11 +820,11 @@ def auto_generate_quiz(topic_id):
                 questions_added += 1
         
         if questions_added == 0:
-            # Delete the quiz if no questions were added
+
             Quiz.delete_quiz(quiz.id, user.id)
             return jsonify({'error': 'Failed to add questions to quiz'}), 500
         
-        # Return success response
+
         response_data = {
             'success': True,
             'quiz_id': str(quiz.id),

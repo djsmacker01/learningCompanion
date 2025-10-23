@@ -1,7 +1,7 @@
--- GCSE Curriculum Tables
--- Create tables for GCSE subjects, topics, exams, and related data
 
--- Table: GCSE Subjects
+
+
+
 CREATE TABLE IF NOT EXISTS gcse_subjects (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     subject_name VARCHAR(100) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS gcse_subjects (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Table: GCSE Topics
+
 CREATE TABLE IF NOT EXISTS gcse_topics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     subject_id UUID REFERENCES gcse_subjects(id) ON DELETE CASCADE,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS gcse_topics (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Table: GCSE Exams (with user_id for personal exam schedules)
+
 CREATE TABLE IF NOT EXISTS gcse_exams (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS gcse_exams (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Table: GCSE Past Papers (Community Practice Questions)
+
 CREATE TABLE IF NOT EXISTS gcse_past_papers (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     subject_id UUID REFERENCES gcse_subjects(id) ON DELETE CASCADE,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS gcse_past_papers (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Table: GCSE Past Paper Questions
+
 CREATE TABLE IF NOT EXISTS gcse_past_paper_questions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     past_paper_id UUID REFERENCES gcse_past_papers(id) ON DELETE CASCADE,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS gcse_past_paper_questions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Table: GCSE Grade Boundaries
+
 CREATE TABLE IF NOT EXISTS gcse_grade_boundaries (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     exam_board VARCHAR(20) NOT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS gcse_grade_boundaries (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Indexes for performance
+
 CREATE INDEX IF NOT EXISTS idx_gcse_subjects_exam_board ON gcse_subjects(exam_board);
 CREATE INDEX IF NOT EXISTS idx_gcse_subjects_specification ON gcse_subjects(specification_code);
 CREATE INDEX IF NOT EXISTS idx_gcse_topics_subject_id ON gcse_topics(subject_id);
@@ -107,7 +107,7 @@ CREATE INDEX IF NOT EXISTS idx_gcse_exams_subject_id ON gcse_exams(subject_id);
 CREATE INDEX IF NOT EXISTS idx_gcse_exams_exam_date ON gcse_exams(exam_date);
 CREATE INDEX IF NOT EXISTS idx_gcse_past_papers_subject_id ON gcse_past_papers(subject_id);
 
--- Enable Row Level Security
+
 ALTER TABLE gcse_subjects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_topics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_exams ENABLE ROW LEVEL SECURITY;
@@ -115,11 +115,11 @@ ALTER TABLE gcse_past_papers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_past_paper_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gcse_grade_boundaries ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+
 CREATE POLICY "Allow public read access to gcse_subjects" ON gcse_subjects FOR SELECT USING (true);
 CREATE POLICY "Allow public read access to gcse_topics" ON gcse_topics FOR SELECT USING (true);
 
--- User-specific policies for gcse_exams
+
 CREATE POLICY "Users can view own exams" ON gcse_exams FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own exams" ON gcse_exams FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own exams" ON gcse_exams FOR UPDATE USING (auth.uid() = user_id);

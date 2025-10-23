@@ -45,7 +45,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Important Disclaimer -->
+    
     <div class="alert alert-info alert-dismissible fade show" role="alert">
         <i class="fas fa-info-circle me-2"></i>
         <strong>Data Notice:</strong> Specification codes are accurate. However, grade boundaries shown are examples
@@ -54,7 +54,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <!-- Subject Hero Section -->
+    
     <div class="subject-hero">
         <div class="container">
             <div class="row align-items-center">
@@ -90,7 +90,7 @@
     </div>
 
     <div class="container">
-        <!-- Breadcrumb -->
+        
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('gcse.gcse_dashboard') }}">GCSE Dashboard</a></li>
@@ -99,10 +99,10 @@
             </ol>
         </nav>
 
-        <!-- Subject Information -->
+        
         <div class="row mb-4">
             <div class="col-md-8">
-                <!-- Topics Section -->
+                
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0"><i class="fas fa-list me-2"></i>Topics Covered</h4>
@@ -145,7 +145,7 @@
                     </div>
                 </div>
 
-                <!-- Specifications Section -->
+                
                 {% if specifications %}
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
@@ -174,7 +174,7 @@
             </div>
 
             <div class="col-md-4">
-                <!-- Quick Actions -->
+                
                 <div class="card mb-4">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Quick Actions</h5>
@@ -209,7 +209,7 @@
                     </div>
                 </div>
 
-                <!-- Grade Boundaries -->
+                
                 {% if grade_boundaries %}
                 <div class="card mb-4 border-warning">
                     <div class="card-header bg-warning text-dark">
@@ -252,7 +252,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Exam Board Info -->
+                
                 <div class="card mb-4">
                     <div class="card-header bg-secondary text-white">
                         <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Exam Board</h5>

@@ -30,7 +30,7 @@ except ImportError:
 try:
     import pytesseract
     from PIL import Image
-    import fitz  # PyMuPDF
+    import fitz
     OCR_AVAILABLE = True
 except ImportError:
     OCR_AVAILABLE = False
@@ -138,14 +138,14 @@ class PDFProcessor:
             with pdfplumber.open(file_path) as pdf:
                 for page_num, page in enumerate(pdf.pages, 1):
                     try:
-                        # Try to extract text with better formatting preservation
+
                         page_text = page.extract_text(layout=True)
                         if not page_text:
-                            # Fallback to regular extraction
+
                             page_text = page.extract_text()
                         
                         if page_text:
-                            # Clean up the text but preserve structure
+
                             page_text = self._clean_pdf_page_text(page_text)
                             text_content += page_text + "\n\n"
                             pages_info.append({
@@ -294,26 +294,26 @@ class PDFProcessor:
         try:
             import pytesseract
             from PIL import Image
-            import fitz  # PyMuPDF
+            import fitz
             
             text_content = ""
             pages_info = []
             
-            # Open PDF with PyMuPDF
+
             pdf_document = fitz.open(file_path)
             
             for page_num in range(pdf_document.page_count):
                 page = pdf_document[page_num]
                 
-                # Convert PDF page to image
-                mat = fitz.Matrix(2.0, 2.0)  # Scale factor for better OCR
+
+                mat = fitz.Matrix(2.0, 2.0)
                 pix = page.get_pixmap(matrix=mat)
                 img_data = pix.tobytes("png")
                 
-                # Convert to PIL Image
+
                 image = Image.open(io.BytesIO(img_data))
                 
-                # Extract text using OCR
+
                 page_text = pytesseract.image_to_string(image, lang='eng')
                 
                 if page_text.strip():
@@ -381,37 +381,37 @@ class PDFProcessor:
         if not text:
             return ""
         
-        # Split into lines for better processing
+
         lines = text.split('\n')
         cleaned_lines = []
         
         for line in lines:
             line = line.strip()
             if not line:
-                # Preserve empty lines for structure
+
                 cleaned_lines.append("")
                 continue
             
-            # Remove excessive spaces but keep single spaces
+
             line = re.sub(r'\s+', ' ', line)
             
-            # Remove special characters that aren't useful but keep punctuation
+
             line = re.sub(r'[^\w\s\.\,\!\?\;\:\-\(\)\[\]\'\"]+', ' ', line)
             
-            # Clean up multiple spaces again
+
             line = re.sub(r'\s+', ' ', line)
             
-            # Skip lines that are just page numbers or very short
+
             if re.match(r'^\d+$', line) or len(line) < 3:
                 continue
                 
             cleaned_lines.append(line)
         
-        # Join lines and clean up excessive empty lines
+
         result = '\n'.join(cleaned_lines)
         result = re.sub(r'\n{3,}', '\n\n', result)
         
-        # Add better structure detection
+
         result = self._add_structure_markers(result)
         
         return result.strip()
@@ -451,34 +451,34 @@ class PDFProcessor:
         
         sections = []
         
-        # Look for common section patterns
+
         section_patterns = [
             r'(Chapter\s+\d+[:\s]+[^\n]+)',
             r'(Section\s+\d+[:\s]+[^\n]+)',
-            r'(^\d+\.\s+[^\n]+)',  # Numbered sections
-            r'(^[A-Z][A-Z\s]{2,}:)',  # All caps headings
-            r'(^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*:)',  # Title case headings
+            r'(^\d+\.\s+[^\n]+)',
+            r'(^[A-Z][A-Z\s]{2,}:)',
+            r'(^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*:)',
         ]
         
         for pattern in section_patterns:
             matches = re.findall(pattern, text, re.MULTILINE)
             for match in matches:
-                if len(match.strip()) > 3:  # Avoid very short matches
+                if len(match.strip()) > 3:
                     sections.append({
                         'title': match.strip(),
                         'type': 'heading'
                     })
         
-        # Look for key terms (words that appear frequently)
+
         words = re.findall(r'\b[A-Z][a-z]+\b', text)
         word_freq = {}
         for word in words:
-            if len(word) > 4:  # Only longer words
+            if len(word) > 4:
                 word_freq[word] = word_freq.get(word, 0) + 1
         
-        # Add frequent terms as key concepts
+
         for word, freq in sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10]:
-            if freq > 2:  # Only terms that appear multiple times
+            if freq > 2:
                 sections.append({
                     'title': word,
                     'type': 'concept',
@@ -519,12 +519,12 @@ class PDFProcessor:
     def process_uploaded_pdf(self, file) -> Dict:
         """Complete PDF processing pipeline"""
         try:
-            # Save the file
+
             save_result = self.save_uploaded_file(file)
             if not save_result['success']:
                 return save_result
             
-            # Check if it's a PDF
+
             if save_result['file_type'] != 'pdf':
                 return {
                     'success': False,
@@ -532,17 +532,17 @@ class PDFProcessor:
                     'file_info': save_result
                 }
             
-            # Extract text content
+
             extraction_result = self.extract_text_from_pdf(save_result['file_path'])
             
-            # Combine results
+
             result = {
                 'success': extraction_result['success'],
                 'file_info': save_result,
                 'content_info': extraction_result
             }
             
-            # Add error if extraction failed
+
             if not extraction_result['success']:
                 result['error'] = extraction_result['error']
             

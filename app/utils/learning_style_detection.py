@@ -84,28 +84,28 @@ class LearningStyleDetector:
     def create_adaptive_learning_path(self, subject: str, current_level: str, target_level: str, learning_style: str) -> Dict:
         """Create adaptive learning path based on learning style and performance"""
         try:
-            # Get user's current performance data
+
             performance_data = self._get_user_performance_data(subject)
             
-            # Analyze learning gaps
+
             learning_gaps = self._analyze_learning_gaps(performance_data, target_level)
             
-            # Create style-specific learning modules
+
             learning_modules = self._create_style_specific_modules(subject, learning_gaps, learning_style)
             
-            # Generate adaptive progression
+
             adaptive_progression = self._generate_adaptive_progression(learning_modules, performance_data)
             
-            # Create personalized assessments
+
             personalized_assessments = self._create_personalized_assessments(learning_modules, learning_style)
             
-            # Generate learning milestones
+
             learning_milestones = self._generate_learning_milestones(adaptive_progression, target_level)
             
-            # Save adaptive learning path
+
             self._save_adaptive_learning_path(subject, learning_style, adaptive_progression)
             
-            # Generate learning style-specific recommendations
+
             recommendations = self._generate_path_recommendations(subject, learning_style, target_level)
             
             return {
@@ -171,25 +171,25 @@ class LearningStyleDetector:
     def analyze_learning_progress(self, user_id: str, time_period: str = '30_days') -> Dict:
         """Analyze learning progress with style-specific insights"""
         try:
-            # Get user's learning data
+
             learning_data = self._get_user_learning_data(user_id, time_period)
             
-            # Analyze progress patterns
+
             progress_patterns = self._analyze_progress_patterns(learning_data)
             
-            # Detect learning style evolution
+
             style_evolution = self._detect_learning_style_evolution(learning_data)
             
-            # Calculate learning velocity
+
             learning_velocity = self._calculate_learning_velocity(learning_data)
             
-            # Identify optimization opportunities
+
             optimization_opportunities = self._identify_optimization_opportunities(progress_patterns, style_evolution)
             
-            # Generate progress insights
+
             progress_insights = self._generate_progress_insights(progress_patterns, learning_velocity, optimization_opportunities)
             
-            # Create improvement recommendations
+
             improvement_recommendations = self._create_improvement_recommendations(optimization_opportunities, style_evolution)
             
             return {
@@ -220,35 +220,35 @@ class LearningStyleDetector:
             subject_learning_styles: Optional dict mapping subjects to their specific learning styles
         """
         try:
-            # If no subject-specific styles provided, use global style for all
+
             if not subject_learning_styles:
                 subject_learning_styles = {}
             
-            # Analyze optimal study times
+
             optimal_times = self._analyze_optimal_study_times(user_learning_style, available_time)
             
-            # Create subject-specific schedules with subject-specific learning styles
+
             subject_schedules = self._create_subject_specific_schedules(subjects, priorities, user_learning_style, subject_learning_styles)
             
-            # Optimize session lengths
+
             optimized_sessions = self._optimize_session_lengths(subject_schedules, user_learning_style)
             
-            # Create break recommendations
+
             break_recommendations = self._create_break_recommendations(user_learning_style, optimized_sessions)
             
-            # Generate study intensity patterns
+
             intensity_patterns = self._generate_study_intensity_patterns(user_learning_style, optimized_sessions)
             
-            # Create revision schedule
+
             revision_schedule = self._create_revision_schedule(optimized_sessions, user_learning_style)
             
-            # Generate motivation triggers
+
             motivation_triggers = self._generate_motivation_triggers(user_learning_style, optimized_sessions)
             
-            # Format weekly schedule for frontend
+
             weekly_schedule = subject_schedules
             
-            # Create study blocks summary
+
             study_blocks = []
             for day, sessions in subject_schedules.items():
                 if isinstance(sessions, list):
@@ -263,10 +263,10 @@ class LearningStyleDetector:
                                 'description': f"{session.get('subject', 'Study')}: {session.get('activity', 'Study session')} ({session.get('duration', '45 min')})"
                             })
             
-            # Extract optimization tips
+
             optimization_tips = optimized_sessions.get('optimization_notes', [])
             if not optimization_tips or len(optimization_tips) == 0:
-                # Build tips from optimization data
+
                 optimization_tips = []
                 if optimized_sessions.get('ideal_session_length'):
                     optimization_tips.append(f"✓ Ideal session length: {optimized_sessions.get('ideal_session_length')} - Perfect for {user_learning_style} learners")
@@ -277,7 +277,7 @@ class LearningStyleDetector:
                 if optimized_sessions.get('maximum_session_length'):
                     optimization_tips.append(f"✓ Maximum session length: {optimized_sessions.get('maximum_session_length')} before taking a longer break")
                 
-                # Add learning style specific tip
+
                 style_tips = {
                     'visual': 'Use visual aids like diagrams, charts, and mind maps during study sessions',
                     'auditory': 'Study in a quiet environment or use noise-cancelling headphones for maximum focus',
@@ -435,7 +435,7 @@ class LearningStyleDetector:
     
     def _calculate_learning_style_confidence(self, primary_style: str, behavioral_patterns: Dict) -> Dict:
         """Calculate confidence scores for learning style determination"""
-        # This would use more sophisticated algorithms in a real implementation
+
         confidence_scores = {
             'visual': 0.0,
             'auditory': 0.0,
@@ -444,10 +444,10 @@ class LearningStyleDetector:
             'multimodal': 0.0
         }
         
-        # Set primary style confidence high
+
         confidence_scores[primary_style] = 0.85
         
-        # Distribute remaining confidence among other styles
+
         remaining_confidence = 0.15
         other_styles = [style for style in confidence_scores.keys() if style != primary_style]
         
@@ -544,7 +544,7 @@ class LearningStyleDetector:
             if not self.client:
                 return []
             
-            # Create style-specific guidance
+
             style_guidance = {
                 'visual': 'Focus on diagrams, charts, graphs, mind maps, color-coding, visual models, and pictorial representations. Use words like "draw", "sketch", "visualize", "diagram", "chart", "map".',
                 'auditory': 'Focus on discussions, verbal explanations, listening, recording, mnemonics, and verbal repetition. Use words like "discuss", "explain", "listen", "record", "verbalize".',
@@ -583,13 +583,13 @@ Keep descriptions specific to {learning_style} learning (1-2 sentences each)."""
             
             content = response.choices[0].message.content.strip()
             
-            # Parse into modules
+
             modules = []
             import re
             for line in content.split('\n'):
                 line = line.strip()
                 if line and not line.startswith('#'):
-                    # Remove numbering
+
                     clean_line = re.sub(r'^\d+\.\s*', '', line)
                     clean_line = re.sub(r'^[-*]\s*', '', clean_line).strip()
                     if ':' in clean_line:
@@ -634,7 +634,7 @@ Keep descriptions specific to {learning_style} learning (1-2 sentences each)."""
     def _create_personalized_assessments(self, learning_modules: List[Dict], learning_style: str) -> List[Dict]:
         """Create personalized assessments based on learning style"""
         assessments = []
-        for module in learning_modules[:5]:  # Create assessments for first 5 modules
+        for module in learning_modules[:5]:
             module_name = module.get('name', 'Module')
             assessments.append({
                 'module': module_name,
@@ -711,7 +711,7 @@ Format as a simple list."""
             if not self.client:
                 return []
             
-            # Style-specific instruction
+
             style_keywords = {
                 'visual': 'diagrams, charts, graphs, mind maps, color-coding, visual models, sketches, pictures, videos, flowcharts',
                 'auditory': 'discussions, verbal explanations, recording, listening, mnemonics, songs, podcasts, reading aloud, study groups',
@@ -752,7 +752,7 @@ Format as a simple list. Make each recommendation explicitly {learning_style}-fo
             
             content = response.choices[0].message.content.strip()
             
-            # Parse into list
+
             import re
             recommendations = []
             for line in content.split('\n'):
@@ -1053,20 +1053,20 @@ Return as JSON:
             if not self.supabase:
                 return self._generate_sample_learning_data(time_period)
             
-            # Calculate date range
+
             days_map = {'7_days': 7, '30_days': 30, '90_days': 90, 'all_time': 365}
             days = days_map.get(time_period, 30)
             start_date = (datetime.now() - timedelta(days=days)).isoformat()
             
-            # Fetch study sessions
+
             sessions_response = self.supabase.table('study_sessions').select('*').eq('user_id', user_id).gte('created_at', start_date).execute()
             sessions = sessions_response.data if sessions_response.data else []
             
-            # Fetch quiz attempts
+
             quiz_response = self.supabase.table('quiz_attempts').select('*').eq('user_id', user_id).gte('created_at', start_date).execute()
             quizzes = quiz_response.data if quiz_response.data else []
             
-            # Fetch topics/content interactions
+
             topics_response = self.supabase.table('topics').select('*').eq('user_id', user_id).gte('created_at', start_date).execute()
             topics = topics_response.data if topics_response.data else []
             
@@ -1142,7 +1142,7 @@ Return as JSON:
             
             content = response.choices[0].message.content.strip()
             
-            # Remove markdown code blocks if present
+
             if '```json' in content:
                 content = content.split('```json')[1].split('```')[0].strip()
             elif '```' in content:
@@ -1211,7 +1211,7 @@ Return as JSON:
             
             content = response.choices[0].message.content.strip()
             
-            # Remove markdown code blocks if present
+
             if '```json' in content:
                 content = content.split('```json')[1].split('```')[0].strip()
             elif '```' in content:
@@ -1246,28 +1246,28 @@ Return as JSON:
             total_topics = learning_data.get('total_topics', 0)
             days = learning_data.get('date_range', {}).get('days', 30)
             
-            # Adjust days for more realistic calculations (cap at 90 days for velocity calc)
-            # This prevents unfairly low scores for "all_time" when most activity is recent
+
+
             effective_days = min(days, 90)
             
-            # Calculate per-day averages
+
             avg_time_per_day = total_time / effective_days if effective_days > 0 else 0
             avg_quizzes_per_day = total_quizzes / effective_days if effective_days > 0 else 0
             avg_topics_per_day = total_topics / effective_days if effective_days > 0 else 0
             
-            # Calculate velocity based on activity density
-            # Time factor: 60 min/day = 100%, scaled to 40 points
+
+
             time_factor = min(avg_time_per_day / 60, 1.0) * 40
             
-            # Quiz factor: 0.3 quizzes/day (2 per week) = 100%, scaled to 30 points
+
             quiz_factor = min(avg_quizzes_per_day / 0.3, 1.0) * 30
             
-            # Topic factor: 0.14 topics/day (1 per week) = 100%, scaled to 30 points
+
             topic_factor = min(avg_topics_per_day / 0.14, 1.0) * 30
             
             velocity = time_factor + quiz_factor + topic_factor
             
-            # Bonus: Total activity bonus (up to 10 points)
+
             total_activity = total_time + (total_quizzes * 30) + (total_topics * 60)
             activity_bonus = min(total_activity / 3000, 1.0) * 10
             
@@ -1456,7 +1456,7 @@ Return as JSON:
             
             content = response.choices[0].message.content.strip()
             
-            # Remove markdown code blocks if present
+
             if '```json' in content:
                 content = content.split('```json')[1].split('```')[0].strip()
             elif '```' in content:
@@ -1550,13 +1550,13 @@ Include all 7 days."""
         subject_index = 0
         for day in days:
             daily_sessions = []
-            for time_slot in time_slots[:2]:  # 2 sessions per day
+            for time_slot in time_slots[:2]:
                 if subject_index < len(subjects):
                     subject = subjects[subject_index]
                     priority = priorities.get(subject, 'medium')
                     duration = '60 min' if priority == 'high' else '45 min'
                     
-                    # Get subject-specific learning style or use global fallback
+
                     subject_style = subject_learning_styles.get(subject, learning_style)
                     activity = self._get_learning_style_activity(subject_style, subject)
                     
@@ -1565,7 +1565,7 @@ Include all 7 days."""
                         'time_slot': time_slot,
                         'duration': duration,
                         'activity': activity,
-                        'learning_style': subject_style  # Include for reference
+                        'learning_style': subject_style
                     })
                     
                     subject_index = (subject_index + 1) % len(subjects)
@@ -1635,7 +1635,7 @@ Make sure optimization_notes contains at least 5 specific, actionable tips."""
         except Exception as e:
             print(f"Error optimizing session lengths: {e}")
             
-            # Learning style specific tips
+
             style_specific_tips = {
                 'visual': [
                     'Use colorful highlighters and visual aids during study sessions',
@@ -1674,7 +1674,7 @@ Make sure optimization_notes contains at least 5 specific, actionable tips."""
                     'Start with your most challenging subject when energy is highest',
                     'Use the Pomodoro Technique: 25 minutes focused work, 5 minutes break',
                     'Schedule 10-15 minute breaks after every 45-60 minutes of study',
-                ] + tips[:2],  # Add 2 learning-style specific tips
+                ] + tips[:2],
                 'optimized_sessions': subject_schedules
             }
     
@@ -1909,7 +1909,7 @@ Return as JSON array:
     
     def _get_comprehensive_user_data(self, user_id: str) -> Dict:
         """Get comprehensive user data from database"""
-        # Reuse the learning data fetching method
+
         return self._get_user_learning_data(user_id, 'all_time')
     
     def _analyze_comprehensive_learning_patterns(self, user_data: Dict) -> Dict:
@@ -1919,7 +1919,7 @@ Return as JSON array:
     
     def _detect_comprehensive_learning_preferences(self, user_data: Dict) -> Dict:
         """Detect comprehensive learning preferences"""
-        # Reuse the style evolution detection
+
         return self._detect_learning_style_evolution(user_data)
     
     def _identify_strengths_and_weaknesses(self, user_data: Dict) -> Dict:
@@ -2056,7 +2056,7 @@ Return as JSON array:
             
             content = response.choices[0].message.content.strip()
             
-            # Remove markdown code blocks if present
+
             if '```json' in content:
                 content = content.split('```json')[1].split('```')[0].strip()
             elif '```' in content:
@@ -2121,7 +2121,7 @@ Return as JSON:
             
             content = response.choices[0].message.content.strip()
             
-            # Remove markdown code blocks if present
+
             if '```json' in content:
                 content = content.split('```json')[1].split('```')[0].strip()
             elif '```' in content:
@@ -2193,7 +2193,7 @@ Return as JSON:
         """Analyze learning pace patterns"""
         return {'pace_patterns': 'sample_analysis'}
     
-    # Learning preference analysis methods
+
     def _analyze_content_type_preferences(self, user_behavior_data: Dict) -> Dict:
         """Analyze content type preferences"""
         return {'content_preferences': 'sample_analysis'}

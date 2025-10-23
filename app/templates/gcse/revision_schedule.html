@@ -55,7 +55,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+    
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
@@ -64,7 +64,7 @@
         </ol>
     </nav>
 
-    <!-- Hero Section -->
+    
     <div class="revision-hero">
         <div class="container">
             <div class="row align-items-center">
@@ -84,7 +84,7 @@
 
     <div class="container">
         {% if revision_plan %}
-        <!-- Revision Plan Items -->
+        
         <div class="row">
             {% for plan_item in revision_plan %}
             <div class="col-md-6 mb-4">
@@ -99,7 +99,7 @@
                             </span>
                         </div>
 
-                        <!-- Countdown -->
+                        
                         <div
                             class="alert alert-{{ 'danger' if plan_item.days_until <= 7 else 'warning' if plan_item.days_until <= 30 else 'info' }} mb-3">
                             <h4 class="mb-0">
@@ -108,7 +108,7 @@
                             <small>Exam Date: {{ plan_item.exam.exam_date }}</small>
                         </div>
 
-                        <!-- Study Plan Details -->
+                        
                         <div class="row text-center mb-3">
                             <div class="col-6">
                                 <div class="p-3 bg-light rounded">
@@ -124,7 +124,7 @@
                             </div>
                         </div>
 
-                        <!-- Exam Details -->
+                        
                         <div class="mb-3">
                             <p class="mb-1">
                                 <i class="fas fa-graduation-cap me-2"></i>
@@ -145,7 +145,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Action Buttons -->
+                        
                         <div class="d-grid gap-2">
                             {% if plan_item.topic %}
                             <a href="{{ url_for('sessions.start_session', topic_id=plan_item.topic.id) }}"
@@ -163,7 +163,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <!-- Empty State -->
+        
         <div class="row">
             <div class="col-12">
                 <div class="card border-primary">
@@ -197,7 +197,7 @@
         </div>
         {% endif %}
 
-        <!-- Helpful Tips -->
+        
         <div class="row mt-5">
             <div class="col-12">
                 <div class="card border-info">

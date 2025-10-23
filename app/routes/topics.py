@@ -461,15 +461,15 @@ def import_materials():
                     flash('No file selected.', 'error')
                     return render_template('topics/import_materials.html', form=form)
                 
-                # Process the uploaded file
+
                 from app.utils.document_processor import DocumentProcessor
                 doc_processor = DocumentProcessor()
                 
-                # Check if document processing is available
+
                 available_formats = DocumentProcessor.is_document_processing_available()
                 file_extension = file.filename.split('.')[-1].lower() if '.' in file.filename else 'unknown'
                 
-                # Check if the file type is supported
+
                 supported_formats = DocumentProcessor.get_supported_formats()
                 if file_extension not in supported_formats:
                     topic = Topic.create(
@@ -485,7 +485,7 @@ def import_materials():
                         flash('Failed to create topic for material.', 'error')
                         return render_template('topics/import_materials.html', form=form)
                 
-                # Process the document
+
                 processing_result = doc_processor.process_document(file)
                 
                 if processing_result['success']:
@@ -493,7 +493,7 @@ def import_materials():
                     file_info = processing_result['file_info']
                     file_type = processing_result.get('file_type', file_extension)
                     
-                    # Create enhanced description with extracted content
+
                     enhanced_description = f"{description}\n\n"
                     enhanced_description += f"File: {file_info['original_filename']}\n"
                     enhanced_description += f"Size: {file_info['file_size']:,} bytes\n"
@@ -505,27 +505,27 @@ def import_materials():
                         enhanced_description += f"EXTRACTED CONTENT FROM {file_type.upper()}:\n"
                         enhanced_description += "=" * 50 + "\n\n"
                         
-                        # Add the extracted text (truncate if too long)
+
                         extracted_text = content_info.get('cleaned_text') or content_info.get('text_content', '')
                         if len(extracted_text) > 5000:
                             enhanced_description += extracted_text[:5000] + "\n\n... (content truncated - full content available in topic details) ..."
                         else:
                             enhanced_description += extracted_text
                         
-                        # Add key sections if available
+
                         if content_info.get('key_sections'):
                             enhanced_description += "\n\nKEY SECTIONS FOUND:\n"
                             enhanced_description += "-" * 30 + "\n"
-                            for section in content_info['key_sections'][:10]:  # Limit to 10 sections
+                            for section in content_info['key_sections'][:10]:
                                 enhanced_description += f"- {section['title']}\n"
                     
-                    # Add special handling for markdown files
+
                     if file_type == 'markdown' and content_info.get('html_content'):
                         enhanced_description += "\n\nRENDERED MARKDOWN:\n"
                         enhanced_description += "-" * 30 + "\n"
                         enhanced_description += "(HTML content available for rich display)\n"
                     
-                    # Create the topic with extracted content
+
                     topic = Topic.create(
                         title=title,
                         description=enhanced_description,
@@ -538,14 +538,14 @@ def import_materials():
                     else:
                         flash('Failed to create topic for material.', 'error')
                 else:
-                    # Document processing failed, create topic with detailed error info
+
                     content_info = processing_result.get('content_info', {})
                     error_msg = processing_result.get('error', content_info.get('error', 'Unknown error'))
                     is_image_based = processing_result.get('is_image_based', content_info.get('is_image_based', False))
                     suggestions = processing_result.get('suggestions', content_info.get('suggestions', []))
                     file_info = processing_result.get('file_info', {})
                     
-                    # Create enhanced error description
+
                     error_description = f"{description}\n\n"
                     error_description += f"Uploaded file: {file.filename}\n"
                     error_description += f"File size: {file_info.get('file_size', 0):,} bytes\n"
@@ -566,13 +566,13 @@ def import_materials():
                     else:
                         error_description += f"{file_extension.upper()} Processing Error: {error_msg}\n\n"
                         
-                        # Add suggestions if available
+
                         if suggestions:
                             error_description += "SUGGESTIONS:\n"
                             for i, suggestion in enumerate(suggestions, 1):
                                 error_description += f"{i}. {suggestion}\n"
                         
-                        # Add library installation info if needed
+
                         if "not available" in error_msg.lower():
                             required_libs = DocumentProcessor.get_required_libraries()
                             if required_libs:

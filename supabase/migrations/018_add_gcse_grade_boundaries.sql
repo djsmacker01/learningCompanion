@@ -1,4 +1,4 @@
--- Create grade boundaries table for GCSE grade calculations
+
 
 DROP TABLE IF EXISTS gcse_grade_boundaries CASCADE;
 
@@ -17,13 +17,13 @@ CREATE TABLE gcse_grade_boundaries (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Insert example grade boundaries for Mathematics AQA
+
 INSERT INTO gcse_grade_boundaries (exam_board, subject_code, exam_year, exam_month, tier, grade, raw_mark, percentage_mark) VALUES
--- Mathematics Foundation
+
 ('AQA', '8300', 2023, 'June', 'Foundation', '5', 77, 77.0),
 ('AQA', '8300', 2023, 'June', 'Foundation', '4', 65, 65.0),
 ('AQA', '8300', 2023, 'June', 'Foundation', '3', 53, 53.0),
--- Mathematics Higher
+
 ('AQA', '8300', 2023, 'June', 'Higher', '9', 214, 89.2),
 ('AQA', '8300', 2023, 'June', 'Higher', '8', 186, 77.5),
 ('AQA', '8300', 2023, 'June', 'Higher', '7', 158, 65.8),

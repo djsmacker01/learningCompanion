@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS learning_style_profiles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Adaptive Learning Paths Table
+
 CREATE TABLE IF NOT EXISTS adaptive_learning_paths (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS adaptive_learning_paths (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Personalized Content Delivery Table
+
 CREATE TABLE IF NOT EXISTS personalized_content_delivery (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS personalized_content_delivery (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning Progress Analysis Table
+
 CREATE TABLE IF NOT EXISTS learning_progress_analysis (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS learning_progress_analysis (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Intelligent Study Schedules Table
+
 CREATE TABLE IF NOT EXISTS intelligent_study_schedules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS intelligent_study_schedules (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning Insights Table
+
 CREATE TABLE IF NOT EXISTS learning_insights (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS learning_insights (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning Style Assessments Table
+
 CREATE TABLE IF NOT EXISTS learning_style_assessments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS learning_style_assessments (
     completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Adaptive Learning Modules Table
+
 CREATE TABLE IF NOT EXISTS adaptive_learning_modules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     learning_path_id UUID NOT NULL REFERENCES adaptive_learning_paths(id) ON DELETE CASCADE,
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS adaptive_learning_modules (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Learning Analytics Table
+
 CREATE TABLE IF NOT EXISTS learning_analytics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS learning_analytics (
     generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for performance
+
 CREATE INDEX IF NOT EXISTS idx_learning_style_profiles_user_id ON learning_style_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_learning_style_profiles_primary_style ON learning_style_profiles(primary_learning_style);
 CREATE INDEX IF NOT EXISTS idx_learning_style_profiles_active ON learning_style_profiles(is_active);
@@ -184,7 +184,7 @@ CREATE INDEX IF NOT EXISTS idx_learning_analytics_user_id ON learning_analytics(
 CREATE INDEX IF NOT EXISTS idx_learning_analytics_type ON learning_analytics(analytics_type);
 CREATE INDEX IF NOT EXISTS idx_learning_analytics_generated_at ON learning_analytics(generated_at);
 
--- Enable RLS
+
 ALTER TABLE learning_style_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE adaptive_learning_paths ENABLE ROW LEVEL SECURITY;
 ALTER TABLE personalized_content_delivery ENABLE ROW LEVEL SECURITY;
@@ -195,8 +195,8 @@ ALTER TABLE learning_style_assessments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE adaptive_learning_modules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE learning_analytics ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
--- Note: Using more permissive policies for initial setup - can be tightened later
+
+
 CREATE POLICY "Enable read access for all users" ON learning_style_profiles
     FOR SELECT USING (true);
 
@@ -272,7 +272,7 @@ CREATE POLICY "Enable read access for all users" ON learning_analytics
 CREATE POLICY "Enable insert for all users" ON learning_analytics
     FOR INSERT WITH CHECK (true);
 
--- Grant permissions
+
 GRANT ALL ON learning_style_profiles TO authenticated;
 GRANT ALL ON adaptive_learning_paths TO authenticated;
 GRANT ALL ON personalized_content_delivery TO authenticated;
@@ -283,10 +283,10 @@ GRANT ALL ON learning_style_assessments TO authenticated;
 GRANT ALL ON adaptive_learning_modules TO authenticated;
 GRANT ALL ON learning_analytics TO authenticated;
 
--- Note: Sample data can be inserted manually after migration if needed
--- INSERT INTO learning_style_assessments (user_id, assessment_type, assessment_responses, style_scores, primary_learning_style, secondary_learning_styles, assessment_confidence) VALUES
--- ('00000000-0000-0000-0000-000000000000', 'comprehensive', 
---  '{"answers": [{"question_id": 1, "style": "visual"}, {"question_id": 2, "style": "visual"}, {"question_id": 3, "style": "kinesthetic"}]}', 
---  '{"visual": 2, "auditory": 0, "kinesthetic": 1, "reading_writing": 0}', 
---  'visual', '["kinesthetic", "auditory"]', 85.5)
--- ON CONFLICT DO NOTHING;
+
+
+
+
+
+
+

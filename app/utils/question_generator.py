@@ -399,7 +399,7 @@ class SmartQuestionGenerator:
             return None
         
         try:
-            # Create the prompt for AI
+
             prompt = SmartQuestionGenerator._create_quiz_generation_prompt(
                 topic_title, topic_description, num_questions, difficulty, question_types
             )
@@ -416,12 +416,12 @@ class SmartQuestionGenerator:
             
             quiz_content = response.choices[0].message.content
             
-            # Parse the JSON response
+
             try:
                 quiz_data = json.loads(quiz_content)
                 return SmartQuestionGenerator._validate_and_format_ai_quiz(quiz_data, topic_title)
             except json.JSONDecodeError:
-                # Try to extract JSON from the response
+
                 json_match = re.search(r'\{.*\}', quiz_content, re.DOTALL)
                 if json_match:
                     quiz_data = json.loads(json_match.group())
@@ -496,7 +496,7 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
             if not questions:
                 return None
             
-            # Validate and format each question
+
             formatted_questions = []
             for q in questions:
                 formatted_q = SmartQuestionGenerator._format_ai_question(q)
@@ -586,15 +586,15 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
         
         questions = []
         
-        # Extract enhanced key concepts
+
         key_concepts = SmartQuestionGenerator._extract_enhanced_concepts(topic_title, topic_description)
         
-        # Determine question distribution
+
         question_distribution = SmartQuestionGenerator._calculate_question_distribution(
             num_questions, question_types
         )
         
-        # Generate questions based on distribution
+
         for question_type, count in question_distribution.items():
             for _ in range(count):
                 question = None
@@ -679,10 +679,10 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
             remaining = num_questions - sum(distribution.values())
             distribution['fill_blank'] = max(0, remaining)
         
-        # Ensure we don't exceed the requested number
+
         total = sum(distribution.values())
         if total > num_questions:
-            # Reduce from the most common type
+
             if 'multiple_choice' in distribution:
                 distribution['multiple_choice'] -= (total - num_questions)
         
@@ -747,7 +747,7 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
                                     key_concepts: List[str], difficulty: str) -> Optional[Dict]:
         """Enhanced true/false question generation"""
         
-        # Analyze content more intelligently
+
         content_analysis = SmartQuestionGenerator._analyze_content_for_enhanced_tf(topic_description)
         
         if content_analysis['should_be_true']:
@@ -802,23 +802,23 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
     def _extract_enhanced_answer(description: str) -> str:
         """Extract better answers from descriptions"""
         
-        # Split into sentences and clean them
+
         sentences = [s.strip() for s in description.split('.') if s.strip()]
         
-        # Look for key sentences
+
         for sentence in sentences:
-            # Skip very short or very long sentences
+
             if 15 <= len(sentence) <= 120:
-                # Look for sentences with key words
+
                 if any(word in sentence.lower() for word in ['primary', 'main', 'key', 'important', 'benefit', 'advantage', 'purpose', 'function']):
                     return sentence
         
-        # Fallback to first reasonable sentence
+
         for sentence in sentences:
             if 20 <= len(sentence) <= 100:
                 return sentence
         
-        # Final fallback
+
         return "This concept is important for understanding the topic."
     
     @staticmethod
@@ -874,7 +874,7 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
         
         desc_lower = description.lower()
         
-        # More sophisticated analysis
+
         positive_indicators = {
             'benefit': 3, 'advantage': 3, 'improve': 2, 'enhance': 2, 'help': 2, 
             'support': 2, 'enable': 2, 'effective': 2, 'successful': 2, 'valuable': 2,
@@ -891,7 +891,7 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
         negative_score = sum(score for word, score in negative_indicators.items() if word in desc_lower)
         
         if positive_score > negative_score:
-            # Generate true statement
+
             true_statements = [
                 f"This topic provides valuable benefits for learning and understanding.",
                 f"This approach is effective for improving knowledge retention.",
@@ -905,7 +905,7 @@ For fill-in-blank: set question_type to "fill_blank" and provide the correct ans
                 'false_statement': f"This topic has no educational value or benefits."
             }
         else:
-            # Generate false statement
+
             false_statements = [
                 f"This topic is completely useless for learning purposes.",
                 f"This approach never works and always fails.",

@@ -9,7 +9,7 @@ import uuid
 from typing import Dict, List, Optional, Tuple
 from werkzeug.utils import secure_filename
 
-# PDF Processing
+
 try:
     import PyPDF2
     PDF_AVAILABLE = True
@@ -31,12 +31,12 @@ except ImportError:
 try:
     import pytesseract
     from PIL import Image
-    import fitz  # PyMuPDF
+    import fitz
     OCR_AVAILABLE = True
 except ImportError:
     OCR_AVAILABLE = False
 
-# Word Document Processing
+
 try:
     from docx import Document
     DOCX_AVAILABLE = True
@@ -49,7 +49,7 @@ try:
 except ImportError:
     DOC_AVAILABLE = False
 
-# Text and Other Formats
+
 try:
     import markdown
     MARKDOWN_AVAILABLE = True
@@ -112,7 +112,7 @@ class DocumentProcessor:
             from app.utils.pdf_processor import PDFProcessor
             pdf_processor = PDFProcessor()
             
-            # Use existing PDF processing logic
+
             extraction_result = pdf_processor.extract_text_from_pdf(file_path)
             
             return {
@@ -203,7 +203,7 @@ class DocumentProcessor:
             }
         
         try:
-            # Use COM to open Word and extract text
+
             word = win32com.client.Dispatch("Word.Application")
             word.Visible = False
             
@@ -212,7 +212,7 @@ class DocumentProcessor:
             doc.Close()
             word.Quit()
             
-            # Clean and process text
+
             processed_content = self._process_extracted_text(text_content, "doc")
             
             return {
@@ -275,19 +275,19 @@ class DocumentProcessor:
     def _process_markdown(self, file_path: str, file_info: Dict) -> Dict:
         """Process Markdown files"""
         try:
-            # Read the markdown file
+
             with open(file_path, 'r', encoding='utf-8') as f:
                 markdown_content = f.read()
             
-            # Convert to HTML for better display (optional)
+
             html_content = ""
             if MARKDOWN_AVAILABLE:
                 html_content = markdown.markdown(markdown_content)
             
-            # Clean and process text (use raw markdown for content)
+
             processed_content = self._process_extracted_text(markdown_content, "markdown")
             
-            # Add HTML content if available
+
             if html_content:
                 processed_content['html_content'] = html_content
             
@@ -347,10 +347,10 @@ class DocumentProcessor:
                 'file_type': file_type
             }
         
-        # Clean the text
+
         cleaned_text = self._clean_text(text_content)
         
-        # Extract key sections
+
         key_sections = self._extract_key_sections(cleaned_text)
         
         return {
@@ -412,20 +412,20 @@ class DocumentProcessor:
                 formatted_lines.append("")
                 continue
             
-            # If line is all caps and short, it's likely a heading
+
             if line.isupper() and len(line) < 100 and not line.endswith('.'):
-                # Add spacing around headings
+
                 formatted_lines.append("")
                 formatted_lines.append(line)
                 formatted_lines.append("-" * min(len(line), 50))
                 formatted_lines.append("")
-            # If line starts with bullet points or dashes
+
             elif re.match(r'^[\•\-\*]\s+', line):
                 formatted_lines.append(f"  {line}")
-            # If line looks like a date range or location
+
             elif re.match(r'^(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)', line, re.IGNORECASE):
                 formatted_lines.append(f"  {line}")
-            # If line looks like a job title or company
+
             elif len(line) < 80 and not line.endswith('.') and not line.endswith(','):
                 formatted_lines.append(f"  {line}")
             else:
@@ -508,15 +508,15 @@ class DocumentProcessor:
     def save_uploaded_file(self, file) -> Dict:
         """Save uploaded file and return file info"""
         try:
-            # Generate secure filename
+
             filename = secure_filename(file.filename)
             unique_filename = f"{uuid.uuid4()}_{filename}"
             file_path = os.path.join(self.upload_dir, unique_filename)
             
-            # Save file
+
             file.save(file_path)
             
-            # Get file info
+
             file_size = os.path.getsize(file_path)
             file_extension = filename.split('.')[-1].lower() if '.' in filename else 'unknown'
             

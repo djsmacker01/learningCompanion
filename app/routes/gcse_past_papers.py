@@ -33,19 +33,19 @@ def past_papers_list():
         
         past_papers = []
         if subject_id:
-            # Filter by specific subject
+
             past_papers = GCSEPastPaper.get_past_papers_by_subject(
                 subject_id, exam_board, exam_year, difficulty_level
             )
         else:
-            # Show all available past papers from all subjects
+
             for subject in subjects:
                 subject_papers = GCSEPastPaper.get_past_papers_by_subject(
                     subject.id, exam_board, exam_year, difficulty_level
                 )
                 past_papers.extend(subject_papers)
             
-            # Sort by year (newest first) and then by subject
+
             past_papers.sort(key=lambda p: (p.exam_year, p.subject_id), reverse=True)
         
         

@@ -43,7 +43,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Breadcrumb -->
+    
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
@@ -53,13 +53,13 @@
     </nav>
 
     <div class="exam-form-container">
-        <!-- Header -->
+        
         <div class="form-header">
             <h1><i class="fas fa-calendar-plus me-2"></i>Schedule GCSE Exam</h1>
             <p class="mb-0">Add your exam dates to get personalized countdowns and revision schedules</p>
         </div>
 
-        <!-- Flash Messages -->
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
@@ -71,11 +71,11 @@
         {% endif %}
         {% endwith %}
 
-        <!-- Exam Creation Form -->
+        
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('gcse.create_exam') }}" id="createExamForm">
-                    <!-- Basic Information -->
+                    
                     <div class="form-section">
                         <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
 
@@ -115,7 +115,7 @@
                         </div>
                     </div>
 
-                    <!-- Exam Details -->
+                    
                     <div class="form-section">
                         <h5 class="mb-3"><i class="fas fa-clipboard-list me-2"></i>Exam Details (Optional)</h5>
 
@@ -163,7 +163,7 @@
                         </div>
                     </div>
 
-                    <!-- Form Actions -->
+                    
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <a href="{{ url_for('gcse.gcse_dashboard') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-times me-2"></i>Cancel
@@ -176,7 +176,7 @@
             </div>
         </div>
 
-        <!-- Helpful Tips -->
+        
         <div class="card mt-4 border-info">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-lightbulb me-2 text-info"></i>Tips for Scheduling Exams</h5>
