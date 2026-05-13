@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# During pytest, do not connect to a real Supabase from .env (tests use mocks / in-memory paths).
+if os.environ.get('PYTEST_RUNNING') == '1':
+    for _k in ('SUPABASE_URL', 'SUPABASE_KEY', 'SUPABASE_SERVICE_ROLE_KEY'):
+        os.environ.pop(_k, None)
 
 supabase = None
 SUPABASE_AVAILABLE = False
@@ -37,7 +41,8 @@ def get_supabase_client():
     return supabase
 
 
-get_supabase_client()
+if os.environ.get('PYTEST_RUNNING') != '1':
+    get_supabase_client()
 
 
 _in_memory_topics = []

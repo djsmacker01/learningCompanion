@@ -1,3 +1,8 @@
+import os
+
+# Must run before any `app` import: when pytest loads `.env`, we still avoid opening a real Supabase during tests.
+os.environ['PYTEST_RUNNING'] = '1'
+
 import pytest
 from unittest.mock import MagicMock, patch
 from flask_login import UserMixin
