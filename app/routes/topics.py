@@ -37,16 +37,6 @@ def list_topics():
         flash('Error loading topics. Please try again.', 'error')
         return render_template('topics/list.html', topics=[])
 
-@topics.route('/topics/debug')
-@login_required
-def debug_env():
-    import os
-    return {
-        'SUPABASE_URL': os.getenv('SUPABASE_URL'),
-        'SUPABASE_SERVICE_ROLE_KEY': os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20] + '...' if os.getenv('SUPABASE_SERVICE_ROLE_KEY') else 'Not set',
-        'SUPABASE_AVAILABLE': os.getenv('SUPABASE_AVAILABLE', 'Not set')
-    }
-
 @topics.route('/topics/new', methods=['GET', 'POST'])
 @login_required
 def create_topic():
@@ -62,14 +52,10 @@ def create_topic():
                 return redirect(url_for('auth.login'))
             
             print(f"User ID: {user.id}")
-            print(f"Supabase URL: {os.getenv('SUPABASE_URL')}")
-            print(f"Supabase Service Role Key: {os.getenv('SUPABASE_SERVICE_ROLE_KEY', 'Not set')[:20]}...")
-            print(f"Supabase Available: {os.getenv('SUPABASE_AVAILABLE', 'Not set')}")
-            
+
             from app.models import get_supabase_client, SUPABASE_AVAILABLE
             client = get_supabase_client()
             print(f"Supabase client available: {SUPABASE_AVAILABLE}")
-            print(f"Supabase client object: {client is not None}")
             
             topic = Topic.create(
                 title=form.title.data.strip(),

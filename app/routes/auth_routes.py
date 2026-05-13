@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
 import secrets
+import os
 
 from app.forms.auth_forms import (
     LoginForm, RegistrationForm, ProfileForm, ChangePasswordForm, 
@@ -126,7 +127,20 @@ def register():
             flash(f'Welcome to Learning Companion, {user.full_name}! Your account has been created successfully.', 'success')
             return redirect(url_for('main.dashboard'))
         else:
-            flash('Failed to create account. Please try again.', 'error')
+            url_ok = bool(os.getenv('SUPABASE_URL'))
+            key_ok = bool(os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY'))
+            if not url_ok or not key_ok:
+                flash(
+                    'Account creation needs Supabase credentials. Set SUPABASE_URL and SUPABASE_KEY '
+                    '(use the service role key from Project Settings → API) in your .env, then restart the app.',
+                    'error',
+                )
+            else:
+                flash(
+                    'Could not save your account to the database. Check the terminal for "Error creating user", '
+                    'confirm migrations ran (supabase/migrations/), and use the service role key—not the anon key.',
+                    'error',
+                )
     
     return render_template('auth/register.html', form=form)
 
