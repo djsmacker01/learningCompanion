@@ -60,7 +60,7 @@ For assignments that want “manual testing” evidence, I wrote **`manual_testi
 I’ve got notes in two places because different weeks meant different platforms:
 
 - **`deployment_guide.md`** — Railway, Render, Heroku-style flow, DigitalOcean — the “pick your fighter” doc.
-- **`deployment.md`** — when I was chasing **Vercel** specifically.
+- **`deployment.md`** — full **Vercel** flow (import repo, env vars, redeploy, CLI, troubleshooting).
 
 Whatever you use: set **`FLASK_ENV=production`**, generate a proper **`SECRET_KEY`** in the host’s dashboard (not in Git), and paste **Supabase** URL + key there too. My **`.gitignore`** already ignores `.env` — please don’t commit secrets; I’ve made that mistake in my head enough times without doing it for real.
 
