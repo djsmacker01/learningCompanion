@@ -15,7 +15,11 @@ load_dotenv()
 from app.models import get_supabase_client
 
 
-SUPABASE_AVAILABLE = bool(os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_SERVICE_ROLE_KEY'))
+# Must match get_supabase_client(): use SUPABASE_KEY and/or SUPABASE_SERVICE_ROLE_KEY (not only service role name).
+SUPABASE_AVAILABLE = bool(
+    os.getenv('SUPABASE_URL')
+    and (os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY'))
+)
 
 
 class UserProfile:

@@ -1,9 +1,24 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from app.models import get_supabase_client, SUPABASE_AVAILABLE
 import uuid
 
 _in_memory_sessions = []
 _next_session_id = 1
+
+
+def _session_dayordinal(session_date_value):
+    if isinstance(session_date_value, datetime):
+        return session_date_value.date().toordinal()
+    if isinstance(session_date_value, date):
+        return session_date_value.toordinal()
+    if isinstance(session_date_value, str):
+        try:
+            cleaned = session_date_value.replace('Z', '+00:00')
+            return datetime.fromisoformat(cleaned).date().toordinal()
+        except ValueError:
+            return 0
+    return 0
+
 
 class StudySession:
     def __init__(self, id, topic_id, user_id, session_date, duration_minutes, 
@@ -27,8 +42,25 @@ class StudySession:
         
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
-            raise Exception("Supabase not available - cannot create session")
-        
+            global _in_memory_sessions
+            new_id = str(uuid.uuid4())
+            created_at = datetime.utcnow()
+            new_sess = StudySession(
+                new_id,
+                topic_id,
+                user_id,
+                session_date,
+                duration_minutes,
+                confidence_before,
+                confidence_after,
+                notes or '',
+                session_type,
+                completed,
+                created_at,
+            )
+            _in_memory_sessions.append(new_sess)
+            return new_sess
+
         try:
             data = {
                 'topic_id': topic_id,
@@ -113,8 +145,12 @@ class StudySession:
       
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
-            raise Exception("Supabase not available - cannot retrieve sessions")
-        
+            sessions = [s for s in _in_memory_sessions if s.user_id == user_id]
+            sessions.sort(key=lambda s: _session_dayordinal(s.session_date), reverse=True)
+            if limit:
+                sessions = sessions[:limit]
+            return sessions
+
         try:
             query = client.table('study_sessions').select('*').eq('user_id', user_id).order('session_date', desc=True)
             if limit:
@@ -149,8 +185,13 @@ class StudySession:
         
         client = get_supabase_client()
         if not SUPABASE_AVAILABLE or not client:
-            raise Exception("Supabase not available - cannot retrieve sessions")
-        
+            sessions = [
+                s for s in _in_memory_sessions
+                if str(s.topic_id) == str(topic_id) and s.user_id == user_id
+            ]
+            sessions.sort(key=lambda s: _session_dayordinal(s.session_date), reverse=True)
+            return sessions
+
         try:
             response = client.table('study_sessions').select('*').eq('topic_id', topic_id).eq('user_id', user_id).order('session_date', desc=True).execute()
             
@@ -418,7 +459,18 @@ class StudySession:
         week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
         
         sessions = StudySession.get_user_sessions(user_id)
-        week_sessions = [s for s in sessions if s.session_date >= week_start]
-        
-        return sum(s.duration_minutes for s in week_sessions)
+        total_minutes = 0
+        for s in sessions:
+            sd = s.session_date
+            if isinstance(sd, datetime):
+                sd_cmp = sd
+            elif isinstance(sd, date):
+                sd_cmp = datetime.combine(sd, datetime.min.time())
+            elif isinstance(sd, str):
+                sd_cmp = datetime.fromisoformat(sd.replace('Z', '+00:00'))
+            else:
+                continue
+            if sd_cmp >= week_start:
+                total_minutes += s.duration_minutes
+        return total_minutes
 

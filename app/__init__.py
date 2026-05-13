@@ -8,17 +8,22 @@ load_dotenv()
 
 
 if os.getenv('SUPABASE_URL'):
-    print("✓ Supabase configured")
-if os.getenv('SUPABASE_SERVICE_ROLE_KEY'):
-    print("✓ Supabase credentials loaded")
+    print("[ok] Supabase URL configured")
+if os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY'):
+    print("[ok] Supabase API key detected (SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY)")
 if os.getenv('OPENAI_API_KEY'):
-    print("✓ OpenAI API configured")
+    print("[ok] OpenAI API key detected")
 
 login_manager = LoginManager()
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+    resolved = config_name if config_name in config else 'default'
+    app.config.from_object(config[resolved])
+    if resolved == 'production' and not app.config.get('SECRET_KEY'):
+        raise RuntimeError(
+            'SECRET_KEY must be set in the environment for production (never use a default value).'
+        )
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

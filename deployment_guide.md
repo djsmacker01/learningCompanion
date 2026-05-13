@@ -13,7 +13,7 @@
 6. **Add environment variables:**
    ```
    SECRET_KEY=your-secret-key
-   SUPABASE_URL=https://rrhudaxhqhpiaezrfvnl.supabase.co
+   SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
    SUPABASE_KEY=your-supabase-key
    OPENAI_API_KEY=your-openai-key
    FLASK_ENV=production
@@ -42,7 +42,7 @@
 4. **Set environment variables:**
    ```bash
    heroku config:set SECRET_KEY=your-secret-key
-   heroku config:set SUPABASE_URL=https://rrhudaxhqhpiaezrfvnl.supabase.co
+   heroku config:set SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
    heroku config:set SUPABASE_KEY=your-supabase-key
    heroku config:set OPENAI_API_KEY=your-openai-key
    heroku config:set FLASK_ENV=production
@@ -76,8 +76,9 @@ Make sure you have these ready:
 
 ### 3. Test Locally
 ```bash
-# Test with production settings
+# Production-like run (SECRET_KEY is required — same rule as live hosting)
 export FLASK_ENV=production
+export SECRET_KEY="use-a-long-random-string-here"
 python run.py
 ```
 

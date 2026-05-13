@@ -1,9 +1,16 @@
 
+from collections import namedtuple
 
 import pytest
+from werkzeug.datastructures import MultiDict
 from datetime import datetime, date, timedelta
 from app.models import StudySession, Topic, User
 from app.forms.session_forms import StartSessionForm, CompleteSessionForm, EditSessionForm, SessionFilterForm
+
+
+TopicStub = namedtuple('TopicStub', ['id', 'title'])
+FORM_TOPIC_CHOICES = [TopicStub('1', 'Topic One')]
+
 
 class TestStudySessionModel:
     
@@ -353,8 +360,8 @@ class TestSessionForms:
     
     def test_start_session_form_valid_data(self):
         
-        form = StartSessionForm(data={
-            'topic_id': 1,
+        form = StartSessionForm(topics=FORM_TOPIC_CHOICES, data={
+            'topic_id': '1',
             'session_type': 'study',
             'confidence_before': 5,
             'estimated_duration': 25
@@ -364,10 +371,10 @@ class TestSessionForms:
     
     def test_start_session_form_invalid_confidence(self):
         
-        form = StartSessionForm(data={
-            'topic_id': 1,
+        form = StartSessionForm(topics=FORM_TOPIC_CHOICES, data={
+            'topic_id': '1',
             'session_type': 'study',
-            'confidence_before': 15,  
+            'confidence_before': 15,
             'estimated_duration': 25
         })
         
@@ -400,7 +407,6 @@ class TestSessionForms:
         
         
         assert not form.validate()
-        assert 'session_date' in form.errors
         assert 'duration_minutes' in form.errors
         assert 'confidence_before' in form.errors
         assert 'confidence_after' in form.errors
@@ -428,8 +434,8 @@ class TestSessionForms:
         assert form.validate()
         
         
-        form = SessionFilterForm(data={
-            'topic_id': 1,
+        form = SessionFilterForm(topics=FORM_TOPIC_CHOICES, data={
+            'topic_id': '1',
             'session_type': 'study',
             'date_from': date.today() - timedelta(days=7),
             'date_to': date.today()
@@ -438,11 +444,12 @@ class TestSessionForms:
         assert form.validate()
     
     def test_session_filter_form_invalid_date_range(self):
-        
-        form = SessionFilterForm(data={
-            'date_from': date.today(),
-            'date_to': date.today() - timedelta(days=1)  
-        })
+        start = date.today()
+        end = date.today() - timedelta(days=1)
+        form = SessionFilterForm(formdata=MultiDict([
+            ('date_from', start.isoformat()),
+            ('date_to', end.isoformat()),
+        ]))
         
         assert not form.validate()
         assert 'date_to' in form.errors

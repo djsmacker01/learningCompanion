@@ -19,8 +19,8 @@ def get_supabase_client():
     if supabase is None:
         try:
             supabase_url = os.getenv('SUPABASE_URL')
-            supabase_key = os.getenv('SUPABASE_KEY')
-            
+            supabase_key = os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+
             if not supabase_url or not supabase_key:
                 print("ERROR: Supabase credentials not found in environment variables")
                 SUPABASE_AVAILABLE = False
@@ -204,10 +204,11 @@ class Topic:
             # Check if user has shared access to this topic
             shared_access = client.table('shared_topic_access').select('topic_id').eq('topic_id', topic_id).eq('user_id', user_id).execute()
             
+            shared_response = None
             if shared_access.data:
                 shared_response = client.table('topics').select('*').eq('id', topic_id).eq('is_active', True).execute()
             
-            if shared_response.data:
+            if shared_response and shared_response.data:
                 topic_data = shared_response.data[0]
                 return Topic(
                     topic_data['id'],
@@ -686,4 +687,6 @@ class Topic:
 
 # Import AI Activity model
 from .ai_activity import AIActivity
+
+from .study_session import StudySession
 

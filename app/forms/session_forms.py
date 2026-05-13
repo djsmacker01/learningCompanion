@@ -4,9 +4,20 @@ from wtforms.validators import DataRequired, NumberRange, Length, ValidationErro
 from datetime import date, datetime
 
 class StartSessionForm(FlaskForm):
-    topic_id = SelectField('Topic', coerce=str, validators=[DataRequired(message='Please select a topic')])
-    session_type = SelectField('Session Type', 
-                              choices=[('review', 'Review'), ('practice', 'Practice')],
+    topic_id = SelectField(
+        'Topic',
+        coerce=str,
+        choices=[('', 'Select a topic')],
+        validators=[DataRequired(message='Please select a topic')],
+    )
+    session_type = SelectField('Session Type',
+                              choices=[
+                                  ('study', 'Study'),
+                                  ('review', 'Review'),
+                                  ('practice', 'Practice'),
+                                  ('quiz', 'Quiz'),
+                                  ('other', 'Other'),
+                              ],
                               validators=[DataRequired(message='Please select a session type')])
     confidence_before = IntegerField('Confidence Before (1-10)', 
                                    validators=[DataRequired(message='Please rate your confidence'),
@@ -57,8 +68,14 @@ class EditSessionForm(FlaskForm):
                          validators=[Optional(), 
                                    Length(max=1000, message='Notes cannot exceed 1000 characters')],
                          render_kw={'rows': 4})
-    session_type = SelectField('Session Type', 
-                              choices=[('review', 'Review'), ('practice', 'Practice')],
+    session_type = SelectField('Session Type',
+                              choices=[
+                                  ('study', 'Study'),
+                                  ('review', 'Review'),
+                                  ('practice', 'Practice'),
+                                  ('quiz', 'Quiz'),
+                                  ('other', 'Other'),
+                              ],
                               validators=[DataRequired(message='Please select a session type')])
     submit = SubmitField('Update Session')
     
@@ -78,9 +95,21 @@ class EditSessionForm(FlaskForm):
                 raise ValidationError('Large confidence drops are unusual. Please verify your ratings.')
 
 class SessionFilterForm(FlaskForm):
-    topic_id = SelectField('Filter by Topic', coerce=lambda x: x if x else None, validators=[Optional()])
-    session_type = SelectField('Filter by Type', 
-                              choices=[('', 'All Types'), ('review', 'Review'), ('practice', 'Practice')],
+    topic_id = SelectField(
+        'Filter by Topic',
+        coerce=lambda x: x if x else None,
+        choices=[('', 'All Topics')],
+        validators=[Optional()],
+    )
+    session_type = SelectField('Filter by Type',
+                              choices=[
+                                  ('', 'All Types'),
+                                  ('study', 'Study'),
+                                  ('review', 'Review'),
+                                  ('practice', 'Practice'),
+                                  ('quiz', 'Quiz'),
+                                  ('other', 'Other'),
+                              ],
                               validators=[Optional()])
     date_from = DateField('From Date', validators=[Optional()])
     date_to = DateField('To Date', validators=[Optional()])
@@ -92,7 +121,14 @@ class SessionFilterForm(FlaskForm):
             self.topic_id.choices = [('', 'All Topics')] + [(topic.id, topic.title) for topic in topics]
     
     def validate_date_to(self, field):
-        
-        if self.date_from.data and field.data and field.data < self.date_from.data:
+        start = self.date_from.data
+        finish = field.data
+        if start is None or finish is None:
+            return
+        if isinstance(start, datetime):
+            start = start.date()
+        if isinstance(finish, datetime):
+            finish = finish.date()
+        if finish < start:
             raise ValidationError('End date must be after start date')
 
