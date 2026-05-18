@@ -168,3 +168,7 @@ def create_app(config_name='default'):
 
     return app
 
+
+import os as _os
+app = create_app(_os.getenv('FLASK_ENV', 'production'))
+
